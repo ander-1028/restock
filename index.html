@@ -169,6 +169,13 @@ button:disabled,.btn[aria-disabled="true"]{opacity:.38;cursor:not-allowed;transf
 .sec-head h2,.sec-head h3{font-size:24px;font-weight:700;margin:0;letter-spacing:-.01em}
 .sec-head .count{color:var(--fg-3);font-weight:600;margin-left:6px}
 .group{margin-top:44px}
+.hint{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;background:var(--accent-soft);color:var(--fg);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.5}
+.hint.ok{background:var(--ok-soft);color:var(--ok);font-weight:600}
+.more{border-top:1px solid var(--line-soft);padding-top:6px}
+.more summary{cursor:pointer;color:var(--link);font-weight:600;font-size:15px;padding:10px 0;list-style:none}
+.more summary::-webkit-details-marker{display:none}
+.more summary::after{content:" ›";display:inline-block;transition:transform .2s}
+.more[open] summary::after{transform:rotate(90deg)}
 .members{display:grid;gap:8px}
 .member{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--tile);border-radius:12px;padding:10px 14px}
 .member>span:first-child{display:grid;min-width:0}
@@ -1161,7 +1168,7 @@ function notifyBand(l) {
 function filteredProducts() {
   const q = PF.q.trim().toLowerCase();
   return Object.keys(D.products).map(id => Object.assign({}, D.products[id], { _id: id }))
-    .filter(p => PF.store === 'all' || (p.stores || []).includes(PF.store))
+    .filter(p => PF.store === 'all' || !(p.stores || []).length || p.stores.includes(PF.store))
     .filter(p => PF.cat === 'all' || p.cat === PF.cat)
     .filter(p => !q || [p.name, p.brand, p.spec, p.barcode, p.itemNo, p.note, catOf(p.cat).name].join(' ').toLowerCase().includes(q))
     .sort((a, b) => (CATS.indexOf(catOf(a.cat)) - CATS.indexOf(catOf(b.cat))) || String(a.name).localeCompare(String(b.name), 'zh-Hant'));
@@ -1196,9 +1203,9 @@ function productResults() {
     else h += '<div class="empty"><h3>找不到符合的商品</h3><p class="muted">換個關鍵字，或切回「全部」看看。</p></div>';
   } else {
     h += '<div class="prod-grid">' + list.map(p => '<button class="prod-card reveal" data-act="product" data-pid="' + esc(p._id) + '">' +
-      '<span class="ph">' + thumbInner(p) + '</span><span class="pc-body"><span class="pc-cat">' + esc(catOf(p.cat).name) + (p.sample ? '<span class="pill">範例</span>' : '') + '</span>' +
+      '<span class="ph">' + thumbInner(p) + '</span><span class="pc-body"><span class="pc-cat">' + esc(catOf(p.cat).name) + (p.sample ? '<span class="pill">範例</span>' : '') + (p.photo && !p.barcode ? '<span class="pill accent">可補條碼</span>' : '') + '</span>' +
       '<span class="pc-name">' + esc(p.name) + '</span>' + (subLine(p) ? '<span class="pc-sub">' + subLine(p) + '</span>' : '') +
-      '<span class="pc-stores">' + esc((p.stores || []).map(s => storeOf(s).name).join('・')) + (p.barcode ? '・有條碼' : '') + '</span></span></button>').join('') + '</div>';
+      '<span class="pc-stores">' + esc((p.stores || []).map(s => storeOf(s).name).join('・')) + '' + '</span></span></button>').join('') + '</div>';
   }
   return h;
 }
@@ -1381,7 +1388,7 @@ function pickerResults() {
   const inList = {}; itemsOf(PK.listId).forEach(i => { if (itemStore(i) === PK.store) inList[i.productId] = i; });
   const q = PK.q.trim().toLowerCase();
   let prods = Object.keys(D.products).map(id => Object.assign({}, D.products[id], { _id: id }));
-  if (!PK.all) prods = prods.filter(p => (p.stores || []).includes(PK.store));
+  if (!PK.all) prods = prods.filter(p => !(p.stores || []).length || p.stores.includes(PK.store));
   if (q) prods = prods.filter(p => [p.name, p.brand, p.spec, p.barcode, p.itemNo, catOf(p.cat).name].join(' ').toLowerCase().includes(q));
   if (!prods.length) {
     const anyOther = !PK.all && Object.keys(D.products).length > 0;
@@ -1425,9 +1432,10 @@ function productHtml(pid) {
     '<p class="pd-cat">' + esc(catOf(p.cat).name) + (p.sample ? '・範例' : '') + '</p><h2 class="pd-name">' + esc(p.name) + '</h2>' +
     (subLine(p) ? '<p class="pd-sub">' + subLine(p) + '</p>' : '') +
     '<div class="pd-acts"><button class="btn btn-primary" data-act="clerk-product" data-pid="' + esc(pid) + '">給店員看</button><button class="btn btn-secondary" data-act="edit-product" data-pid="' + esc(pid) + '">編輯</button>' + (cl && !inCur ? '<button class="btn-link" data-act="add-to-cur" data-pid="' + esc(pid) + '">加到這張清單 ›</button>' : '') + '</div>' +
+    productTip(p, pid) +
     '<dl class="facts"><div class="fact"><dt>在哪買</dt><dd>' + esc(stores) + '</dd></div>' +
     (p.itemNo ? '<div class="fact"><dt>Item 編號</dt><dd class="mono-text">' + esc(p.itemNo) + '</dd></div>' : '') +
-    '<div class="fact"><dt>條碼</dt><dd>' + (p.barcode ? '<div class="bc-box"><svg data-bc="' + esc(p.barcode) + '" data-h="64" data-w="1.8"></svg></div>' : '<span class="muted">沒有存條碼</span>') + '</dd></div>' +
+    (p.barcode ? '<div class="fact"><dt>條碼</dt><dd><div class="bc-box"><svg data-bc="' + esc(p.barcode) + '" data-h="64" data-w="1.8"></svg></div></dd></div>' : '') +
     '<div class="fact"><dt>缺貨時</dt><dd>' + (p.sub ? '可以買同品類其他牌子' : '不可替代，缺貨就先不買') + '</dd></div>' +
     (p.note ? '<div class="fact"><dt>備註</dt><dd>' + esc(p.note) + '</dd></div>' : '') +
     (p.tagPhoto && SAFE_IMG.test(p.tagPhoto) ? '<div class="fact"><dt>價籤照片</dt><dd><img class="tag-img" src="' + p.tagPhoto + '" alt="價籤照片"></dd></div>' : '') +
@@ -1436,11 +1444,25 @@ function productHtml(pid) {
 }
 
 /* 商品編輯 */
+function productTip(p, pid) {
+  const miss = [];
+  if (!p.photo) miss.push('照片'); if (!p.barcode) miss.push('條碼'); if (!p.brand) miss.push('品牌'); if (!p.spec) miss.push('規格'); if (!(p.stores || []).length) miss.push('在哪買');
+  if (!miss.length) return '';
+  const msg = (p.photo && !p.barcode) ? '已經有照片了。再拍一張商品背面的條碼，之後請店員找東西會更方便。' : '還可以補上：' + miss.join('、') + '。資料越完整，代買的人越不會拿錯。';
+  return '<div class="hint" style="text-align:left;margin-top:20px"><span style="flex:1 1 200px">' + msg + '</span><button class="btn btn-sm btn-primary" data-act="edit-product" data-pid="' + esc(pid) + '">補充資料</button></div>';
+}
+function edHint() {
+  const el = $('#ed-hint'); if (!el || !ED) return;
+  const d = ED.d, bi = $('#ed-barcode'), bc = cleanCode(bi ? bi.value : d.barcode);
+  if (!d.photo) el.innerHTML = '<p class="help">先拍一張商品照片就能存，品牌、規格、條碼都可以之後慢慢補。</p>';
+  else if (bc) el.innerHTML = '<div class="hint ok">✓ 已經有條碼，店員可以直接掃。</div>';
+  else el.innerHTML = '<div class="hint"><span style="flex:1 1 200px">照片存好了。也可以再拍一張商品背面的條碼，之後請店員找東西會更方便。</span><button type="button" class="btn btn-sm btn-primary" data-act="ed-back">拍條碼</button></div>';
+}
 function openEditor(pid, opts) {
   opts = opts || {};
   if (!guard()) return;
   const src = pid && D.products[pid];
-  const d = src ? JSON.parse(JSON.stringify(src)) : { cat: opts.cat || '', name: '', brand: '', spec: '', stores: opts.store ? [opts.store] : [], itemNo: '', barcode: '', sub: true, note: '', photo: '', tagPhoto: '' };
+  const d = src ? JSON.parse(JSON.stringify(src)) : { cat: opts.cat || '', name: '', brand: '', spec: '', stores: opts.store ? [opts.store] : [], itemNo: '', barcode: '', sub: true, note: '', photo: '', tagPhoto: '', backPhoto: '' };
   d.stores = Array.isArray(d.stores) ? d.stores.slice() : [];
   ED = { pid: src ? pid : null, d, opts };
   const hint = d.cat ? catOf(d.cat).hint : '例：1857ml × 2';
@@ -1449,20 +1471,24 @@ function openEditor(pid, opts) {
   openSheet({
     title: ED.pid ? '編輯商品' : '新增商品',
     html: '<form id="ed-form" class="form" novalidate>' +
-      '<div><div class="photo-frame" id="ed-photo">' + edPhoto(d.photo, d.cat) + '</div><div class="photo-acts"><button type="button" class="btn btn-secondary btn-sm" data-act="ed-photo">拍照或選照片</button>' + '<button type="button" class="btn-link" data-act="ed-photo-clear" id="ed-photo-clear"' + (d.photo ? '' : ' hidden') + '>移除照片</button></div></div>' +
+      '<div><div class="photo-frame" id="ed-photo">' + edPhoto(d.photo, d.cat) + '</div><div class="photo-acts"><button type="button" class="btn btn-primary btn-sm" data-act="ed-photo">' + (d.photo ? '換一張照片' : '拍照或選照片') + '</button><button type="button" class="btn-link" data-act="ed-photo-clear" id="ed-photo-clear"' + (d.photo ? '' : ' hidden') + '>移除照片</button></div></div>' +
+      '<div id="ed-hint"></div>' +
       '<label class="field"><span>品類</span><select id="ed-cat"><option value="">選一個品類</option>' + CATS.map(c => '<option value="' + c.id + '"' + (d.cat === c.id ? ' selected' : '') + '>' + c.name + '</option>').join('') + '</select></label>' +
       '<label class="field" id="ed-name-wrap"' + (d.cat === 'other' ? '' : ' hidden') + '><span>品名（「其他」類才需要填）</span><input id="ed-name" value="' + esc(d.cat === 'other' ? d.name : '') + '" placeholder="例：燈泡、拖把" maxlength="40" autocomplete="off"></label>' +
       '<div class="field-row"><label class="field"><span>品牌</span><input id="ed-brand" value="' + esc(d.brand) + '" placeholder="例：Kirkland" maxlength="40" autocomplete="off"></label>' +
       '<label class="field"><span>規格</span><input id="ed-spec" value="' + esc(d.spec) + '" placeholder="例：' + esc(hint) + '" maxlength="40" autocomplete="off"></label></div>' +
-      '<fieldset class="field"><legend>在哪裡買（可複選）</legend><div class="chips">' + STORES.map(s => '<button type="button" class="chip" data-act="ed-store" data-store="' + s.id + '" aria-pressed="' + d.stores.includes(s.id) + '">' + s.name + '</button>').join('') + '</div></fieldset>' +
-      '<label class="field" id="ed-itemno-wrap"' + (costco ? '' : ' hidden') + '><span>好事多 Item 編號</span><input id="ed-itemno" value="' + esc(d.itemNo) + '" inputmode="numeric" placeholder="價籤上的數字，店員最常用這個查" maxlength="10" autocomplete="off"></label>' +
-      '<div class="field"><span>條碼（商品背面）</span><div class="input-row"><input id="ed-barcode" value="' + esc(d.barcode) + '" inputmode="numeric" placeholder="台灣商品是 471 開頭的 13 碼" maxlength="32" autocomplete="off"><button type="button" class="btn btn-secondary" data-act="ed-scan">拍條碼</button></div><p class="help" id="ed-bc-help"></p></div>' +
+      '<fieldset class="field"><legend>在哪裡買（可複選，之後再補也行）</legend><div class="chips">' + STORES.map(s => '<button type="button" class="chip" data-act="ed-store" data-store="' + s.id + '" aria-pressed="' + d.stores.includes(s.id) + '">' + s.name + '</button>').join('') + '</div></fieldset>' +
       '<div class="field"><span>缺貨時可以買別的牌子嗎？</span><div class="seg" role="group"><button type="button" data-act="ed-sub" data-v="1" aria-pressed="' + !!d.sub + '">可以替代</button><button type="button" data-act="ed-sub" data-v="0" aria-pressed="' + !d.sub + '">不可替代</button></div></div>' +
       '<label class="field"><span>備註</span><textarea id="ed-note" rows="2" maxlength="120" placeholder="例：要綠色包裝那款，不是藍色">' + esc(d.note) + '</textarea></label>' +
-      '<div class="field" id="ed-tag-wrap"' + (costco ? '' : ' hidden') + '><span>價籤照片（選填，給店員查用）</span><div class="photo-frame tag" id="ed-tag">' + edPhoto(d.tagPhoto, null, '價籤') + '</div><div class="photo-acts"><button type="button" class="btn btn-secondary btn-sm" data-act="ed-tag">拍價籤</button><button type="button" class="btn-link" data-act="ed-tag-clear" id="ed-tag-clear"' + (d.tagPhoto ? '' : ' hidden') + '>移除</button></div></div>' +
-      '<div class="form-actions"><button type="submit" class="btn btn-primary btn-wide">' + (opts.addTo ? '儲存並加進清單' : '儲存') + '</button>' +
+      '<details class="more" id="ed-more"' + (d.barcode || d.backPhoto || d.itemNo || d.tagPhoto ? ' open' : '') + '><summary>更多資料：條碼、Item 編號</summary><div class="form" style="margin-top:14px">' +
+        '<div class="field"><span>商品背面（有條碼的那面）</span><div class="photo-frame tag" id="ed-back">' + edPhoto(d.backPhoto, null, '背面照') + '</div><div class="photo-acts"><button type="button" class="btn btn-secondary btn-sm" data-act="ed-back">拍條碼那面</button><button type="button" class="btn-link" data-act="ed-back-clear" id="ed-back-clear"' + (d.backPhoto ? '' : ' hidden') + '>移除</button></div></div>' +
+        '<div class="field"><span>條碼數字（拍照會自動帶入）</span><div class="input-row"><input id="ed-barcode" value="' + esc(d.barcode) + '" inputmode="numeric" placeholder="通常不用自己打" maxlength="32" autocomplete="off"><button type="button" class="btn btn-secondary" data-act="ed-scan">相機掃描</button></div><p class="help" id="ed-bc-help"></p></div>' +
+        '<label class="field" id="ed-itemno-wrap"' + (costco ? '' : ' hidden') + '><span>好事多 Item 編號（標籤上的「品號」）</span><input id="ed-itemno" value="' + esc(d.itemNo) + '" inputmode="numeric" placeholder="店員最常用這個查" maxlength="10" autocomplete="off"></label>' +
+        '<div class="field" id="ed-tag-wrap"' + (costco ? '' : ' hidden') + '><span>價籤照片（選填）</span><div class="photo-frame tag" id="ed-tag">' + edPhoto(d.tagPhoto, null, '價籤') + '</div><div class="photo-acts"><button type="button" class="btn btn-secondary btn-sm" data-act="ed-tag">拍價籤</button><button type="button" class="btn-link" data-act="ed-tag-clear" id="ed-tag-clear"' + (d.tagPhoto ? '' : ' hidden') + '>移除</button></div></div>' +
+      '</div></details>' +
+      '<div class="form-actions"><button type="submit" class="btn btn-primary btn-wide">' + (opts.addTo ? '儲存並加進清單' : '儲存（之後可以再補）') + '</button>' +
       (ED.pid ? '<button type="button" class="btn btn-danger btn-wide" data-act="ed-delete">' + (armed ? '再按一次，確定刪除' : '刪除這個商品') + '</button>' : '') + '</div></form>',
-    mount: () => bcHelp(),
+    mount: () => { bcHelp(); edHint(); },
     onClose: () => {
       const o = ED && ED.opts, p = ED && ED.pid; ED = null;
       if (o && o.addTo && D.lists[o.addTo]) openPicker(o.addTo);
@@ -1474,11 +1500,12 @@ function edPhoto(src, cat, label) {
   if (src && SAFE_IMG.test(src)) return '<img src="' + src + '" alt="">';
   return label ? '<span class="muted" style="font-size:14px">' + label + '</span>' : '<span class="mono">' + esc(cat ? catOf(cat).mono : '照') + '</span>';
 }
-function bcHelp() {
+function bcHelp() { bcHelp0(); edHint(); }
+function bcHelp0() {
   const inp = $('#ed-barcode'), help = $('#ed-bc-help'); if (!inp || !help) return;
   const v = cleanCode(inp.value);
   help.className = 'help';
-  if (!v) { help.textContent = '同一個商品在每家店條碼都一樣，存一次全家都能用。生鮮、秤重的通常沒有條碼，可以不填。'; return; }
+  if (!v) { help.textContent = '拍商品照片或背面照時會自動讀條碼。生鮮、秤重的通常沒有條碼，不用填。'; return; }
   if (/^\d{13}$/.test(v)) {
     if (ean13ok(v)) { help.className = 'help ok'; help.textContent = '✓ 有效的 EAN-13' + (v.startsWith('471') ? '（台灣商品）' : ''); }
     else { help.className = 'help warn'; help.textContent = '最後一碼對不上，請再核對一次數字。'; }
@@ -1493,10 +1520,9 @@ function saveEditor() {
   d.itemNo = cleanCode($('#ed-itemno').value); d.barcode = cleanCode($('#ed-barcode').value); d.note = $('#ed-note').value.trim();
   if (!d.cat) { toast('請先選品類'); $('#ed-cat').focus(); return; }
   if (!d.name) { toast('「其他」類請填品名'); $('#ed-name').focus(); return; }
-  if (!d.stores.length) { toast('請至少選一間店'); return; }
   if (!d.stores.includes('costco')) { d.itemNo = ''; d.tagPhoto = ''; }
   const id = ED.pid || uid();
-  const body = { cat: d.cat, name: d.name, brand: d.brand, spec: d.spec, stores: d.stores, itemNo: d.itemNo, barcode: d.barcode, sub: !!d.sub, note: d.note, photo: d.photo || '', tagPhoto: d.tagPhoto || '', sample: !!d.sample, createdAt: d.createdAt || Date.now() };
+  const body = { cat: d.cat, name: d.name, brand: d.brand, spec: d.spec, stores: d.stores, itemNo: d.itemNo, barcode: d.barcode, sub: !!d.sub, note: d.note, photo: d.photo || '', tagPhoto: d.tagPhoto || '', backPhoto: d.backPhoto || '', sample: !!d.sample, createdAt: d.createdAt || Date.now() };
   put('products', id, body);
   // 同步清單項目上的名稱，避免商品被刪後紀錄只剩「已刪除的商品」
   Object.keys(D.items).forEach(k => { const it = D.items[k]; if (it.productId === id && (it.name !== body.name || it.cat !== body.cat) && listStatus(D.lists[it.listId]) === 'active') patch('items', k, { name: body.name, cat: body.cat }); });
@@ -1546,7 +1572,7 @@ function clerkHtml() {
     '<h2 class="scan-name">' + esc(p.name) + '</h2>' +
     '<p class="scan-sub">' + [subLine(p), it ? '要買 ' + it.qty + ' 個' : ''].filter(Boolean).join('・') + '</p>' +
     (showNo ? '<div class="scan-itemno"><span>ITEM 編號</span><strong>' + esc(p.itemNo) + '</strong></div>' : '') +
-    (p.barcode ? '<div class="scan-bc"><svg data-bc="' + esc(p.barcode) + '" data-h="120" data-w="2.6"></svg></div>' : '<p class="scan-hint">這個商品沒有存條碼，請看照片' + (showNo ? '或 Item 編號' : '') + '。</p>') +
+    (p.barcode ? '<div class="scan-bc"><svg data-bc="' + esc(p.barcode) + '" data-h="120" data-w="2.6"></svg></div>' : (p.backPhoto && SAFE_IMG.test(p.backPhoto) ? '<figure class="scan-tag"><img src="' + p.backPhoto + '" alt="商品背面"><figcaption>商品背面</figcaption></figure>' : '')) +
     (p.tagPhoto && SAFE_IMG.test(p.tagPhoto) ? '<figure class="scan-tag"><img src="' + p.tagPhoto + '" alt="價籤照片"><figcaption>價籤照片</figcaption></figure>' : '') +
     (p.note ? '<p class="scan-note">' + esc(p.note) + '</p>' : '') +
     '<p class="scan-tip">螢幕調亮一點，掃描比較容易成功' + (n > 1 ? '・左右滑動換下一個' : '') + '</p></div></div>';
@@ -1786,11 +1812,32 @@ const ACT = {
   },
   'ed-sub': a => { if (!ED) return; ED.d.sub = a.dataset.v === '1'; $$('[data-act="ed-sub"]', sheetRoot).forEach(b => b.setAttribute('aria-pressed', String(b === a))); },
   'ed-photo': () => pickFile(async f => {
-    toast('處理照片中…');
-    try { const url = await compressImage(f, 720, 110000); if (!ED) return; ED.d.photo = url; $('#ed-photo').innerHTML = edPhoto(url); $('#ed-photo-clear').hidden = false; toast('照片已壓縮好（約 ' + Math.round(url.length * 0.75 / 1024) + ' KB）'); }
-    catch (e) { toast('這張照片讀不了，換一張試試（建議用 JPG）', 3500); }
+    toast('處理照片中…', 6000);
+    let url;
+    try { url = await compressImage(f, 720, 110000); } catch (e) { toast('這張照片讀不了，換一張試試（建議用 JPG）', 3500); return; }
+    if (!ED) return;
+    ED.d.photo = url; $('#ed-photo').innerHTML = edPhoto(url); $('#ed-photo-clear').hidden = false;
+    edHint();
+    if (!cleanCode($('#ed-barcode').value)) {
+      let code = null; try { code = await decodeBarcode(f); } catch (e) { code = null; }
+      if (!ED) return;
+      if (code) { $('#ed-barcode').value = cleanCode(code); bcHelp(); toast('✓ 從照片讀到條碼 ' + code, 3500); return; }
+    }
+    toast('照片存好了');
   }),
-  'ed-photo-clear': () => { if (!ED) return; ED.d.photo = ''; $('#ed-photo').innerHTML = edPhoto('', $('#ed-cat').value); $('#ed-photo-clear').hidden = true; },
+  'ed-photo-clear': () => { if (!ED) return; ED.d.photo = ''; $('#ed-photo').innerHTML = edPhoto('', $('#ed-cat').value); $('#ed-photo-clear').hidden = true; edHint(); },
+  'ed-back': () => pickFile(async f => {
+    toast('處理照片中…', 6000);
+    let url;
+    try { url = await compressImage(f, 640, 80000); } catch (e) { toast('這張照片讀不了，換一張試試', 3500); return; }
+    if (!ED) return;
+    ED.d.backPhoto = url; $('#ed-back').innerHTML = edPhoto(url); $('#ed-back-clear').hidden = false; $('#ed-more').open = true;
+    let code = null; try { code = await decodeBarcode(f); } catch (e) { code = null; }
+    if (!ED) return;
+    if (code) { $('#ed-barcode').value = cleanCode(code); bcHelp(); toast('✓ 讀到條碼 ' + code, 3500); }
+    else { edHint(); toast('這張讀不到條碼，照片先存著，店員可以看照片找。想再試就靠近一點重拍。', 5000); }
+  }),
+  'ed-back-clear': () => { if (!ED) return; ED.d.backPhoto = ''; $('#ed-back').innerHTML = edPhoto('', null, '背面照'); $('#ed-back-clear').hidden = true; },
   'ed-tag': () => pickFile(async f => {
     toast('處理照片中…');
     try { const url = await compressImage(f, 640, 80000); if (!ED) return; ED.d.tagPhoto = url; $('#ed-tag').innerHTML = edPhoto(url); $('#ed-tag-clear').hidden = false; toast('價籤照片已存好'); }
