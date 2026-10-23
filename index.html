@@ -1,0 +1,1960 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>家庭補貨清單</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: Apple 官網節奏 — 白／淺灰交錯的滿版色帶、980px 內容欄、置中超大標題、毛玻璃導覽列、從底部浮起的面板 */
+:root{
+  --bg:#ffffff; --bg-alt:#f5f5f7; --surface:#ffffff; --tile:#f5f5f7; --tile-2:#e8e8ed; --seg-on:#ffffff;
+  --fg:#1d1d1f; --fg-2:#6e6e73; --fg-3:#86868b; --line:#d2d2d7; --line-soft:#e8e8ed;
+  --accent:#0071e3; --accent-press:#0062c4; --link:#0066cc; --on-accent:#ffffff; --accent-soft:rgba(0,113,227,.10);
+  --ok:#248a3d; --ok-soft:rgba(36,138,61,.12); --warn:#b64400; --warn-soft:rgba(201,52,0,.10); --danger:#d70015;
+  --glass:rgba(255,255,255,.74); --scrim:rgba(0,0,0,.36);
+  --shadow:0 12px 40px rgba(0,0,0,.08); --shadow-sm:0 2px 12px rgba(0,0,0,.05);
+  /* 給店員掃描的畫面永遠白底黑字，兩種主題都一樣 */
+  --scan-bg:#ffffff; --scan-fg:#000000; --scan-fg-2:#515154; --scan-tile:#f5f5f7; --scan-line:#d2d2d7; --scan-link:#0066cc; --scan-accent:#0071e3;
+  --finish:#248a3d; --finish-press:#1e7533;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;
+  --t-hero:clamp(48px,11vw,104px); --t-h1:clamp(36px,6.4vw,64px); --t-h2:clamp(26px,3.8vw,40px);
+  --r-lg:28px; --r-md:18px; --r-sm:12px;
+  --ease:cubic-bezier(.22,.8,.24,1);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --bg-alt:#101011; --surface:#1c1c1e; --tile:#2c2c2e; --tile-2:#3a3a3c; --seg-on:#636366;
+    --fg:#f5f5f7; --fg-2:#a1a1a6; --fg-3:#86868b; --line:#424245; --line-soft:#2c2c2e;
+    --accent:#0071e3; --accent-press:#0a84ff; --link:#2997ff; --on-accent:#ffffff; --accent-soft:rgba(41,151,255,.16);
+    --ok:#30d158; --ok-soft:rgba(48,209,88,.16); --warn:#ff9f0a; --warn-soft:rgba(255,159,10,.16); --danger:#ff453a;
+    --glass:rgba(22,22,23,.74); --scrim:rgba(0,0,0,.6);
+    --shadow:0 12px 40px rgba(0,0,0,.5); --shadow-sm:0 2px 12px rgba(0,0,0,.4);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#000000; --bg-alt:#101011; --surface:#1c1c1e; --tile:#2c2c2e; --tile-2:#3a3a3c; --seg-on:#636366;
+  --fg:#f5f5f7; --fg-2:#a1a1a6; --fg-3:#86868b; --line:#424245; --line-soft:#2c2c2e;
+  --accent:#0071e3; --accent-press:#0a84ff; --link:#2997ff; --on-accent:#ffffff; --accent-soft:rgba(41,151,255,.16);
+  --ok:#30d158; --ok-soft:rgba(48,209,88,.16); --warn:#ff9f0a; --warn-soft:rgba(255,159,10,.16); --danger:#ff453a;
+  --glass:rgba(22,22,23,.74); --scrim:rgba(0,0,0,.6);
+  --shadow:0 12px 40px rgba(0,0,0,.5); --shadow-sm:0 2px 12px rgba(0,0,0,.4);
+  color-scheme:dark;
+}
+
+html{-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:17px;line-height:1.47;letter-spacing:.01em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body.locked{overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:70;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
+*,*::before,*::after{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer;background:none;border:0;padding:0;-webkit-tap-highlight-color:transparent}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+h1,h2,h3,h4{text-wrap:balance}
+p{margin:0}
+.muted{color:var(--fg-2)}
+.center{text-align:center}
+.wrap{max-width:1012px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* ── 導覽列 ── */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:60;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line-soft)}
+.nav .wrap{display:flex;align-items:center;gap:6px;height:48px}
+.brand{font-weight:600;font-size:17px;margin-right:auto;white-space:nowrap;letter-spacing:0}
+.nav-links{display:flex;gap:2px}
+.nav-links button{font-size:14px;color:var(--fg-2);padding:6px 11px;border-radius:980px;transition:color .2s,background .2s}
+.nav-links button:hover{color:var(--fg)}
+.nav-links button[aria-current="page"]{color:var(--fg);background:var(--tile)}
+.sync{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--fg-3);margin-left:6px;white-space:nowrap;min-height:32px}
+.sync i{width:7px;height:7px;border-radius:50%;background:var(--fg-3)}
+.sync[data-mode="cloud"] i{background:var(--ok)}
+.sync[data-mode="local"] i{background:var(--warn)}
+@media (max-width:520px){.sync span{display:none}.brand{font-size:16px}.nav-links button{padding:6px 9px}}
+
+/* ── 色帶與標題 ── */
+.band{padding-block:56px}
+.band.alt{background:var(--bg-alt)}
+.band.tight{padding-block:28px 8px}
+.hero{padding-block:76px 52px;text-align:center}
+.hero.sm{padding-block:64px 40px}
+.hero-title{font-size:var(--t-hero);font-weight:700;letter-spacing:-.03em;line-height:1.04;margin:0}
+.list-title{font-size:var(--t-h1);font-weight:700;letter-spacing:-.02em;line-height:1.08;margin:0}
+.tagline{font-size:clamp(21px,3.2vw,28px);font-weight:600;margin-top:14px;letter-spacing:-.005em;text-wrap:balance}
+.hero-status{color:var(--fg-2);margin-top:10px}
+.eyebrow{font-size:17px;font-weight:600;color:var(--fg-2);margin-bottom:8px}
+.cta-row{display:flex;gap:12px 24px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:28px}
+.section-title{font-size:var(--t-h2);font-weight:700;letter-spacing:-.015em;line-height:1.1;margin:0 0 28px}
+.back{margin-bottom:18px}
+
+/* ── 按鈕 ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:10px 22px;border-radius:980px;font-size:17px;font-weight:500;white-space:nowrap;text-decoration:none;transition:background .2s,transform .15s,opacity .2s}
+.btn:hover{text-decoration:none}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-primary:hover{background:var(--accent-press)}
+.btn-secondary{background:var(--tile);color:var(--fg)}
+.btn-secondary:hover{background:var(--tile-2)}
+.btn-danger{background:var(--tile);color:var(--danger)}
+.btn-sm{min-height:36px;padding:6px 16px;font-size:15px}
+.btn-wide{width:100%}
+.btn-link{color:var(--link);font-size:17px;min-height:44px;display:inline-flex;align-items:center}
+.btn-link:hover{text-decoration:underline}
+button:disabled,.btn[aria-disabled="true"]{opacity:.38;cursor:not-allowed;transform:none}
+
+/* ── 小標籤 ── */
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:980px;background:var(--tile);color:var(--fg-2);white-space:nowrap;letter-spacing:.02em}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.accent{background:var(--accent-soft);color:var(--link)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:36px;padding:6px 14px;border-radius:980px;background:var(--tile);font-size:14px;font-weight:500;color:var(--fg);transition:background .2s}
+.chip:hover{background:var(--tile-2)}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.chip.quiet{background:transparent;color:var(--fg-2)}
+.chip.quiet:hover{color:var(--danger);background:var(--tile)}
+
+/* ── 提醒橫幅 ── */
+.banners{display:grid;gap:12px;margin-bottom:48px}
+.banner{display:flex;align-items:center;gap:14px 16px;flex-wrap:wrap;background:var(--surface);border-radius:var(--r-md);padding:16px 20px;box-shadow:var(--shadow-sm)}
+.banner .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);flex:none}
+.banner.warn .dot{background:var(--warn)}
+.banner.ok .dot{background:var(--ok)}
+.banner-text{flex:1 1 220px;min-width:0}
+.banner-text strong{display:block;font-weight:600}
+.banner-text p{color:var(--fg-2);font-size:14px;margin-top:2px}
+.banner-acts{display:flex;gap:8px;flex-wrap:wrap}
+.list-banner{margin-bottom:36px}
+
+/* ── 清單卡 ── */
+.list-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:20px}
+.list-card{background:var(--surface);border-radius:var(--r-lg);padding:28px 28px 24px;cursor:pointer;display:flex;flex-direction:column;gap:6px;text-align:left;transition:transform .35s var(--ease),box-shadow .35s;min-width:0}
+.list-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.lc-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.lc-store{font-size:14px;color:var(--fg-2);font-weight:600}
+.lc-pills{display:flex;gap:6px;flex-wrap:wrap}
+.lc-title{font-size:28px;font-weight:700;letter-spacing:-.01em;line-height:1.15;margin:0;overflow-wrap:anywhere}
+.lc-stack{display:flex;justify-content:center;margin:20px 0 16px;overflow:hidden}
+.lc-stack .th{width:clamp(56px,17vw,84px);height:clamp(56px,17vw,84px);margin-left:-14px;border:4px solid var(--surface);border-radius:22px}
+.lc-stack .th:first-child{margin-left:0}
+.lc-stack .th .mono{font-size:clamp(20px,5vw,28px)}
+.progress{height:4px;border-radius:4px;background:var(--line-soft);overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .6s var(--ease)}
+.lc-meta{font-size:14px;color:var(--fg-2);margin-top:10px;display:flex;flex-wrap:wrap;gap:2px 14px;font-variant-numeric:tabular-nums}
+
+/* ── 縮圖 ── */
+.th{flex:none;display:grid;place-items:center;background:var(--tile);border-radius:14px;overflow:hidden;width:56px;height:56px}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.mono{font-size:24px;font-weight:600;color:var(--fg-2);line-height:1}
+
+/* ── 空狀態 ── */
+.empty{background:var(--surface);border-radius:var(--r-lg);padding:48px 24px;text-align:center;display:grid;gap:12px;justify-items:center}
+.empty h3{font-size:28px;margin:0;font-weight:700;letter-spacing:-.01em}
+.steps{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:12px;margin:16px 0 4px;width:100%;max-width:720px;text-align:left}
+.step{background:var(--tile);border-radius:var(--r-md);padding:18px;display:grid;gap:4px}
+.step b{font-size:13px;color:var(--fg-3);font-weight:600;font-variant-numeric:tabular-nums}
+.step strong{font-size:17px}
+.step span{font-size:14px;color:var(--fg-2)}
+
+/* ── 清單項目 ── */
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;flex-wrap:wrap}
+.sec-head h2,.sec-head h3{font-size:24px;font-weight:700;margin:0;letter-spacing:-.01em}
+.sec-head .count{color:var(--fg-3);font-weight:600;margin-left:6px}
+.group{margin-top:44px}
+.members{display:grid;gap:8px}
+.member{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--tile);border-radius:12px;padding:10px 14px}
+.member>span:first-child{display:grid;min-width:0}
+.member small{color:var(--fg-2);font-size:13px;overflow-wrap:anywhere}
+.cam{position:fixed;inset:0;z-index:110;background:#000000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px))}
+.cam video{width:100%;max-width:640px;max-height:68vh;object-fit:cover;border-radius:20px;background:#111111}
+.cam-tip{color:#ffffff;font-size:17px}
+.cam-acts{display:flex;gap:12px}
+.cam .btn-secondary{background:#2c2c2e;color:#ffffff}
+.store-sub{font-size:15px;font-weight:600;color:var(--fg-2);margin:24px 0 10px;letter-spacing:.02em}
+.store-sub:first-of-type{margin-top:0}
+input[type="date"]{width:100%;min-height:48px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;font-size:17px;outline:none;-webkit-appearance:none;appearance:none}
+.items{display:grid;gap:12px}
+.item{display:grid;grid-template-columns:44px 76px minmax(0,1fr);gap:14px;align-items:start;background:var(--surface);border-radius:var(--r-md);padding:16px;transition:opacity .3s}
+.check{width:44px;height:44px;border-radius:50%;display:grid;place-items:center}
+.check>span{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;color:var(--on-accent);transition:background .2s,border-color .2s}
+.check svg{width:15px;height:15px;opacity:0;transition:opacity .2s}
+.item.bought .check>span{background:var(--accent);border-color:var(--accent)}
+.item.bought .check svg{opacity:1}
+.item.bought .item-name{color:var(--fg-3)}
+.item.bought .th{opacity:.6}
+.item .th{width:76px;height:76px;border-radius:16px}
+.item .th .mono{font-size:28px}
+.item-name{font-size:19px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.item-name .x{color:var(--fg-2);font-weight:500;margin-left:8px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.item-sub{color:var(--fg-2);font-size:15px;margin-top:2px;overflow-wrap:anywhere}
+.item-code{font-family:var(--mono);font-size:14px;margin-top:4px}
+.item-note{font-size:14px;background:var(--tile);border-radius:10px;padding:6px 10px;margin-top:8px;display:inline-block;overflow-wrap:anywhere}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.item-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepper{display:inline-flex;align-items:center;background:var(--tile);border-radius:980px;height:36px}
+.stepper button{width:38px;height:36px;border-radius:980px;font-size:20px;line-height:1;color:var(--link)}
+.stepper output{min-width:22px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+.item-by{font-size:12px;color:var(--fg-3);margin-top:10px}
+.items-empty{background:var(--surface);border-radius:var(--r-md);padding:28px;text-align:center;color:var(--fg-2)}
+@media (max-width:520px){
+  .item{grid-template-columns:36px 60px minmax(0,1fr);gap:10px;padding:14px 12px}
+  .item .th{width:60px;height:60px;border-radius:14px}
+  .item .th .mono{font-size:22px}
+  .check{width:36px;height:44px}
+}
+
+/* ── 通知區 ── */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px}
+.tile{background:var(--bg-alt);border-radius:var(--r-md);padding:24px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.band.alt .tile{background:var(--surface)}
+.tile h3{font-size:19px;margin:0;font-weight:600}
+.tile>p{color:var(--fg-2);font-size:14px}
+.tile .btn{margin-top:auto;align-self:flex-start}
+.tile.span2{grid-column:span 2}
+@media (max-width:520px){.tile.span2{grid-column:auto}}
+.text-preview{margin-top:28px}
+.text-preview textarea{font-size:14px;line-height:1.6;color:var(--fg-2);resize:vertical}
+
+/* ── 表單 ── */
+.form{display:grid;gap:18px}
+.field{display:grid;gap:6px;border:0;padding:0;margin:0;min-width:0}
+.field>span,.field>legend{font-size:14px;font-weight:600;color:var(--fg-2);padding:0;margin-bottom:6px}
+input[type="text"],input[type="email"],input[type="search"],input[type="datetime-local"],input:not([type]),select,textarea{width:100%;min-height:48px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;font-size:17px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--fg-2) 50%),linear-gradient(135deg,var(--fg-2) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 15px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:36px}
+textarea{min-height:80px}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.field-row{grid-template-columns:1fr}}
+.input-row{display:flex;gap:8px}
+.input-row input{flex:1;min-width:0}
+.help{font-size:13px;color:var(--fg-3)}
+.help.ok{color:var(--ok)}
+.help.warn{color:var(--warn)}
+.seg{display:inline-flex;background:var(--tile);border-radius:12px;padding:3px;gap:2px;justify-self:start}
+.seg button{padding:8px 18px;border-radius:9px;font-size:15px;font-weight:500;color:var(--fg-2);min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--seg-on);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.14)}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--fg-2);min-height:40px;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+.photo-frame{width:min(100%,280px);aspect-ratio:1;max-width:100%;margin:0 auto;border-radius:var(--r-lg);background:var(--tile);display:grid;place-items:center;overflow:hidden}
+.photo-frame img{width:100%;height:100%;object-fit:cover}
+.photo-frame .mono{font-size:72px;color:var(--fg-3)}
+.photo-frame.tag{width:min(100%,200px)}
+.photo-acts{display:flex;justify-content:center;gap:8px 16px;flex-wrap:wrap;margin-top:12px}
+.form-actions{display:grid;gap:10px;margin-top:6px}
+
+/* ── 面板 ── */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:80;display:flex;align-items:flex-end;justify-content:center;animation:fade .25s ease}
+.sheet{background:var(--bg);width:100%;max-width:680px;max-height:92vh;max-height:92dvh;overflow-y:auto;overscroll-behavior:contain;border-radius:var(--r-lg) var(--r-lg) 0 0;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));animation:up .4s var(--ease)}
+.sheet-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px max(20px,env(safe-area-inset-right,0px)) 14px max(20px,env(safe-area-inset-left,0px));background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
+.sheet-head h2{font-size:21px;font-weight:700;margin:0;overflow-wrap:anywhere;min-width:0}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:var(--tile);color:var(--fg-2);display:grid;place-items:center;flex:none;font-size:15px}
+.sheet-body{padding:8px max(20px,env(safe-area-inset-right,0px)) 0 max(20px,env(safe-area-inset-left,0px))}
+@media (min-width:720px){.scrim{align-items:center;padding:24px}.sheet{border-radius:var(--r-lg);max-height:88vh;padding-bottom:28px}}
+
+.store-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.store-tile{border:2px solid transparent;background:var(--tile);border-radius:var(--r-md);padding:16px;text-align:left;display:grid;gap:2px;transition:border-color .2s,background .2s}
+.store-tile b{font-size:21px;font-weight:700}
+.store-tile small{color:var(--fg-2);font-size:13px}
+.store-tile[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+
+/* ── 挑商品 ── */
+.picker-top{display:grid;gap:6px;position:sticky;top:68px;z-index:1;background:var(--bg);padding-block:4px 10px}
+.pk-cat{font-size:14px;color:var(--fg-3);font-weight:600;margin:22px 0 8px}
+.pk-rows{display:grid;gap:8px}
+.pk-row{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px;border-radius:14px;background:var(--bg-alt)}
+.pk-row .th{width:52px;height:52px;border-radius:12px}
+.pk-row .th .mono{font-size:20px}
+.pk-text{min-width:0;display:grid}
+.pk-text strong{font-weight:600;overflow-wrap:anywhere}
+.pk-text span{font-size:13px;color:var(--fg-2);overflow-wrap:anywhere}
+.pk-empty{padding:28px 0;text-align:center;color:var(--fg-2);display:grid;gap:4px}
+.picker-new{margin-top:32px;padding-top:24px;border-top:1px solid var(--line-soft)}
+.picker-new h3{font-size:19px;margin:0 0 4px}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:4px;margin-top:14px}
+
+/* ── 商品頁 ── */
+.filter-row{display:grid;gap:14px}
+.cat-scroll{display:flex;gap:4px;overflow-x:auto;padding:16px 2px 8px;scroll-snap-type:x proximity;scrollbar-width:none}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-btn{flex:none;display:grid;justify-items:center;gap:6px;width:74px;padding:6px 0;border-radius:14px;scroll-snap-align:start;position:relative}
+.mono-tile{width:56px;height:56px;border-radius:16px;background:var(--tile);display:grid;place-items:center;font-size:22px;font-weight:600;color:var(--fg-2);transition:background .2s,color .2s,transform .2s}
+.cat-btn:hover .mono-tile{transform:scale(1.05)}
+.cat-btn>span:not(.mono-tile){font-size:12px;color:var(--fg-2);white-space:nowrap}
+.cat-btn[aria-pressed="true"] .mono-tile{background:var(--fg);color:var(--bg)}
+.cat-btn[aria-pressed="true"]>span:not(.mono-tile){color:var(--fg);font-weight:600}
+.cat-btn .n{position:absolute;top:2px;right:6px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--on-accent);font-size:11px;font-weight:600;display:grid;place-items:center;padding:0 5px;font-variant-numeric:tabular-nums}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:16px}
+@media (max-width:520px){.prod-grid{grid-template-columns:1fr 1fr;gap:12px}}
+.prod-card{background:var(--surface);border-radius:var(--r-md);overflow:hidden;text-align:left;display:flex;flex-direction:column;transition:transform .35s var(--ease),box-shadow .35s;min-width:0}
+.prod-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.prod-card .ph{aspect-ratio:1;max-width:100%;background:var(--surface);display:grid;place-items:center;overflow:hidden}
+.prod-card .ph img{width:100%;height:100%;object-fit:cover}
+.prod-card .ph .mono{font-size:clamp(40px,9vw,60px);color:var(--fg-3)}
+.pc-body{padding:14px 16px 18px;display:grid;gap:2px;min-width:0}
+.pc-cat{font-size:12px;font-weight:600;color:var(--fg-3);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pc-name{font-size:17px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.pc-sub{font-size:14px;color:var(--fg-2);overflow-wrap:anywhere}
+.pc-stores{font-size:12px;color:var(--fg-3);margin-top:6px}
+
+.pd{display:grid;gap:6px;text-align:center;padding-top:8px}
+.pd-photo{width:min(100%,340px);aspect-ratio:1;max-width:100%;margin:0 auto 18px;border-radius:var(--r-lg);background:var(--tile);display:grid;place-items:center;overflow:hidden}
+.pd-photo img{width:100%;height:100%;object-fit:cover}
+.pd-photo .mono{font-size:96px;color:var(--fg-3)}
+.pd-cat{font-size:14px;font-weight:600;color:var(--fg-2)}
+.pd-name{font-size:clamp(30px,6vw,40px);font-weight:700;letter-spacing:-.015em;line-height:1.1;margin:0}
+.pd-sub{font-size:19px;color:var(--fg-2)}
+.pd-acts{display:flex;justify-content:center;gap:10px 16px;flex-wrap:wrap;margin-top:18px}
+.facts{display:grid;margin:28px 0 0;text-align:left;border-top:1px solid var(--line-soft)}
+.fact{display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;padding:14px 0;border-bottom:1px solid var(--line-soft);align-items:start}
+.fact dt{color:var(--fg-2);font-size:14px;padding-top:2px}
+.fact dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.mono-text{font-family:var(--mono);font-size:19px;letter-spacing:.04em}
+.bc-box{background:var(--scan-bg);border-radius:12px;padding:6px;display:block;max-width:320px}
+.bc-box svg{display:block;width:100%;height:auto}
+.tag-img{max-width:220px;border-radius:12px}
+
+/* ── 紀錄 ── */
+.hist{display:grid;gap:14px}
+.hist-card{background:var(--surface);border-radius:var(--r-md);padding:22px 24px;display:flex;gap:16px 24px;align-items:center;flex-wrap:wrap}
+.hc-main{flex:1 1 260px;min-width:0;display:grid;gap:4px}
+.hc-main h3{font-size:22px;margin:0;font-weight:700;overflow-wrap:anywhere}
+.hc-main p{font-size:14px;color:var(--fg-2)}
+.hc-act{display:flex;gap:8px 16px;align-items:center;flex-wrap:wrap}
+
+/* ── 底部結帳列 ── */
+.cobar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:1px solid var(--line-soft);padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.cobar .wrap{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;justify-content:space-between}
+.cobar p{font-size:13px;color:var(--fg-2);flex:1 1 220px;min-width:0}
+.cobar p strong{color:var(--fg);font-weight:600}
+.cobar .btns{display:flex;gap:10px;flex:1 1 280px;justify-content:flex-end}
+.cobar .btns .btn{flex:1;max-width:220px}
+main.has-cobar{padding-bottom:150px}
+
+/* ── 給店員看／載具（永遠白底） ── */
+.scan{position:fixed;inset:0;z-index:90;background:var(--scan-bg);color:var(--scan-fg);overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);animation:fade .25s ease;color-scheme:light}
+.scan-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));background:var(--scan-bg)}
+.scan-top button{color:var(--scan-link);font-size:17px;font-weight:600;min-height:44px;padding:0 10px}
+.scan-top button:disabled{opacity:.3}
+.scan-title{font-size:15px;color:var(--scan-fg-2);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pager{display:flex;align-items:center;gap:2px;font-size:15px;color:var(--scan-fg-2);font-variant-numeric:tabular-nums}
+.pager button{font-size:26px;font-weight:400;width:44px}
+.scan-body{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:8px max(20px,env(safe-area-inset-right,0px)) 48px max(20px,env(safe-area-inset-left,0px));max-width:640px;margin:0 auto;width:100%}
+.scan-hint{font-size:15px;color:var(--scan-fg-2)}
+.scan-photo{width:min(76vw,340px);aspect-ratio:1;max-width:100%;border-radius:var(--r-lg);overflow:hidden;background:var(--scan-tile);display:grid;place-items:center}
+.scan-photo img{width:100%;height:100%;object-fit:cover}
+.scan-photo .mono{font-size:96px;color:var(--scan-fg-2)}
+.scan-name{font-size:clamp(32px,8.5vw,52px);font-weight:700;line-height:1.08;letter-spacing:-.02em;margin:4px 0 0;overflow-wrap:anywhere}
+.scan-sub{font-size:19px;color:var(--scan-fg-2)}
+.scan-itemno{display:grid;gap:2px;border:2px solid var(--scan-fg);border-radius:20px;padding:10px 28px 12px}
+.scan-itemno span{font-size:12px;font-weight:700;letter-spacing:.12em}
+.scan-itemno strong{font-family:var(--mono);font-size:clamp(36px,11vw,56px);letter-spacing:.06em;line-height:1.05}
+.scan-bc{width:100%;max-width:520px;background:var(--scan-bg)}
+.scan-bc svg{display:block;width:100%;height:auto;margin:0 auto}
+.bc-digits{font-family:var(--mono);font-size:30px;letter-spacing:.12em;padding:12px;border:2px dashed var(--scan-line);border-radius:12px;color:var(--scan-fg);overflow-wrap:anywhere}
+.scan-note{font-size:17px;background:var(--scan-tile);padding:10px 16px;border-radius:12px;overflow-wrap:anywhere}
+.scan-tag{margin:0;display:grid;gap:6px;justify-items:center}
+.scan-tag img{max-width:min(70vw,280px);border-radius:14px}
+.scan-tag figcaption{font-size:13px;color:var(--scan-fg-2)}
+.scan-tip{font-size:13px;color:var(--scan-fg-2);margin-top:6px}
+.carrier-code{font-family:var(--mono);font-size:28px;letter-spacing:.1em}
+.co-head{font-size:clamp(30px,8vw,44px);font-weight:700;letter-spacing:-.02em;margin:8px 0 0}
+.co-sum{display:flex;justify-content:center;gap:40px;margin-top:6px}
+.co-sum div{display:grid;justify-items:center}
+.co-sum strong{font-size:44px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.co-sum span{font-size:14px;color:var(--scan-fg-2)}
+.co-miss{font-size:15px;color:var(--scan-fg-2);max-width:460px;overflow-wrap:anywhere}
+.ring{position:relative;width:128px;height:128px;margin-top:10px}
+.ring svg{transform:rotate(-90deg);width:100%;height:100%}
+.ring circle{fill:none;stroke-width:8}
+.ring .rbg{stroke:var(--scan-line)}
+.ring .rfg{stroke:var(--scan-accent);stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+.ring span{position:absolute;inset:0;display:grid;place-items:center;font-size:30px;font-weight:600;font-variant-numeric:tabular-nums}
+.scan .btn-secondary{background:var(--scan-tile);color:var(--scan-fg)}
+.scan .btn-primary{background:var(--scan-accent);color:#ffffff}
+.btn-finish{background:var(--finish);color:#ffffff}
+.btn-finish:hover{background:var(--finish-press)}
+.co-btns{display:flex;flex-direction:column;gap:12px;width:min(100%,280px);margin-top:8px}
+.co-btns .btn{width:100%}
+.done-mark{width:84px;height:84px;border-radius:50%;background:var(--scan-accent);display:grid;place-items:center;margin-top:20px}
+.done-mark svg{width:40px;height:40px;color:#ffffff}
+
+/* ── 頁尾、提示 ── */
+.foot{background:var(--bg-alt);border-top:1px solid var(--line-soft);padding-block:20px 28px;font-size:12px;color:var(--fg-3)}
+.foot p+p{margin-top:4px}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:var(--fg);color:var(--bg);padding:12px 20px;border-radius:980px;font-size:15px;z-index:120;opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .3s var(--ease);max-width:calc(100% - 32px);width:max-content;text-align:center;box-shadow:var(--shadow)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+main.has-cobar ~ .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+
+/* ── 動畫 ── */
+.reveal{transition:opacity 1s var(--ease),transform 1s var(--ease)}
+.reveal.pre{opacity:0;transform:translateY(40px)}
+.rise{animation:rise 1s var(--ease) both}
+.rise.d1{animation-delay:.08s}
+.rise.d2{animation-delay:.16s}
+@keyframes rise{from{opacity:.3;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}}
+@keyframes up{from{transform:translateY(48px);opacity:.5}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .reveal.pre{opacity:1;transform:none}
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <button class="brand" data-go="lists">補貨清單</button>
+    <nav class="nav-links" aria-label="主要頁面">
+      <button data-go="lists">清單</button>
+      <button data-go="products">商品</button>
+      <button data-go="history">紀錄</button>
+      <button data-go="me">我的</button>
+    </nav>
+    <button class="sync" id="sync" data-go="me" data-mode="connecting" aria-label="同步狀態"><i></i><span>連線中</span></button>
+  </div>
+</header>
+<main id="app"></main>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 0.2</p><p id="foot-mode">正在連線…</p></div></footer>
+<div class="cobar" id="cobar" hidden></div>
+<div id="sheet-root"></div>
+<div id="overlay-root"></div>
+<div id="cam-root"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="file-in" accept="image/*" hidden>
+
+<script>
+(function () {
+'use strict';
+
+/* ───────── 設定 ───────── */
+/* ── Supabase 設定：填好這兩行就會變成全家同步；留空就是單機版 ── */
+const SUPABASE_URL = 'https://hrgzbugycehfprqavlyt.supabase.co';       // 例：https://abcdefgh.supabase.co
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyZ3pidWd5Y2VoZnBycWF2bHl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3NTQyMDAsImV4cCI6MjEwODMzMDIwMH0.gCLZdBEcVALics6q40gCF-gBuMTH2iiYrXpJ3_Cf5UQ';  // Project API keys 裡的 anon / publishable key（可以公開的那把，不是 service_role）
+const APP_URL = /^https?:$/.test(location.protocol) ? location.origin + location.pathname : '';
+const FEATURES = { premium: false }; // 付費功能開關（預留，目前沒有任何付費功能）
+const LS_DATA = 'restock.local.v1', LS_CARRIER = 'restock.carrier', LS_SEEN = 'restock.seen';
+const COOLDOWN = 120000;            // 結帳後可收回的時間：2 分鐘
+
+const STORES = [
+  { id: 'costco', name: '好事多', sub: 'Item 編號・大包裝' },
+  { id: 'pxmart', name: '全聯', sub: '品牌・規格・照片' },
+  { id: 'hyper', name: '量販店', sub: '家樂福・大潤發' },
+  { id: 'cvs', name: '超商', sub: '7-ELEVEN・全家' },
+  { id: 'other', name: '其他', sub: '自由填寫' },
+];
+const CATS = [
+  { id: 'milk', name: '牛奶', mono: '奶', hint: '1857ml × 2' },
+  { id: 'yogurt', name: '優格', mono: '優', hint: '無糖 900g' },
+  { id: 'egg', name: '雞蛋', mono: '蛋', hint: '洗選蛋 30 入' },
+  { id: 'cheese', name: '起司', mono: '起', hint: '切片 24 片' },
+  { id: 'rice', name: '米', mono: '米', hint: '3kg' },
+  { id: 'bread', name: '吐司麵包', mono: '吐', hint: '全麥吐司 1 條' },
+  { id: 'noodle', name: '麵條', mono: '麵', hint: '1.2kg' },
+  { id: 'oat', name: '燕麥穀片', mono: '燕', hint: '4.5kg' },
+  { id: 'oil', name: '食用油', mono: '油', hint: '2.5L' },
+  { id: 'soy', name: '醬油調味', mono: '醬', hint: '薄鹽 1L' },
+  { id: 'water', name: '礦泉水', mono: '水', hint: '600ml × 24 瓶' },
+  { id: 'coffee', name: '咖啡', mono: '咖', hint: '咖啡豆 1.13kg' },
+  { id: 'tea', name: '茶飲', mono: '茶', hint: '無糖綠茶 × 24 瓶' },
+  { id: 'fruit', name: '水果', mono: '果', hint: '香蕉 1 串' },
+  { id: 'veg', name: '蔬菜', mono: '菜', hint: '高麗菜 1 顆' },
+  { id: 'meat', name: '肉品', mono: '肉', hint: '豬梅花 1kg' },
+  { id: 'frozen', name: '冷凍食品', mono: '凍', hint: '水餃 50 入' },
+  { id: 'tissue', name: '衛生紙', mono: '紙', hint: '100 抽 × 24 包' },
+  { id: 'towel', name: '廚房紙巾', mono: '巾', hint: '大捲 × 12' },
+  { id: 'laundry', name: '洗衣精', mono: '衣', hint: '補充包 2L × 3' },
+  { id: 'dish', name: '洗碗精', mono: '碗', hint: '1L' },
+  { id: 'trash', name: '垃圾袋', mono: '袋', hint: '中型 × 3 包' },
+  { id: 'wrap', name: '保鮮膜', mono: '膜', hint: '30cm × 2 捲' },
+  { id: 'shower', name: '沐浴乳', mono: '浴', hint: '1L 壓頭' },
+  { id: 'shampoo', name: '洗髮精', mono: '髮', hint: '1L' },
+  { id: 'toothpaste', name: '牙膏牙刷', mono: '牙', hint: '160g × 4 條' },
+  { id: 'pad', name: '衛生棉', mono: '棉', hint: '日用 23cm' },
+  { id: 'pet', name: '寵物用品', mono: '寵', hint: '貓砂 10L' },
+  { id: 'battery', name: '電池', mono: '電', hint: '3 號 × 40 顆' },
+  { id: 'other', name: '其他', mono: '其', hint: '寫清楚規格' },
+];
+const STORE_MAP = Object.fromEntries(STORES.map(s => [s.id, s]));
+const CAT_MAP = Object.fromEntries(CATS.map(c => [c.id, c]));
+const storeOf = id => STORE_MAP[id] || STORE_MAP.other;
+const catOf = id => CAT_MAP[id] || CAT_MAP.other;
+
+/* ───────── 工具 ───────── */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const enc = encodeURIComponent;
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const pad = n => String(n).padStart(2, '0');
+const WD = '日一二三四五六';
+const SAFE_IMG = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+const CHECK_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const BIG_CHECK = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M10 21l7 7 14-15" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function fmtTime(ms) {
+  if (!ms) return '';
+  const d = new Date(ms), t = new Date();
+  const hm = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  if (d.toDateString() === t.toDateString()) return '今天 ' + hm;
+  return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + hm;
+}
+function fmtRemind(ms) {
+  const d = new Date(ms);
+  return (d.getMonth() + 1) + '/' + d.getDate() + '（' + WD[d.getDay()] + '）' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function toLocalInput(ms) {
+  const d = new Date(ms);
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function fromLocalInput(v) { if (!v) return null; const t = new Date(v).getTime(); return isNaN(t) ? null : t; }
+function mmss(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + pad(s % 60); }
+function presets() {
+  const now = new Date(), out = [];
+  const a = new Date(now); a.setHours(20, 0, 0, 0); let la = '今晚 8 點';
+  if (a <= now) { a.setDate(a.getDate() + 1); la = '明晚 8 點'; }
+  out.push([la, a.getTime()]);
+  const b = new Date(now); b.setDate(b.getDate() + 1); b.setHours(10, 0, 0, 0); out.push(['明早 10 點', b.getTime()]);
+  const c = new Date(now); c.setDate(c.getDate() + ((6 - now.getDay() + 7) % 7)); c.setHours(10, 0, 0, 0);
+  if (c <= now) c.setDate(c.getDate() + 7);
+  out.push(['週六早上 10 點', c.getTime()]);
+  return out;
+}
+
+/* 條碼 */
+function ean13ok(s) { if (!/^\d{13}$/.test(s)) return false; let t = 0; for (let i = 0; i < 12; i++) t += (+s[i]) * (i % 2 ? 3 : 1); return (10 - t % 10) % 10 === +s[12]; }
+function ean8ok(s) { if (!/^\d{8}$/.test(s)) return false; let t = 0; for (let i = 0; i < 7; i++) t += (+s[i]) * (i % 2 ? 1 : 3); return (10 - t % 10) % 10 === +s[7]; }
+function upcOk(s) { return /^\d{12}$/.test(s) && ean13ok('0' + s); }
+function bcFormat(code) { if (ean13ok(code)) return 'EAN13'; if (ean8ok(code)) return 'EAN8'; if (upcOk(code)) return 'UPC'; return 'CODE128'; }
+function cleanCode(v) { return String(v || '').trim().replace(/[^0-9A-Za-z\-]/g, '').slice(0, 32); }
+
+function drawBarcodes(root) {
+  $$('svg[data-bc]', root).forEach(svg => {
+    const code = svg.getAttribute('data-bc');
+    const fmt = svg.getAttribute('data-fmt') || bcFormat(code);
+    const opts = { format: fmt, width: +(svg.getAttribute('data-w') || 2), height: +(svg.getAttribute('data-h') || 80), displayValue: true, fontSize: 18, textMargin: 4, margin: 10, background: '#ffffff', lineColor: '#000000', font: 'monospace' };
+    const fallback = () => { const d = document.createElement('div'); d.className = 'bc-digits'; d.textContent = code; svg.replaceWith(d); };
+    if (typeof window.JsBarcode !== 'function') return fallback();
+    try { window.JsBarcode(svg, code, opts); }
+    catch (e) { try { opts.format = 'CODE128'; window.JsBarcode(svg, code, opts); } catch (e2) { return fallback(); } }
+    const w = parseFloat(svg.getAttribute('width')), h = parseFloat(svg.getAttribute('height'));
+    if (w && h) { svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h); svg.removeAttribute('width'); svg.removeAttribute('height'); svg.style.maxWidth = w + 'px'; }
+  });
+}
+
+/* 照片壓縮（約 100KB 以內）與條碼辨識 */
+function loadImage(file) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => { res(img); setTimeout(() => URL.revokeObjectURL(url), 2000); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('image')); };
+    img.src = url;
+  });
+}
+async function compressImage(file, maxSide, maxChars) {
+  const img = await loadImage(file);
+  const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+  let scale = Math.min(1, maxSide / Math.max(w, h)), q = 0.82, out = '';
+  for (let i = 0; i < 10; i++) {
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * scale)); c.height = Math.max(1, Math.round(h * scale));
+    const x = c.getContext('2d'); x.fillStyle = '#ffffff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+    out = c.toDataURL('image/jpeg', q);
+    if (out.length <= maxChars) return out;
+    if (q > 0.5) q -= 0.1; else scale *= 0.8;
+  }
+  if (out.length > maxChars) throw new Error('too big');
+  return out;
+}
+let zxingP = null;
+function loadZXing() {
+  if (window.ZXing) return Promise.resolve(window.ZXing);
+  if (zxingP) return zxingP;
+  zxingP = new Promise(res => {
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js';
+    s.onload = () => res(window.ZXing || null);
+    s.onerror = () => { zxingP = null; res(null); };
+    document.head.appendChild(s);
+  });
+  return zxingP;
+}
+function imgCanvas(img, maxSide, rotate) {
+  const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+  const sc = Math.min(1, maxSide / Math.max(w, h)), sw = Math.round(w * sc), sh = Math.round(h * sc);
+  const c = document.createElement('canvas'); const x = c.getContext('2d');
+  if (rotate) { c.width = sh; c.height = sw; x.translate(sh, 0); x.rotate(Math.PI / 2); } else { c.width = sw; c.height = sh; }
+  x.drawImage(img, 0, 0, sw, sh);
+  return c;
+}
+async function decodeBarcode(file) {
+  const img = await loadImage(file);
+  return decodeCanvasList([imgCanvas(img, 1400, false), imgCanvas(img, 1400, true)]);
+}
+async function decodeCanvasList(canvases, skipDetector) {
+  if (!skipDetector && 'BarcodeDetector' in window) {
+    try {
+      const det = new window.BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'] });
+      for (const c of canvases) { const r = await det.detect(c); if (r && r[0] && r[0].rawValue) return r[0].rawValue; }
+    } catch (e) { /* 換 ZXing */ }
+  }
+  const Z = await loadZXing();
+  if (!Z) return null;
+  const hints = new Map();
+  hints.set(Z.DecodeHintType.POSSIBLE_FORMATS, [Z.BarcodeFormat.EAN_13, Z.BarcodeFormat.EAN_8, Z.BarcodeFormat.UPC_A, Z.BarcodeFormat.UPC_E, Z.BarcodeFormat.CODE_128, Z.BarcodeFormat.CODE_39]);
+  hints.set(Z.DecodeHintType.TRY_HARDER, true);
+  const reader = new Z.MultiFormatReader(); reader.setHints(hints);
+  for (const c of canvases) {
+    const data = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    const lum = new Uint8ClampedArray(c.width * c.height);
+    for (let i = 0, j = 0; i < lum.length; i++, j += 4) lum[i] = (data[j] * 299 + data[j + 1] * 587 + data[j + 2] * 114) / 1000;
+    for (const Bin of [Z.HybridBinarizer, Z.GlobalHistogramBinarizer]) {
+      try {
+        const src = new Z.RGBLuminanceSource(lum, c.width, c.height);
+        const res = reader.decode(new Z.BinaryBitmap(new Bin(src)), hints);
+        if (res) return res.getText();
+      } catch (e) { /* 這個方向沒讀到 */ }
+    }
+  }
+  return null;
+}
+
+/* ───────── 狀態 ───────── */
+const D = { products: {}, lists: {}, items: {} };
+const loaded = { products: false, lists: false, items: false };
+let MODE = 'connecting';  // cloud | local
+let SB = null, ME = null, CAN_WRITE = true, MEMBERS = [];
+const NAMES = {};
+let VIEW = 'lists', CUR_LIST = null;
+const PF = { store: 'all', cat: 'all', q: '' };
+let MY_CARRIER = '';
+let SHEET = null, OVERLAY = null, PK = null, ED = null, NL = null;
+let ARMED = null; // 兩段式確認
+const PENDING_QTY = {}, qtyTimers = {};
+let FILE_CB = null;
+
+const app = $('#app'), sheetRoot = $('#sheet-root'), overlayRoot = $('#overlay-root'), cobar = $('#cobar');
+
+function ready() { return MODE === 'local' || (MODE === 'cloud' && loaded.products && loaded.lists && loaded.items); }
+function listStatus(l) {
+  if (!l) return 'active';
+  if (l.status === 'checkout') return Date.now() >= (l.notifyAt || 0) ? 'done' : 'checkout';
+  return l.status === 'done' ? 'done' : 'active';
+}
+function itemsOf(listId) {
+  return Object.keys(D.items).filter(id => D.items[id].listId === listId)
+    .map(id => Object.assign({}, D.items[id], { _id: id }))
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+}
+function prodOf(it) {
+  return D.products[it.productId] || { name: it.name || '已刪除的商品', cat: it.cat || 'other', brand: '', spec: '', sub: true, note: '', photo: '', stores: [] };
+}
+function dueEnd(l) { if (!l.dueAt) return null; const d = new Date(l.dueAt); d.setHours(23, 59, 59, 999); return d.getTime(); }
+function fmtDue(ms) { const d = new Date(ms); return (d.getMonth() + 1) + '/' + d.getDate() + '（' + WD[d.getDay()] + '）'; }
+function toDateInput(ms) { const d = new Date(ms); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function fromDateInput(v) { if (!v) return null; const t = new Date(v + 'T00:00').getTime(); return isNaN(t) ? null : t; }
+function overdueWhy(l) {
+  if (listStatus(l) !== 'active' || !itemsOf(l._id || l.id).some(i => i.state === 'todo')) return '';
+  const now = Date.now();
+  if (l.dueAt && now > dueEnd(l)) return '期限 ' + fmtDue(l.dueAt) + ' 已經過了';
+  if (l.remindAt && now > l.remindAt) return '提醒時間 ' + fmtRemind(l.remindAt) + ' 已經過了';
+  return '';
+}
+function isOverdue(l) { return !!overdueWhy(l); }
+function itemStore(it) { return it.store || ((D.lists[it.listId] || {}).store) || 'other'; }
+function listStores(listId) { const out = []; itemsOf(listId).forEach(i => { const x = itemStore(i); if (!out.includes(x)) out.push(x); }); return out; }
+function storesLabel(l) { const st = listStores(l._id || l.id); if (!st.length) return l.store ? storeOf(l.store).name : '還沒選店家'; return st.map(x => storeOf(x).name).join('・'); }
+let LAST_STORE = 'costco';
+function allLists() { return Object.keys(D.lists).map(id => Object.assign({}, D.lists[id], { _id: id })); }
+function nameOf(id) {
+  if (!id || id === 'local' || MODE !== 'cloud') return '';
+  if (id === ME) return '你';
+  return NAMES[id] || String(id).split('@')[0];
+}
+function whoSp(w) { return w ? (w === '你' ? w : w + ' ') : ''; }
+function thumbInner(p) {
+  if (p && p.photo && SAFE_IMG.test(p.photo)) return '<img src="' + p.photo + '" alt="">';
+  return '<span class="mono" aria-hidden="true">' + esc(catOf(p && p.cat).mono) + '</span>';
+}
+function subLine(p) { return [p.brand, p.spec].filter(Boolean).map(esc).join('・'); }
+function byText(o) {
+  if (!o || !o.at) return '';
+  const w = nameOf(o.by);
+  return (w ? esc(w) + '・' : '') + fmtTime(o.at) + ' 更新';
+}
+
+/* ───────── 寫入（雲端或本機） ───────── */
+const qChain = {};
+function enqueue(path, fn) { const p = (qChain.all || Promise.resolve()).catch(() => {}).then(fn); qChain.all = p; return p; } // 依序寫入，避免項目比清單先到
+function guard() { if (!CAN_WRITE) { toast('你目前只能看，不能修改。請擁有者把你設成可編輯。', 4000); return false; } return true; }
+function onWriteError(e) {
+  const c = e && String(e.code || '');
+  if (c === '42501') toast('沒有存到：你沒有這張清單的編輯權限。', 4500);
+  else toast('沒有存到，請檢查網路後再試一次。' + (e && e.message ? '（' + e.message + '）' : ''), 4500);
+}
+function saveLocal() {
+  if (MODE !== 'local') return;
+  try { localStorage.setItem(LS_DATA, JSON.stringify(D)); }
+  catch (e) { toast('這台裝置的空間不夠，照片可能沒存到。'); }
+}
+function put(col, id, obj) {
+  if (!guard()) return Promise.resolve();
+  const body = Object.assign({}, obj, { by: ME || 'local', at: Date.now() });
+  if (!body.owner) body.owner = (D[col][id] && (D[col][id].owner || D[col][id].createdBy)) || ME || 'local';
+  D[col] = Object.assign({}, D[col], { [id]: body });
+  scheduleRender();
+  if (MODE === 'cloud') return enqueue(col + '/' + id, () => sbUpsert(col, id, body)).catch(onWriteError);
+  saveLocal(); return Promise.resolve();
+}
+function patch(col, id, fields) {
+  if (!guard()) return Promise.resolve();
+  const cur = D[col][id]; if (!cur) return Promise.resolve();
+  const f = Object.assign({}, fields, { by: ME || 'local', at: Date.now() });
+  D[col] = Object.assign({}, D[col], { [id]: Object.assign({}, cur, f) });
+  scheduleRender();
+  if (MODE === 'cloud') return enqueue(col + '/' + id, () => (D[col][id] ? sbUpsert(col, id, D[col][id]) : null)).catch(onWriteError);
+  saveLocal(); return Promise.resolve();
+}
+function remove(col, id) {
+  if (!guard()) return Promise.resolve();
+  const next = Object.assign({}, D[col]); delete next[id]; D[col] = next;
+  scheduleRender();
+  if (MODE === 'cloud') return enqueue(col + '/' + id, () => sbDelete(col, id)).catch(onWriteError);
+  saveLocal(); return Promise.resolve();
+}
+function setQty(itemId, qty) {
+  const it = D.items[itemId]; if (!it || !guard()) return;
+  qty = Math.max(1, Math.min(99, qty));
+  PENDING_QTY[itemId] = qty;
+  D.items = Object.assign({}, D.items, { [itemId]: Object.assign({}, it, { qty }) });
+  scheduleRender();
+  clearTimeout(qtyTimers[itemId]);
+  qtyTimers[itemId] = setTimeout(() => { delete PENDING_QTY[itemId]; patch('items', itemId, { qty }); }, 450);
+}
+
+/* ───────── Supabase 雲端 ───────── */
+async function sbUpsert(col, id, data) {
+  const owner = String(data.owner || data.createdBy || ME).toLowerCase();
+  const list_id = col === 'lists' ? id : col === 'items' ? data.listId : null;
+  const { error } = await SB.from('docs').upsert({ col, id, data, owner, list_id, updated_at: new Date().toISOString() });
+  if (error) throw error;
+}
+async function sbDelete(col, id) {
+  const { error } = await SB.from('docs').delete().match({ col, id });
+  if (error) throw error;
+}
+async function cloudLoadAll() {
+  const next = { products: {}, lists: {}, items: {} };
+  const step = 1000;
+  for (let from = 0; ; from += step) {
+    const { data, error } = await SB.from('docs').select('col,id,data').range(from, from + step - 1);
+    if (error) throw error;
+    (data || []).forEach(r => { if (next[r.col]) next[r.col][r.id] = r.data; });
+    if (!data || data.length < step) break;
+  }
+  for (const id in PENDING_QTY) if (next.items[id]) next.items[id] = Object.assign({}, next.items[id], { qty: PENDING_QTY[id] });
+  D.products = next.products; D.lists = next.lists; D.items = next.items;
+  loaded.products = loaded.lists = loaded.items = true;
+  scheduleRender();
+}
+function announceOne(col, prev, d, type) {
+  if (!d || !d.by || d.by === ME) return;
+  const who = nameOf(d.by) || '家人';
+  let msg = '';
+  if (col === 'items') {
+    if (type === 'INSERT') msg = who + ' 加了「' + (d.name || '商品') + '」';
+    else if (prev && prev.state !== d.state && d.state === 'bought') msg = who + ' 買到了「' + (d.name || '商品') + '」';
+    else if (prev && prev.qty !== d.qty) msg = who + ' 把「' + (d.name || '商品') + '」改成 ' + d.qty + ' 個';
+  } else if (col === 'lists') {
+    if (type === 'INSERT') msg = who + ' 開了新清單「' + d.title + '」';
+    else if (prev && prev.status !== 'checkout' && d.status === 'checkout') msg = who + ' 正在結帳「' + d.title + '」';
+  }
+  if (msg) toast(msg);
+}
+function subscribeRealtime() {
+  SB.channel('docs-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'docs' }, p => {
+      if (p.eventType === 'DELETE') {
+        const o = p.old || {}; if (!D[o.col]) return;
+        const next = Object.assign({}, D[o.col]); delete next[o.id]; D[o.col] = next;
+      } else {
+        const n = p.new || {}; if (!D[n.col]) return;
+        let data = n.data;
+        if (n.col === 'items' && PENDING_QTY[n.id]) data = Object.assign({}, data, { qty: PENDING_QTY[n.id] });
+        try { announceOne(n.col, D[n.col][n.id], data, p.eventType); } catch (e) { /* 忽略 */ }
+        D[n.col] = Object.assign({}, D[n.col], { [n.id]: data });
+      }
+      scheduleRender();
+    })
+    .subscribe(status => { if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') toast('即時同步斷線，重新整理頁面試試。', 4000); });
+  SB.channel('lm-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'list_members' }, () => {
+      loadLM().then(() => cloudLoadAll()).catch(() => {});
+    })
+    .subscribe();
+}
+let LM = [], MY_NAME = '';
+async function loadLM() {
+  const { data, error } = await SB.from('list_members').select('list_id,email,name,role,created_at').order('created_at');
+  if (error) throw error;
+  LM = data || [];
+  LM.forEach(m => { if (m.name && m.email !== ME) NAMES[m.email] = m.name; });
+  scheduleRender();
+}
+function membersOf(lid) { return LM.filter(m => m.list_id === lid); }
+function listOwner(l) { return String(l.owner || l.createdBy || '').toLowerCase(); }
+function addListMembers(lid, invites) {
+  if (MODE !== 'cloud') return;
+  const rows = [{ list_id: lid, email: ME, name: MY_NAME || '', role: 'owner', invited_by: ME }]
+    .concat((invites || []).filter(v => v.email !== ME).map(v => ({ list_id: lid, email: v.email, name: v.name || v.email.split('@')[0], role: 'editor', invited_by: ME })));
+  enqueue('lm', async () => { const { error } = await SB.from('list_members').upsert(rows, { onConflict: 'list_id,email', ignoreDuplicates: true }); if (error) throw error; await loadLM(); }).catch(onWriteError);
+}
+function inviteText(l, em) {
+  return '我邀請你一起編輯補貨清單「' + l.title + '」' + (l.dueAt ? '（' + fmtDue(l.dueAt) + ' 前要買好）' : '') + '\n用這個信箱登入就看得到：' + em + (APP_URL ? '\n網址：' + APP_URL : '');
+}
+function openInviteDone(lid, em) {
+  const l = D.lists[lid]; if (!l) return;
+  const t = inviteText(l, em);
+  openSheet({ title: '通知對方', html: '<div class="form"><p>已邀請 <strong>' + esc(em) + '</strong>。對方用這個信箱登入，就看得到也改得到這張清單，看不到你的其他清單。</p>' +
+    '<div class="chips"><a class="btn btn-primary" href="' + lineUrl(t) + '" target="_blank" rel="noopener">用 LINE 傳網址</a><a class="btn btn-secondary" href="mailto:' + enc(em) + '?subject=' + enc('一起編輯補貨清單：' + l.title) + '&body=' + enc(t) + '">寄 Email</a></div>' +
+    '<textarea id="inv-text" readonly rows="4" aria-label="邀請文字">' + esc(t) + '</textarea><button class="btn btn-secondary btn-sm" data-act="copy-inv" style="justify-self:start">複製文字</button>' +
+    (/localhost|127\.0\.0\.1/.test(APP_URL) ? '<p class="help warn">現在的網址是 localhost，只有你這台電腦打得開。放上正式網址後，對方才連得到。</p>' : '') + '</div>' });
+}
+async function inviteToList(lid, em, nm) {
+  const { error } = await SB.from('list_members').insert({ list_id: lid, email: em, name: nm || em.split('@')[0], role: 'editor', invited_by: ME });
+  if (error) { toast(error.code === '23505' ? '這個人已經可以編輯這張清單了' : '邀請失敗：' + error.message, 5000); return false; }
+  await loadLM(); return true;
+}
+function shareBand(l) {
+  let body;
+  if (MODE !== 'cloud') body = '<div class="tile reveal"><p>登入雲端版之後，才能邀請別人一起編輯這張清單。</p></div>';
+  else {
+    const owner = listOwner(l), isOwner = owner === ME;
+    const ms = membersOf(l._id).slice().sort((a, b) => (a.role === 'owner' ? -1 : 0) - (b.role === 'owner' ? -1 : 0));
+    const rows = ms.map(m => {
+      const armed = ARMED && ARMED.key === 'lm:' + m.email && Date.now() < ARMED.until;
+      const right = m.role === 'owner' ? '<span class="pill">建立者</span>'
+        : (isOwner ? '<button class="chip quiet" data-act="lm-remove" data-email="' + esc(m.email) + '">' + (armed ? '再按一次移除' : '移除') + '</button>' : '<span class="pill accent">可編輯</span>');
+      return '<div class="member"><span><strong>' + esc(m.email === ME ? '你' : (m.name || m.email.split('@')[0])) + '</strong><small>' + esc(m.email) + '</small></span>' + right + '</div>';
+    }).join('') || '<p class="muted">目前只有你。</p>';
+    body = '<div class="tile span2 reveal"><h3>可以編輯這張清單的人</h3><p>只有這裡的人看得到、改得到這張清單，你的其他清單不會被看到。</p><div class="members">' + rows + '</div>' +
+      '<form class="form" id="inv-form" novalidate><div class="field-row"><input id="inv-email" type="email" placeholder="對方的 Email" autocomplete="off"><input id="inv-name" placeholder="名字，例如：老婆" maxlength="20" autocomplete="off"></div><button class="btn btn-primary" type="submit" style="justify-self:start">邀請一起編輯</button></form></div>';
+  }
+  return '<section class="band"><div class="wrap"><h2 class="section-title reveal">一起編輯</h2><div class="tiles">' + body + '</div></div></section>';
+}
+function loadLocalData() {
+  try {
+    const raw = localStorage.getItem(LS_DATA);
+    if (raw) { const o = JSON.parse(raw); D.products = o.products || {}; D.lists = o.lists || {}; D.items = o.items || {}; }
+  } catch (e) { /* 沒有本機資料 */ }
+}
+async function loadCarrier() {
+  try { MY_CARRIER = localStorage.getItem(LS_CARRIER) || ''; } catch (e) { MY_CARRIER = ''; }
+  if (MODE === 'cloud') {
+    try { const { data } = await SB.from('private_settings').select('carrier,display_name').eq('email', ME).maybeSingle(); if (data && data.carrier) MY_CARRIER = data.carrier; if (data && data.display_name) MY_NAME = data.display_name; } catch (e) { /* 用本機的 */ }
+  }
+  scheduleRender();
+}
+async function saveCarrier(code) {
+  MY_CARRIER = code;
+  try { localStorage.setItem(LS_CARRIER, code); } catch (e) { /* 忽略 */ }
+  if (MODE === 'cloud') {
+    const { error } = await SB.from('private_settings').upsert({ email: ME, carrier: code });
+    if (error) toast('載具只存在這台裝置（雲端沒存到）');
+  }
+  scheduleRender();
+}
+function ensureNames() { /* 名字來自 members 表 */ }
+
+/* ───────── 畫面 ───────── */
+let renderQueued = false, ANIM = false;
+const R = d => ANIM ? ' rise' + (d ? ' d' + d : '') : '';
+function scheduleRender() { if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
+const io = ('IntersectionObserver' in window) ? new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.remove('pre'); io.unobserve(e.target); }
+}), { rootMargin: '0px 0px -6% 0px' }) : null;
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function render(opts) {
+  opts = opts || {};
+  const ae = document.activeElement;
+  let keep = null;
+  if (ae && app.contains(ae) && ae.id) keep = { id: ae.id, v: ae.value, s: ae.selectionStart, e: ae.selectionEnd };
+  const scrolls = {}; $$('[data-keep-scroll]', app).forEach(el => { scrolls[el.id] = el.scrollLeft; });
+  ANIM = !!opts.animate && !reduceMotion;
+  let html = '';
+  if (MODE === 'login') html = viewLogin();
+  else if (MODE === 'denied') html = viewDenied();
+  else if (VIEW === 'list') html = viewList();
+  else if (VIEW === 'products') html = viewProducts();
+  else if (VIEW === 'history') html = viewHistory();
+  else if (VIEW === 'me') html = viewMe();
+  else html = viewLists();
+  app.innerHTML = html;
+  drawBarcodes(app);
+  for (const id in scrolls) { const el = document.getElementById(id); if (el) el.scrollLeft = scrolls[id]; }
+  if (keep) {
+    const el = document.getElementById(keep.id);
+    if (el) { if (typeof keep.v === 'string' && el.type !== 'datetime-local') el.value = keep.v; el.focus({ preventScroll: true }); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (e) { /* 部分欄位不支援 */ } }
+  }
+  if (opts.animate && io && !reduceMotion) {
+    const vh = window.innerHeight;
+    $$('.reveal', app).forEach(el => { if (el.getBoundingClientRect().top > vh * 0.95) { el.classList.add('pre'); io.observe(el); } });
+  }
+  renderCobar();
+  updateChrome();
+  if (SHEET && SHEET.rerender) SHEET.rerender();
+  ensureNames();
+}
+function updateChrome() {
+  const cur = VIEW === 'list' ? 'lists' : VIEW;
+  $$('.nav-links button').forEach(b => { if (b.dataset.go === cur) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  const s = $('#sync'); s.dataset.mode = MODE;
+  s.querySelector('span').textContent = MODE === 'cloud' ? '已同步' : MODE === 'local' ? '僅本機' : (MODE === 'login' || MODE === 'denied') ? '未登入' : '連線中';
+  $('#foot-mode').textContent = MODE === 'cloud' ? '清單和商品存在 Supabase 雲端，家庭成員即時同步。' : MODE === 'local' ? '還沒設定雲端，資料只存在這台裝置的瀏覽器。' : (MODE === 'login' || MODE === 'denied') ? '登入後才看得到家裡的清單。' : '正在連線…';
+}
+
+function goView(v) {
+  VIEW = v; if (v !== 'list') CUR_LIST = null;
+  closeSheet(true);
+  window.scrollTo(0, 0);
+  render({ animate: true });
+}
+function goList(id) { VIEW = 'list'; CUR_LIST = id; closeSheet(true); window.scrollTo(0, 0); render({ animate: true }); }
+
+/* ── 首頁：清單 ── */
+function viewLists() {
+  const lists = allLists();
+  const active = lists.filter(l => listStatus(l) !== 'done').sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const nOver = active.filter(isOverdue).length;
+  let status;
+  if (!ready()) status = '正在讀取家裡的清單…';
+  else if (!active.length) status = '目前沒有要買的東西。';
+  else status = active.length + ' 張清單進行中' + (nOver ? '・' + nOver + ' 張已過提醒時間' : '');
+  let h = '<section class="band hero"><div class="wrap">' +
+    '<h1 class="hero-title' + R() + '">補貨清單</h1>' +
+    '<p class="tagline' + R(1) + '">說清楚哪一罐，就不會買錯。</p>' +
+    '<p class="hero-status' + R(2) + '">' + esc(status) + '</p>' +
+    '<div class="cta-row' + R(2) + '"><button class="btn btn-primary" data-act="new-list">新建清單</button><button class="btn-link" data-go="products">管理商品 ›</button></div>' +
+    '</div></section>';
+  let body;
+  if (!ready()) body = '<div class="empty"><p class="muted">讀取中…</p></div>';
+  else if (!active.length) body = emptyLists();
+  else body = '<div class="list-grid">' + active.map(listCard).join('') + '</div>';
+  h += '<section class="band alt"><div class="wrap">' + homeBanners(lists) + '<h2 class="section-title reveal">進行中</h2>' + body + '</div></section>';
+  return h;
+}
+function seenSet() { try { return new Set(JSON.parse(localStorage.getItem(LS_SEEN) || '[]')); } catch (e) { return new Set(); } }
+function homeBanners(lists) {
+  const out = [], seen = seenSet(), now = Date.now();
+  lists.forEach(l => {
+    const st = listStatus(l);
+    if (st === 'done' && l.createdBy === ME && l.checkoutBy && l.checkoutBy !== ME && MODE === 'cloud' && !seen.has(l._id) && now - (l.notifyAt || 0) < 3 * 864e5) {
+      const its = itemsOf(l._id), nb = its.filter(i => i.state !== 'bought').length;
+      out.push('<div class="banner ok"><span class="dot"></span><div class="banner-text"><strong>' + esc(nameOf(l.checkoutBy)) + ' 買好了「' + esc(l.title) + '」</strong><p>' + fmtTime(l.notifyAt) + ' 完成・已買 ' + (its.length - nb) + ' 項' + (nb ? '・沒買到 ' + nb + ' 項' : '') + '</p></div><div class="banner-acts"><button class="btn btn-sm btn-secondary" data-open-list="' + l._id + '">看明細</button><button class="btn btn-sm btn-secondary" data-act="dismiss" data-list="' + l._id + '">知道了</button></div></div>');
+    } else if (st === 'checkout') {
+      out.push('<div class="banner"><span class="dot"></span><div class="banner-text"><strong>「' + esc(l.title) + '」結帳中</strong><p><span data-countdown="' + l.notifyAt + '">' + mmss(l.notifyAt - now) + '</span> 後存成紀錄並通知' + (nameOf(l.checkoutBy) ? '・' + esc(whoSp(nameOf(l.checkoutBy))) + '結帳' : '') + '</p></div><div class="banner-acts"><button class="btn btn-sm btn-secondary" data-act="co-undo" data-list="' + l._id + '">收回</button></div></div>');
+    } else if (isOverdue(l)) {
+      const left = itemsOf(l._id).filter(i => i.state === 'todo').length;
+      out.push('<div class="banner warn"><span class="dot"></span><div class="banner-text"><strong>「' + esc(l.title) + '」還沒買完</strong><p>' + overdueWhy(l) + '，還有 ' + left + ' 項沒買</p></div><div class="banner-acts"><button class="btn btn-sm btn-primary" data-open-list="' + l._id + '">打開清單</button></div></div>');
+    }
+  });
+  return out.length ? '<div class="banners">' + out.join('') + '</div>' : '';
+}
+function emptyLists() {
+  const hasSample = Object.keys(D.products).some(k => D.products[k].sample);
+  return '<div class="empty reveal"><h3>還沒有要買的清單</h3><p class="muted">三步就能讓代買的人買對。</p>' +
+    '<ol class="steps"><li class="step"><b>1</b><strong>建好商品</strong><span>品牌、規格、照片、條碼，全家共用</span></li>' +
+    '<li class="step"><b>2</b><strong>開一張清單</strong><span>選店家，挑商品，填數量</span></li>' +
+    '<li class="step"><b>3</b><strong>傳給對方</strong><span>LINE、Email 或加到行事曆</span></li></ol>' +
+    '<div class="cta-row"><button class="btn btn-primary" data-act="new-list">新建清單</button>' + (hasSample ? '' : '<button class="btn btn-secondary" data-act="samples-load">先看範例</button>') + '</div></div>';
+}
+function listCard(l) {
+  const its = itemsOf(l._id), b = its.filter(i => i.state === 'bought').length, pct = its.length ? Math.round(b / its.length * 100) : 0;
+  const st = listStatus(l), pills = [];
+  if (st === 'checkout') pills.push('<span class="pill accent">結帳中</span>');
+  if (isOverdue(l)) pills.push('<span class="pill warn">' + (l.dueAt && Date.now() > dueEnd(l) ? '已過期限' : '已過提醒時間') + '</span>');
+  if (l.sample) pills.push('<span class="pill">範例</span>');
+  const th = its.slice(0, 5).map(it => '<span class="th">' + thumbInner(prodOf(it)) + '</span>').join('') || '<span class="th"><span class="mono">空</span></span>';
+  const meta = ['已買 ' + b + ' / ' + its.length];
+  if (l.dueAt) meta.push('期限 ' + fmtDue(l.dueAt));
+  if (l.remindAt) meta.push('提醒 ' + fmtRemind(l.remindAt));
+  const by = nameOf(l.createdBy);
+  return '<article class="list-card reveal" data-open-list="' + l._id + '" tabindex="0" role="button" aria-label="打開清單 ' + esc(l.title) + '">' +
+    '<div class="lc-top"><span class="lc-store">' + esc(storesLabel(l)) + '</span><span class="lc-pills">' + pills.join('') + '</span></div>' +
+    '<h3 class="lc-title">' + esc(l.title) + '</h3>' +
+    '<div class="lc-stack" aria-hidden="true">' + th + '</div>' +
+    '<div class="progress" aria-hidden="true"><i style="width:' + pct + '%"></i></div>' +
+    '<p class="lc-meta"><span>' + meta.join('</span><span>') + '</span>' + (by ? '<span>' + esc(whoSp(by)) + '建立</span>' : '') + '</p></article>';
+}
+
+/* ── 清單詳情 ── */
+function viewList() {
+  const l0 = D.lists[CUR_LIST];
+  if (!l0) {
+    if (ready()) { setTimeout(() => { if (VIEW === 'list' && !D.lists[CUR_LIST]) { toast('這張清單已經被刪除了'); goView('lists'); } }, 0); }
+    return '<section class="band hero"><div class="wrap"><p class="muted">讀取中…</p></div></section>';
+  }
+  const l = Object.assign({}, l0, { _id: CUR_LIST });
+  const st = listStatus(l), its = itemsOf(l._id), locked = st !== 'active';
+  const todo = its.filter(i => i.state === 'todo'), out = its.filter(i => i.state === 'out'), bought = its.filter(i => i.state === 'bought');
+  const pct = its.length ? Math.round(bought.length / its.length * 100) : 0;
+  const creator = nameOf(l.createdBy);
+  let h = '<section class="band hero"><div class="wrap">' +
+    '<button class="btn-link back" data-go="lists">‹ 所有清單</button>' +
+    '<p class="eyebrow' + R() + '">' + esc(storesLabel(l)) + (l.sample ? '・範例' : '') + '</p>' +
+    '<h1 class="list-title' + R(1) + '">' + esc(l.title) + '</h1>' +
+    '<p class="hero-status' + R(2) + '">' + (creator ? esc(whoSp(creator)) + '建立・' : '') + fmtTime(l.createdAt) + (l.dueAt ? '・期限 ' + fmtDue(l.dueAt) : '') + (l.remindAt ? '・提醒 ' + fmtRemind(l.remindAt) : '') + '</p>' +
+    '<div class="cta-row' + R(2) + '" style="max-width:420px;margin-inline:auto;flex-direction:column;gap:10px"><div class="progress" style="width:100%"><i style="width:' + pct + '%"></i></div><p class="muted" style="font-size:14px">已買 ' + bought.length + ' / ' + its.length + ' 項' + (out.length ? '・缺貨 ' + out.length + ' 項' : '') + '</p></div>' +
+    (!locked ? '<div class="cta-row"><button class="btn btn-primary" data-act="pick">加商品</button><button class="btn-link" data-act="list-rename">重新命名 ›</button></div>' : '') +
+    '</div></section>';
+  h += '<section class="band alt"><div class="wrap">';
+  h += listBanner(l, st, its);
+  h += '<div class="sec-head"><h2>要買<span class="count">' + todo.length + '</span></h2>' + (!locked ? '<button class="btn btn-sm btn-secondary" data-act="pick">＋ 加商品</button>' : '') + '</div>';
+  if (todo.length) {
+    const sts = []; todo.forEach(i => { const x = itemStore(i); if (!sts.includes(x)) sts.push(x); });
+    if (sts.length > 1) h += sts.map(x => '<h3 class="store-sub">' + esc(storeOf(x).name) + '</h3><div class="items">' + todo.filter(i => itemStore(i) === x).map(it => itemRow(it, locked)).join('') + '</div>').join('');
+    else h += '<div class="items">' + todo.map(it => itemRow(it, locked)).join('') + '</div>';
+  }
+  else h += '<div class="items-empty">' + (its.length ? '全部處理完了。按下方「載具」或「完成」結帳。' : '還沒有商品，按「加商品」開始挑。') + '</div>';
+  if (out.length) h += '<div class="group"><div class="sec-head"><h2>缺貨・沒找到<span class="count">' + out.length + '</span></h2></div><div class="items">' + out.map(it => itemRow(it, locked)).join('') + '</div></div>';
+  if (bought.length) h += '<div class="group"><div class="sec-head"><h2>已買<span class="count">' + bought.length + '</span></h2></div><div class="items">' + bought.map(it => itemRow(it, locked)).join('') + '</div></div>';
+  h += '</div></section>';
+  if (st !== 'done') h += notifyBand(l);
+  h += shareBand(l);
+  const mine = MODE !== 'cloud' || !listOwner(l) || listOwner(l) === ME;
+  const armed = ARMED && ARMED.key === 'list:' + l._id && Date.now() < ARMED.until;
+  h += '<section class="band alt"><div class="wrap center"><button class="btn btn-danger" data-act="' + (mine ? 'list-delete' : 'list-leave') + '">' + (armed ? (mine ? '再按一次，確定刪除' : '再按一次，確定退出') : (mine ? '刪除這張清單' : '退出這張清單')) + '</button></div></section>';
+  return h;
+}
+function listBanner(l, st, its) {
+  const now = Date.now();
+  if (st === 'checkout') {
+    return '<div class="banner list-banner"><span class="dot"></span><div class="banner-text"><strong>已結帳，<span data-countdown="' + l.notifyAt + '">' + mmss(l.notifyAt - now) + '</span> 後完成</strong><p>時間到會存成購買紀錄並通知' + (nameOf(l.createdBy) && l.createdBy !== ME ? ' ' + esc(nameOf(l.createdBy)) : '發起人') + '。按錯了可以收回。</p></div><div class="banner-acts"><button class="btn btn-sm btn-secondary" data-act="co-undo" data-list="' + l._id + '">收回</button><button class="btn btn-sm btn-finish" data-act="co-finish" data-list="' + l._id + '">直接完成</button>' + (l.carrier && l.checkoutBy === ME ? '<button class="btn btn-sm btn-primary" data-act="co-show" data-list="' + l._id + '">出示載具</button>' : '') + '</div></div>';
+  }
+  if (st === 'done') {
+    const text = doneText(l);
+    return '<div class="banner ok list-banner"><span class="dot"></span><div class="banner-text"><strong>' + (nameOf(l.checkoutBy) ? esc(whoSp(nameOf(l.checkoutBy))) : '') + '已完成・' + fmtTime(l.notifyAt) + '</strong><p>已買 ' + its.filter(i => i.state === 'bought').length + ' 項' + (its.some(i => i.state !== 'bought') ? '，沒買到的已列在下面' : '') + (l.carrier ? '・有用載具' : '') + '</p></div><div class="banner-acts"><a class="btn btn-sm btn-primary" href="' + lineUrl(text) + '" target="_blank" rel="noopener">用 LINE 回報</a><button class="btn btn-sm btn-secondary" data-act="rebuy" data-list="' + l._id + '">再買一次</button><button class="btn btn-sm btn-secondary" data-act="reopen" data-list="' + l._id + '">重新打開</button></div></div>';
+  }
+  if (isOverdue(l)) {
+    return '<div class="banner warn list-banner"><span class="dot"></span><div class="banner-text"><strong>還沒買完</strong><p>' + overdueWhy(l) + '・還有 ' + its.filter(i => i.state === 'todo').length + ' 項沒買</p></div></div>';
+  }
+  return '';
+}
+function itemRow(it, locked) {
+  const p = prodOf(it), tags = [], storeId = itemStore(it);
+  tags.push('<span class="pill accent">' + esc(storeOf(storeId).name) + '</span>');
+  tags.push(p.sub ? '<span class="pill">可替代</span>' : '<span class="pill">不可替代</span>');
+  if (it.state === 'out') tags.push(p.sub ? '<span class="pill warn">缺貨・可買別牌</span>' : '<span class="pill warn">缺貨・這次不買</span>');
+  if (it.subbed) tags.push('<span class="pill ok">買了替代品</span>');
+  if (p.sample) tags.push('<span class="pill">範例</span>');
+  const sub = subLine(p);
+  const code = (p.itemNo && storeId === 'costco') ? '<p class="item-code">Item ' + esc(p.itemNo) + '</p>' : '';
+  const note = p.note ? '<p class="item-note">' + esc(p.note) + '</p>' : '';
+  let acts = '';
+  if (!locked) {
+    acts = '<div class="item-actions">' +
+      '<div class="stepper" role="group" aria-label="數量"><button data-act="dec" aria-label="減少一個">−</button><output>' + it.qty + '</output><button data-act="inc" aria-label="增加一個">＋</button></div>' +
+      '<button class="chip" data-act="clerk">給店員看</button>' +
+      (it.state === 'todo' ? '<button class="chip" data-act="out">缺貨</button>' : '') +
+      (it.state === 'out' ? '<button class="chip" data-act="back-todo">找到了</button>' + (p.sub ? '<button class="chip" data-act="subbed">買了替代品</button>' : '') : '') +
+      '<button class="chip quiet" data-act="remove">移除</button></div>';
+  }
+  const by = byText(it);
+  return '<div class="item ' + esc(it.state) + '" data-item="' + esc(it._id) + '">' +
+    '<button class="check" data-act="toggle" aria-pressed="' + (it.state === 'bought') + '" aria-label="' + (it.state === 'bought' ? '取消已買：' : '標記已買：') + esc(p.name) + '"' + (locked ? ' disabled' : '') + '><span>' + CHECK_SVG + '</span></button>' +
+    '<button class="th" data-act="product" data-pid="' + esc(it.productId) + '" aria-label="看「' + esc(p.name) + '」的詳細資料">' + thumbInner(p) + '</button>' +
+    '<div class="item-body"><p class="item-name">' + esc(p.name) + '<span class="x">× ' + it.qty + '</span></p>' +
+    (sub ? '<p class="item-sub">' + sub + '</p>' : '') + code + note +
+    '<div class="tags">' + tags.join('') + '</div>' + acts + (by ? '<p class="item-by">' + by + '</p>' : '') + '</div></div>';
+}
+
+/* 分享文字與連結 */
+function listText(l) {
+  const its = itemsOf(l._id);
+  const lines = ['【補貨清單】' + l.title];
+  if (l.dueAt) lines.push('期限：' + fmtDue(l.dueAt) + ' 前買好');
+  if (l.remindAt) lines.push('提醒：' + fmtRemind(l.remindAt));
+  let n = 0;
+  listStores(l._id).forEach(sid => {
+  lines.push('', '▍' + storeOf(sid).name);
+  its.filter(it => itemStore(it) === sid).forEach(it => {
+    const i = n++;
+    const p = prodOf(it);
+    let s = (i + 1) + '. ' + p.name + ' × ' + it.qty;
+    const bs = [p.brand, p.spec].filter(Boolean).join(' ');
+    if (bs) s += '｜' + bs;
+    if (p.itemNo && sid === 'costco') s += '｜Item ' + p.itemNo;
+    s += p.sub ? '｜可替代' : '｜不可替代';
+    if (it.state === 'bought') s += '（已買）';
+    lines.push(s);
+    if (p.note) lines.push('   備註：' + p.note);
+  });
+  });
+  if (!its.length) lines.push('（還沒有商品）');
+  if (APP_URL) lines.push('', '線上清單：' + APP_URL);
+  return lines.join('\n');
+}
+function doneText(l) {
+  const its = itemsOf(l._id), b = its.filter(i => i.state === 'bought'), nb = its.filter(i => i.state !== 'bought');
+  let s = '【買好了】' + l.title + '\n已買 ' + b.length + ' 項';
+  if (nb.length) s += '\n沒買到：' + nb.map(i => prodOf(i).name + (i.state === 'out' ? '（缺貨）' : '')).join('、');
+  const subs = b.filter(i => i.subbed);
+  if (subs.length) s += '\n買了替代品：' + subs.map(i => prodOf(i).name).join('、');
+  return s;
+}
+function mailtoUrl(l, text) { return 'mailto:?subject=' + enc('補貨清單：' + l.title) + '&body=' + enc(text); }
+function icsEsc(v) { return String(v).replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;'); }
+function icsText(l) {
+  const f = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const ymd = ms => toDateInput(ms).replace(/-/g, '');
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//restock//zh-TW', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT', 'UID:' + l._id + '@restock', 'DTSTAMP:' + f(new Date())];
+  if (l.remindAt) L.push('DTSTART:' + f(new Date(l.remindAt)), 'DTEND:' + f(new Date(l.remindAt + 1800000)));
+  else L.push('DTSTART;VALUE=DATE:' + ymd(l.dueAt), 'DTEND;VALUE=DATE:' + ymd(l.dueAt + 36 * 3600000));
+  L.push('SUMMARY:' + icsEsc('買東西：' + l.title), 'DESCRIPTION:' + icsEsc(listText(l)));
+  L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc('該去買：' + l.title), 'TRIGGER:' + (l.remindAt ? '-PT0M' : '-PT15H'), 'END:VALARM');
+  L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc('清單還沒買完的話記得買'), 'TRIGGER:' + (l.remindAt ? 'PT2H' : 'PT12H'), 'END:VALARM');
+  L.push('END:VEVENT', 'END:VCALENDAR');
+  return L.join('\r\n');
+}
+function downloadIcs(l) {
+  const url = URL.createObjectURL(new Blob([icsText(l)], { type: 'text/calendar;charset=utf-8' }));
+  const a = document.createElement('a'); a.href = url; a.download = '補貨-' + l.title.replace(/[\\/:*?"<>|]/g, '') + '.ics';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+function lineUrl(text) { return 'https://line.me/R/share?text=' + enc(text); }
+function mailUrl(l, text) { return 'https://mail.google.com/mail/?view=cm&fs=1&su=' + enc('補貨清單：' + l.title) + '&body=' + enc(text); }
+function gcalUrl(l) {
+  const f = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const ymd = ms => toDateInput(ms).replace(/-/g, '');
+  let dates;
+  if (l.remindAt) dates = f(new Date(l.remindAt)) + '/' + f(new Date(l.remindAt + 30 * 60000));
+  else dates = ymd(l.dueAt) + '/' + ymd(l.dueAt + 36 * 3600000);
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + enc('買東西：' + l.title) + '&dates=' + dates + '&details=' + enc(listText(l));
+}
+function notifyBand(l) {
+  const text = listText(l), has = !!l.remindAt, cal = !!(l.remindAt || l.dueAt);
+  return '<section class="band"><div class="wrap">' +
+    '<h2 class="section-title reveal">期限與通知</h2><div class="tiles">' +
+    '<div class="tile reveal"><h3>什麼時候要買好</h3><p>' + (l.dueAt ? fmtDue(l.dueAt) + ' 前。過了還沒買完，首頁會提醒。' : '還沒設定期限。') + '</p><input type="date" id="list-due" value="' + (l.dueAt ? toDateInput(l.dueAt) : '') + '" aria-label="期限"></div>' +
+    '<div class="tile reveal"><h3>提醒時間</h3><p>' + (has ? fmtRemind(l.remindAt) + '。時間到還沒買完，首頁會一直顯示提醒。' : '設定後可以加到日曆；過了時間還沒買完，首頁會提醒。') + '</p>' +
+    '<input type="datetime-local" id="list-remind" value="' + (has ? toLocalInput(l.remindAt) : '') + '" aria-label="提醒時間">' +
+    '<div class="chips">' + presets().map(p => '<button class="chip" data-act="remind-preset" data-ts="' + p[1] + '">' + p[0] + '</button>').join('') + (has ? '<button class="chip quiet" data-act="remind-clear">清除</button>' : '') + '</div></div>' +
+    '<div class="tile reveal"><h3>LINE</h3><p>把整張清單傳給對方' + (APP_URL ? '，對方點連結就能一起打勾' : '') + '。</p><a class="btn btn-primary" href="' + lineUrl(text) + '" target="_blank" rel="noopener">用 LINE 傳送</a></div>' +
+    '<div class="tile reveal"><h3>Email</h3><p>用手機的郵件 App 或 Gmail 開一封寫好的信，填對方信箱就能寄。</p><div class="chips" style="margin-top:auto"><a class="btn btn-secondary" href="' + mailtoUrl(l, text) + '">郵件 App</a><a class="btn btn-secondary" href="' + mailUrl(l, text) + '" target="_blank" rel="noopener">Gmail</a></div></div>' +
+    '<div class="tile reveal"><h3>行事曆</h3><p>' + (cal ? '加到手機行事曆，時間到會跳通知；沒買完過幾小時會再提醒一次。' : '先設定期限或提醒時間，才能加到行事曆。') + '</p>' + (cal ? '<div class="chips" style="margin-top:auto"><button class="btn btn-secondary" data-act="ics">Apple／手機行事曆</button><a class="btn btn-secondary" href="' + gcalUrl(l) + '" target="_blank" rel="noopener">Google 日曆</a></div>' : '<button class="btn btn-secondary" disabled>加到行事曆</button>') + '</div>' +
+    '</div><div class="text-preview reveal"><div class="sec-head"><h3>清單文字</h3><button class="btn btn-sm btn-secondary" data-act="copy-text">複製</button></div>' +
+    '<textarea id="share-text" readonly rows="8" aria-label="清單文字">' + esc(text) + '</textarea></div></div></section>';
+}
+
+/* ── 商品 ── */
+function filteredProducts() {
+  const q = PF.q.trim().toLowerCase();
+  return Object.keys(D.products).map(id => Object.assign({}, D.products[id], { _id: id }))
+    .filter(p => PF.store === 'all' || (p.stores || []).includes(PF.store))
+    .filter(p => PF.cat === 'all' || p.cat === PF.cat)
+    .filter(p => !q || [p.name, p.brand, p.spec, p.barcode, p.itemNo, p.note, catOf(p.cat).name].join(' ').toLowerCase().includes(q))
+    .sort((a, b) => (CATS.indexOf(catOf(a.cat)) - CATS.indexOf(catOf(b.cat))) || String(a.name).localeCompare(String(b.name), 'zh-Hant'));
+}
+function viewProducts() {
+  const total = Object.keys(D.products).length;
+  const counts = {}; for (const k in D.products) { const c = D.products[k].cat; counts[c] = (counts[c] || 0) + 1; }
+  let h = '<section class="band hero sm"><div class="wrap">' +
+    '<h1 class="hero-title' + R() + '">商品</h1>' +
+    '<p class="tagline' + R(1) + '">哪個牌子、什麼規格，拍張照存起來。</p>' +
+    '<p class="hero-status' + R(2) + '">' + (ready() ? total + ' 項商品，全家共用' : '讀取中…') + '</p>' +
+    '<div class="cta-row' + R(2) + '"><button class="btn btn-primary" data-act="new-product">新增商品</button></div></div></section>';
+  h += '<section class="band tight"><div class="wrap"><div class="filter-row">' +
+    '<input type="search" id="pd-q" placeholder="搜尋品名、品牌、條碼" value="' + esc(PF.q) + '" aria-label="搜尋商品" autocomplete="off">' +
+    '<div class="chips" role="group" aria-label="店家">' + [{ id: 'all', name: '全部店家' }].concat(STORES).map(s => '<button class="chip" data-act="pf-store" data-store="' + s.id + '" aria-pressed="' + (PF.store === s.id) + '">' + s.name + '</button>').join('') + '</div></div>' +
+    '<div class="cat-scroll" id="cat-scroll" data-keep-scroll role="group" aria-label="品類">' +
+    '<button class="cat-btn" data-act="pf-cat" data-cat="all" aria-pressed="' + (PF.cat === 'all') + '"><span class="mono-tile">全</span><span>全部</span></button>' +
+    CATS.map(c => '<button class="cat-btn" data-act="pf-cat" data-cat="' + c.id + '" aria-pressed="' + (PF.cat === c.id) + '"><span class="mono-tile">' + c.mono + '</span><span>' + c.name + '</span>' + (counts[c.id] ? '<span class="n">' + counts[c.id] + '</span>' : '') + '</button>').join('') +
+    '</div></div></section>';
+  h += '<section class="band alt"><div class="wrap" id="pd-results">' + productResults() + '</div></section>';
+  return h;
+}
+function productResults() {
+  const total = Object.keys(D.products).length;
+  const list = filteredProducts();
+  let h = '';
+  if (!ready()) h += '<div class="empty"><p class="muted">讀取中…</p></div>';
+  else if (!list.length) {
+    const c = PF.cat !== 'all' ? catOf(PF.cat) : null;
+    if (c && !PF.q) h += '<div class="empty"><h3>還沒有「' + c.name + '」</h3><p class="muted">例如：' + c.hint + '。寫清楚規格，代買的人才不會拿錯。</p><div class="cta-row"><button class="btn btn-primary" data-act="new-product" data-cat="' + c.id + '">新增' + c.name + '</button></div></div>';
+    else if (!total) h += '<div class="empty"><h3>商品庫是空的</h3><p class="muted">先從家裡最常補的東西開始，例如衛生紙、牛奶。</p><div class="cta-row"><button class="btn btn-primary" data-act="new-product">新增商品</button><button class="btn btn-secondary" data-act="samples-load">先看範例</button></div></div>';
+    else h += '<div class="empty"><h3>找不到符合的商品</h3><p class="muted">換個關鍵字，或切回「全部」看看。</p></div>';
+  } else {
+    h += '<div class="prod-grid">' + list.map(p => '<button class="prod-card reveal" data-act="product" data-pid="' + esc(p._id) + '">' +
+      '<span class="ph">' + thumbInner(p) + '</span><span class="pc-body"><span class="pc-cat">' + esc(catOf(p.cat).name) + (p.sample ? '<span class="pill">範例</span>' : '') + '</span>' +
+      '<span class="pc-name">' + esc(p.name) + '</span>' + (subLine(p) ? '<span class="pc-sub">' + subLine(p) + '</span>' : '') +
+      '<span class="pc-stores">' + esc((p.stores || []).map(s => storeOf(s).name).join('・')) + (p.barcode ? '・有條碼' : '') + '</span></span></button>').join('') + '</div>';
+  }
+  return h;
+}
+
+/* ── 紀錄 ── */
+function viewHistory() {
+  const done = allLists().filter(l => listStatus(l) === 'done').sort((a, b) => (b.notifyAt || b.at || 0) - (a.notifyAt || a.at || 0));
+  let h = '<section class="band hero sm"><div class="wrap"><h1 class="hero-title' + R() + '">購買紀錄</h1><p class="tagline' + R(1) + '">買過的清單，一鍵再買一次。</p></div></section>';
+  h += '<section class="band alt"><div class="wrap">';
+  if (!ready()) h += '<div class="empty"><p class="muted">讀取中…</p></div>';
+  else if (!done.length) h += '<div class="empty reveal"><h3>還沒有紀錄</h3><p class="muted">清單結帳後過 2 分鐘，就會出現在這裡。</p></div>';
+  else h += '<div class="hist">' + done.map(l => {
+    const its = itemsOf(l._id), b = its.filter(i => i.state === 'bought').length, nb = its.length - b, w = nameOf(l.checkoutBy);
+    return '<article class="hist-card reveal"><div class="hc-main"><p class="lc-store">' + esc(storesLabel(l)) + '・' + fmtTime(l.notifyAt || l.at) + (l.sample ? '・範例' : '') + '</p><h3>' + esc(l.title) + '</h3><p>' + (w ? esc(whoSp(w)) + '結帳・' : '') + '已買 ' + b + ' 項' + (nb ? '・沒買到 ' + nb + ' 項' : '') + (l.carrier ? '・用載具' : '') + '</p></div>' +
+      '<div class="hc-act"><button class="btn btn-sm btn-primary" data-act="rebuy" data-list="' + l._id + '">再買一次</button><button class="btn-link" data-open-list="' + l._id + '">查看 ›</button></div></article>';
+  }).join('') + '</div>';
+  h += '</div></section>';
+  return h;
+}
+
+/* ── 我的 ── */
+function viewMe() {
+  const hasSample = ['products', 'lists', 'items'].some(c => Object.keys(D[c]).some(k => D[c][k].sample));
+  let share;
+  if (MODE === 'cloud') share = '<p>清單和商品存在 Supabase 雲端，登入後在哪支手機都能用。</p><p>每張清單各自決定誰能編輯：打開清單，在最下面「一起編輯」輸入對方的 Email。對方只看得到你邀請他的那幾張。</p>';
+  else if (MODE === 'local') share = '<p>還沒設定雲端，資料只存在這台裝置的瀏覽器，換手機或換瀏覽器就看不到。</p><p>在 index.html 最上面填好 Supabase 的網址和金鑰，就會改成全家同步。</p>';
+  else share = '<p>正在連線…</p>';
+  let h = '<section class="band hero sm"><div class="wrap"><h1 class="hero-title' + R() + '">我的</h1><p class="tagline' + R(1) + '">載具、共用方式和範例資料。</p></div></section>';
+  h += '<section class="band alt"><div class="wrap"><div class="tiles">' +
+    '<div class="tile span2 reveal"><h3>我的手機條碼載具</h3><p>斜線開頭共 8 碼。' + (MODE === 'cloud' && ME ? '只存在你自己的帳號裡，家人看不到。' : '存在這台裝置。') + '</p>' +
+    '<form class="form" data-carrier-form><div class="input-row"><input id="me-carrier" value="' + esc(MY_CARRIER) + '" placeholder="/ABC1234" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="載具號碼"><button class="btn btn-primary" type="submit">儲存</button></div><p class="help" id="me-carrier-help"></p></form>' +
+    (MY_CARRIER ? '<div class="bc-box" style="max-width:360px;margin-top:6px"><svg data-bc="' + esc(MY_CARRIER) + '" data-fmt="CODE39" data-h="70" data-w="1.6"></svg></div>' : '') + '</div>' +
+    '<div class="tile reveal"><h3>' + (MODE === 'cloud' ? '雲端同步中' : MODE === 'local' ? '只存在這台裝置' : '連線中') + '</h3>' + share + '</div>' +
+    (MODE === 'cloud' ? '<div class="tile reveal"><h3>我的名字</h3><p>一起編輯清單的人會看到這個名字。</p><form class="form" id="myname-form" novalidate><div class="input-row"><input id="myname-in" value="' + esc(MY_NAME) + '" placeholder="例：Anderson" maxlength="20" autocomplete="off" aria-label="我的名字"><button class="btn btn-primary" type="submit">儲存</button></div></form><button class="btn-link" data-act="logout" style="align-self:flex-start">登出（' + esc(ME) + '）</button></div>' : '') +
+    '<div class="tile reveal"><h3>範例資料</h3><p>6 項範例商品和 1 張範例清單，都會標上「範例」。看完可以一次清掉，不會動到你自己建的東西。</p><div class="chips">' + (hasSample ? '<button class="btn btn-sm btn-danger" data-act="samples-clear">' + (ARMED && ARMED.key === 'samples' && Date.now() < ARMED.until ? '再按一次確定清除' : '清除範例') + '</button>' : '<button class="btn btn-sm btn-secondary" data-act="samples-load">載入範例</button>') + '</div></div>' +
+    '<div class="tile reveal"><h3>這一版能做什麼</h3><p>清單、商品、打勾、缺貨處理、給店員看、載具結帳、相機掃條碼、LINE、Email、行事曆都可以用。</p><p>還沒有：手機推播通知。之後再加。</p></div>' +
+    '</div></div></section>';
+  return h;
+}
+
+/* ── 登入 ── */
+function viewLogin() {
+  return '<section class="band hero"><div class="wrap"><h1 class="hero-title' + R() + '">補貨清單</h1><p class="tagline' + R(1) + '">登入後，全家共用同一份清單。</p></div></section>' +
+    '<section class="band alt"><div class="wrap"><div class="empty" style="max-width:520px;margin:0 auto"><h3>用 Email 登入</h3><p class="muted">輸入信箱，我們寄一封登入連結給你，點了就登入，不用密碼。</p>' +
+    '<form id="login-form" class="form" style="width:100%" novalidate><input id="login-email" type="email" placeholder="you@example.com" autocomplete="email"><button class="btn btn-primary btn-wide" type="submit">寄登入連結</button></form>' +
+    '<p class="help">只有加入「家庭成員」的信箱才看得到清單。</p></div></div></section>';
+}
+function viewDenied() {
+  return '<section class="band hero"><div class="wrap"><h1 class="hero-title">補貨清單</h1></div></section>' +
+    '<section class="band alt"><div class="wrap"><div class="empty"><h3>這個信箱還沒加入家庭</h3><p class="muted">' + esc(ME) + ' 還不是家庭成員。請已經加入的家人到「我的」→「家庭成員」新增你的信箱，再重新整理這頁。</p><div class="cta-row"><button class="btn btn-secondary" data-act="logout">換一個信箱登入</button></div></div></div></section>';
+}
+
+/* ── 相機即時掃條碼 ── */
+let camStream = null;
+function stopCam() { if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; } $('#cam-root').innerHTML = ''; }
+async function liveScan() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return { fallback: true };
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }, audio: false }); }
+  catch (e) { return { fallback: true }; }
+  camStream = stream;
+  $('#cam-root').innerHTML = '<div class="cam" role="dialog" aria-label="掃描條碼"><video id="cam-v" playsinline muted autoplay></video><p class="cam-tip">把條碼放在畫面中間，拿穩</p><div class="cam-acts"><button class="btn btn-secondary" id="cam-photo">改用拍照</button><button class="btn btn-secondary" id="cam-cancel">取消</button></div></div>';
+  const v = $('#cam-v'); v.srcObject = stream; try { await v.play(); } catch (e) { /* 等使用者 */ }
+  let det = null;
+  if ('BarcodeDetector' in window) { try { det = new window.BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'] }); } catch (e) { det = null; } }
+  if (!det) loadZXing();
+  return new Promise(res => {
+    let done = false;
+    const finish = r => { if (done) return; done = true; stopCam(); res(r); };
+    $('#cam-cancel').onclick = () => finish({ cancel: true });
+    $('#cam-photo').onclick = () => finish({ fallback: true });
+    const c = document.createElement('canvas');
+    const tick = async () => {
+      if (done) return;
+      try {
+        if (v.readyState >= 2) {
+          let code = null;
+          if (det) { const r = await det.detect(v); code = r && r[0] && r[0].rawValue; }
+          else if (window.ZXing) { const w = v.videoWidth, h = v.videoHeight, sc = Math.min(1, 960 / Math.max(w, h)); c.width = (w * sc) | 0; c.height = (h * sc) | 0; c.getContext('2d').drawImage(v, 0, 0, c.width, c.height); code = await decodeCanvasList([c], true); }
+          if (code) { if (navigator.vibrate) navigator.vibrate(60); finish({ code }); return; }
+        }
+      } catch (e) { /* 下一格再試 */ }
+      setTimeout(tick, 280);
+    };
+    tick();
+  });
+}
+
+/* ── 底部結帳列 ── */
+function renderCobar() {
+  const l = VIEW === 'list' && D.lists[CUR_LIST];
+  const its = l ? itemsOf(CUR_LIST) : [];
+  const show = !!(l && listStatus(l) === 'active' && its.length);
+  app.classList.toggle('has-cobar', show);
+  if (!show) { cobar.hidden = true; cobar.innerHTML = ''; return; }
+  const b = its.filter(i => i.state === 'bought').length;
+  cobar.hidden = false;
+  cobar.innerHTML = '<div class="wrap"><p><strong>已買 ' + b + ' / ' + its.length + '</strong>・沒買到的也會一起通知' + (l.createdBy && l.createdBy !== ME && nameOf(l.createdBy) ? ' ' + esc(nameOf(l.createdBy)) : '') + '</p>' +
+    '<div class="btns"><button class="btn btn-primary" data-act="co-carrier">載具</button><button class="btn btn-secondary" data-act="co-done">完成</button></div></div>';
+}
+
+/* ───────── 面板（sheet） ───────── */
+function lockBody() { document.body.classList.toggle('locked', !!(SHEET || OVERLAY)); }
+function openSheet(cfg) {
+  closeSheet(true);
+  SHEET = cfg;
+  sheetRoot.innerHTML = '<div class="scrim" data-scrim><div class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(cfg.title) + '"><div class="sheet-head"><h2>' + esc(cfg.title) + '</h2><button class="icon-btn" data-act="sheet-close" aria-label="關閉">✕</button></div><div class="sheet-body" id="sheet-body">' + cfg.html + '</div></div></div>';
+  lockBody();
+  drawBarcodes(sheetRoot);
+  if (cfg.mount) cfg.mount();
+  const first = sheetRoot.querySelector('.sheet input:not([type=file]):not([type=checkbox]), .sheet button');
+  if (first && cfg.focusFirst) first.focus();
+}
+function closeSheet(silent) {
+  const s = SHEET; SHEET = null; sheetRoot.innerHTML = ''; lockBody();
+  if (s && s.onClose && !silent) s.onClose();
+}
+
+function openNewList() {
+  if (!guard()) return;
+  NL = { remind: false, invites: [] };
+  openSheet({
+    title: '新建清單',
+    focusFirst: true,
+    html: '<form id="nl-form" class="form" novalidate>' +
+      '<label class="field"><span>1　名稱</span><input id="nl-title" placeholder="例：聚會、10/28 補貨" maxlength="30" autocomplete="off"></label>' +
+      '<label class="field"><span>2　什麼時候要買好</span><input type="date" id="nl-due" aria-label="期限"></label>' +
+      '<div class="field"><span>3　要不要提醒</span><div class="seg" role="group"><button type="button" data-act="nl-remind" data-v="0" aria-pressed="true">不用提醒</button><button type="button" data-act="nl-remind" data-v="1" aria-pressed="false">要提醒</button></div>' +
+      '<div id="nl-remind-wrap" hidden style="margin-top:10px"><input type="datetime-local" id="nl-remind" aria-label="提醒時間"><div class="chips" style="margin-top:8px">' + presets().map(p => '<button type="button" class="chip" data-act="nl-preset" data-ts="' + p[1] + '">' + p[0] + '</button>').join('') + '</div></div></div>' +
+      (MODE === 'cloud' ? '<div class="field"><span>4　邀請一起編輯（選填）</span><div class="field-row"><input id="nl-inv-email" type="email" placeholder="對方的 Email" autocomplete="off"><input id="nl-inv-name" placeholder="名字，例如：老婆" maxlength="20" autocomplete="off"></div><button type="button" class="btn btn-secondary btn-sm" data-act="nl-inv-add" style="justify-self:start;margin-top:8px">＋ 加入</button><div class="chips" id="nl-invs" style="margin-top:8px"></div><p class="help">之後也可以在清單最下面再邀請別人。</p></div>' : '') +
+      '<p class="help">建好之後再挑商品，每樣東西可以各自選要去好事多、全聯還是超商買。</p>' +
+      '<div class="form-actions"><button type="submit" class="btn btn-primary btn-wide">建立，開始挑商品</button></div></form>'
+  });
+}
+function createList() {
+  const title = ($('#nl-title').value || '').trim();
+  if (!title) { toast('請填名稱，例如「聚會」'); $('#nl-title').focus(); return; }
+  const dueAt = fromDateInput($('#nl-due').value);
+  if (!dueAt) { toast('請選什麼時候要買好'); $('#nl-due').focus(); return; }
+  const remindAt = NL.remind ? fromLocalInput($('#nl-remind').value) : null;
+  if (NL.remind && !remindAt) { toast('請選提醒時間，或改成「不用提醒」'); $('#nl-remind').focus(); return; }
+  const id = uid();
+  const pe = $('#nl-inv-email'); if (pe && validEmail(pe.value)) nlAddInvite();
+  put('lists', id, { store: null, dueAt, title: title.slice(0, 30), remindAt, status: 'active', createdBy: ME || 'local', createdAt: Date.now(), sample: false });
+  addListMembers(id, NL.invites);
+  if (NL.invites.length) setTimeout(() => toast('已邀請 ' + NL.invites.length + ' 人，記得把網址傳給對方（清單最下面可以再傳）', 5000), 600);
+  closeSheet(true);
+  goList(id);
+  setTimeout(() => openPicker(id), 120);
+}
+
+const validEmail = v => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v || '').trim());
+function nlAddInvite() {
+  const e = $('#nl-inv-email'), n = $('#nl-inv-name'); if (!e) return;
+  const em = e.value.trim().toLowerCase();
+  if (!validEmail(em)) { toast('請輸入正確的 Email'); return; }
+  if (em === ME) { toast('不用邀請自己'); return; }
+  if (!NL.invites.some(v => v.email === em)) NL.invites.push({ email: em, name: n.value.trim() });
+  e.value = ''; n.value = '';
+  $('#nl-invs').innerHTML = NL.invites.map((v, i) => '<button type="button" class="chip" data-act="nl-inv-del" data-i="' + i + '">' + esc((v.name ? v.name + '・' : '') + v.email) + '  ✕</button>').join('');
+}
+function openPicker(listId) {
+  const l = D.lists[listId]; if (!l) return;
+  PK = { listId, q: '', all: false, store: LAST_STORE };
+  openSheet({
+    title: '加到「' + l.title + '」',
+    html: '<div class="picker-top"><div class="field"><span>這次去哪裡買</span><div class="chips" id="pk-stores">' + STORES.map(s => '<button class="chip" data-act="pk-store" data-store="' + s.id + '" aria-pressed="' + (PK.store === s.id) + '">' + s.name + '</button>').join('') + '</div></div>' +
+      '<input type="search" id="pk-q" placeholder="搜尋商品、品牌" autocomplete="off" aria-label="搜尋商品">' +
+      '<label class="toggle"><input type="checkbox" id="pk-all"> <span id="pk-all-label">也顯示沒標「' + esc(storeOf(PK.store).name) + '」的商品</span></label></div>' +
+      '<div id="pk-results"></div>' +
+      '<div class="picker-new"><h3>沒有想要的？</h3><p class="muted" style="font-size:14px">點品類新增商品，存好會直接加進這張清單。</p><div class="cat-grid">' +
+      CATS.map(c => '<button class="cat-btn" data-act="pk-newcat" data-cat="' + c.id + '"><span class="mono-tile">' + c.mono + '</span><span>' + c.name + '</span></button>').join('') + '</div></div>',
+    rerender: () => { const el = $('#pk-results'); if (el && PK) el.innerHTML = pickerResults(); },
+    onClose: () => { PK = null; }
+  });
+  SHEET.rerender();
+}
+function pickerResults() {
+  const l = D.lists[PK.listId]; if (!l) return '';
+  const inList = {}; itemsOf(PK.listId).forEach(i => { if (itemStore(i) === PK.store) inList[i.productId] = i; });
+  const q = PK.q.trim().toLowerCase();
+  let prods = Object.keys(D.products).map(id => Object.assign({}, D.products[id], { _id: id }));
+  if (!PK.all) prods = prods.filter(p => (p.stores || []).includes(PK.store));
+  if (q) prods = prods.filter(p => [p.name, p.brand, p.spec, p.barcode, p.itemNo, catOf(p.cat).name].join(' ').toLowerCase().includes(q));
+  if (!prods.length) {
+    const anyOther = !PK.all && Object.keys(D.products).length > 0;
+    return '<div class="pk-empty"><p>' + (q ? '找不到符合的商品' : '還沒有標記「' + esc(storeOf(PK.store).name) + '」的商品') + '</p>' + (anyOther ? '<p class="muted" style="font-size:14px">勾選上面的選項，看看其他店的商品。</p>' : '<p class="muted" style="font-size:14px">從下面的品類新增一個。</p>') + '</div>';
+  }
+  let h = '';
+  CATS.forEach(c => {
+    const g = prods.filter(p => catOf(p.cat) === c); if (!g.length) return;
+    h += '<h4 class="pk-cat">' + c.name + '</h4><div class="pk-rows">' + g.map(p => {
+      const it = inList[p._id];
+      const right = it
+        ? '<div class="stepper" data-item="' + esc(it._id) + '"><button data-act="pk-dec" aria-label="減少">−</button><output>' + it.qty + '</output><button data-act="pk-inc" aria-label="增加">＋</button></div>'
+        : '<button class="btn btn-sm btn-primary" data-act="pk-add" data-pid="' + esc(p._id) + '">加入</button>';
+      return '<div class="pk-row"><span class="th">' + thumbInner(p) + '</span><div class="pk-text"><strong>' + esc(p.name) + '</strong><span>' + (subLine(p) || '&nbsp;') + '</span></div>' + right + '</div>';
+    }).join('') + '</div>';
+  });
+  return h;
+}
+function addItem(listId, pid, store) {
+  const l = D.lists[listId], p = D.products[pid]; if (!l || !p) return;
+  store = store || (p.stores || [])[0] || 'other';
+  const ex = itemsOf(listId).find(i => i.productId === pid && itemStore(i) === store);
+  if (ex) { setQty(ex._id, ex.qty + 1); return; }
+  put('items', uid(), { listId, productId: pid, store, name: p.name || '', cat: p.cat || 'other', qty: 1, state: 'todo', subbed: false, createdAt: Date.now(), sample: !!l.sample });
+}
+
+function openProduct(pid) {
+  openSheet({
+    title: '商品資料',
+    html: productHtml(pid),
+    rerender: () => { const b = $('#sheet-body'); if (b && SHEET && SHEET.pid === pid) { b.innerHTML = productHtml(pid); drawBarcodes(b); } },
+    pid
+  });
+}
+function productHtml(pid) {
+  const p = D.products[pid]; if (!p) return '<p class="muted" style="padding:24px 0">這個商品已經被刪除了。</p>';
+  const stores = (p.stores || []).map(s => storeOf(s).name).join('、') || '—';
+  const cl = VIEW === 'list' && D.lists[CUR_LIST] && listStatus(D.lists[CUR_LIST]) === 'active';
+  const inCur = cl && itemsOf(CUR_LIST).some(i => i.productId === pid);
+  return '<div class="pd"><div class="pd-photo">' + thumbInner(p) + '</div>' +
+    '<p class="pd-cat">' + esc(catOf(p.cat).name) + (p.sample ? '・範例' : '') + '</p><h2 class="pd-name">' + esc(p.name) + '</h2>' +
+    (subLine(p) ? '<p class="pd-sub">' + subLine(p) + '</p>' : '') +
+    '<div class="pd-acts"><button class="btn btn-primary" data-act="clerk-product" data-pid="' + esc(pid) + '">給店員看</button><button class="btn btn-secondary" data-act="edit-product" data-pid="' + esc(pid) + '">編輯</button>' + (cl && !inCur ? '<button class="btn-link" data-act="add-to-cur" data-pid="' + esc(pid) + '">加到這張清單 ›</button>' : '') + '</div>' +
+    '<dl class="facts"><div class="fact"><dt>在哪買</dt><dd>' + esc(stores) + '</dd></div>' +
+    (p.itemNo ? '<div class="fact"><dt>Item 編號</dt><dd class="mono-text">' + esc(p.itemNo) + '</dd></div>' : '') +
+    '<div class="fact"><dt>條碼</dt><dd>' + (p.barcode ? '<div class="bc-box"><svg data-bc="' + esc(p.barcode) + '" data-h="64" data-w="1.8"></svg></div>' : '<span class="muted">沒有存條碼</span>') + '</dd></div>' +
+    '<div class="fact"><dt>缺貨時</dt><dd>' + (p.sub ? '可以買同品類其他牌子' : '不可替代，缺貨就先不買') + '</dd></div>' +
+    (p.note ? '<div class="fact"><dt>備註</dt><dd>' + esc(p.note) + '</dd></div>' : '') +
+    (p.tagPhoto && SAFE_IMG.test(p.tagPhoto) ? '<div class="fact"><dt>價籤照片</dt><dd><img class="tag-img" src="' + p.tagPhoto + '" alt="價籤照片"></dd></div>' : '') +
+    (byText(p) ? '<div class="fact"><dt>最後修改</dt><dd class="muted">' + byText(p) + '</dd></div>' : '') +
+    '</dl></div>';
+}
+
+/* 商品編輯 */
+function openEditor(pid, opts) {
+  opts = opts || {};
+  if (!guard()) return;
+  const src = pid && D.products[pid];
+  const d = src ? JSON.parse(JSON.stringify(src)) : { cat: opts.cat || '', name: '', brand: '', spec: '', stores: opts.store ? [opts.store] : [], itemNo: '', barcode: '', sub: true, note: '', photo: '', tagPhoto: '' };
+  d.stores = Array.isArray(d.stores) ? d.stores.slice() : [];
+  ED = { pid: src ? pid : null, d, opts };
+  const hint = d.cat ? catOf(d.cat).hint : '例：1857ml × 2';
+  const costco = d.stores.includes('costco');
+  const armed = ARMED && ARMED.key === 'prod:' + pid && Date.now() < ARMED.until;
+  openSheet({
+    title: ED.pid ? '編輯商品' : '新增商品',
+    html: '<form id="ed-form" class="form" novalidate>' +
+      '<div><div class="photo-frame" id="ed-photo">' + edPhoto(d.photo, d.cat) + '</div><div class="photo-acts"><button type="button" class="btn btn-secondary btn-sm" data-act="ed-photo">拍照或選照片</button>' + '<button type="button" class="btn-link" data-act="ed-photo-clear" id="ed-photo-clear"' + (d.photo ? '' : ' hidden') + '>移除照片</button></div></div>' +
+      '<label class="field"><span>品類</span><select id="ed-cat"><option value="">選一個品類</option>' + CATS.map(c => '<option value="' + c.id + '"' + (d.cat === c.id ? ' selected' : '') + '>' + c.name + '</option>').join('') + '</select></label>' +
+      '<label class="field" id="ed-name-wrap"' + (d.cat === 'other' ? '' : ' hidden') + '><span>品名（「其他」類才需要填）</span><input id="ed-name" value="' + esc(d.cat === 'other' ? d.name : '') + '" placeholder="例：燈泡、拖把" maxlength="40" autocomplete="off"></label>' +
+      '<div class="field-row"><label class="field"><span>品牌</span><input id="ed-brand" value="' + esc(d.brand) + '" placeholder="例：Kirkland" maxlength="40" autocomplete="off"></label>' +
+      '<label class="field"><span>規格</span><input id="ed-spec" value="' + esc(d.spec) + '" placeholder="例：' + esc(hint) + '" maxlength="40" autocomplete="off"></label></div>' +
+      '<fieldset class="field"><legend>在哪裡買（可複選）</legend><div class="chips">' + STORES.map(s => '<button type="button" class="chip" data-act="ed-store" data-store="' + s.id + '" aria-pressed="' + d.stores.includes(s.id) + '">' + s.name + '</button>').join('') + '</div></fieldset>' +
+      '<label class="field" id="ed-itemno-wrap"' + (costco ? '' : ' hidden') + '><span>好事多 Item 編號</span><input id="ed-itemno" value="' + esc(d.itemNo) + '" inputmode="numeric" placeholder="價籤上的數字，店員最常用這個查" maxlength="10" autocomplete="off"></label>' +
+      '<div class="field"><span>條碼（商品背面）</span><div class="input-row"><input id="ed-barcode" value="' + esc(d.barcode) + '" inputmode="numeric" placeholder="台灣商品是 471 開頭的 13 碼" maxlength="32" autocomplete="off"><button type="button" class="btn btn-secondary" data-act="ed-scan">拍條碼</button></div><p class="help" id="ed-bc-help"></p></div>' +
+      '<div class="field"><span>缺貨時可以買別的牌子嗎？</span><div class="seg" role="group"><button type="button" data-act="ed-sub" data-v="1" aria-pressed="' + !!d.sub + '">可以替代</button><button type="button" data-act="ed-sub" data-v="0" aria-pressed="' + !d.sub + '">不可替代</button></div></div>' +
+      '<label class="field"><span>備註</span><textarea id="ed-note" rows="2" maxlength="120" placeholder="例：要綠色包裝那款，不是藍色">' + esc(d.note) + '</textarea></label>' +
+      '<div class="field" id="ed-tag-wrap"' + (costco ? '' : ' hidden') + '><span>價籤照片（選填，給店員查用）</span><div class="photo-frame tag" id="ed-tag">' + edPhoto(d.tagPhoto, null, '價籤') + '</div><div class="photo-acts"><button type="button" class="btn btn-secondary btn-sm" data-act="ed-tag">拍價籤</button><button type="button" class="btn-link" data-act="ed-tag-clear" id="ed-tag-clear"' + (d.tagPhoto ? '' : ' hidden') + '>移除</button></div></div>' +
+      '<div class="form-actions"><button type="submit" class="btn btn-primary btn-wide">' + (opts.addTo ? '儲存並加進清單' : '儲存') + '</button>' +
+      (ED.pid ? '<button type="button" class="btn btn-danger btn-wide" data-act="ed-delete">' + (armed ? '再按一次，確定刪除' : '刪除這個商品') + '</button>' : '') + '</div></form>',
+    mount: () => bcHelp(),
+    onClose: () => {
+      const o = ED && ED.opts, p = ED && ED.pid; ED = null;
+      if (o && o.addTo && D.lists[o.addTo]) openPicker(o.addTo);
+      else if (o && o.reopen && p && D.products[p]) openProduct(p);
+    }
+  });
+}
+function edPhoto(src, cat, label) {
+  if (src && SAFE_IMG.test(src)) return '<img src="' + src + '" alt="">';
+  return label ? '<span class="muted" style="font-size:14px">' + label + '</span>' : '<span class="mono">' + esc(cat ? catOf(cat).mono : '照') + '</span>';
+}
+function bcHelp() {
+  const inp = $('#ed-barcode'), help = $('#ed-bc-help'); if (!inp || !help) return;
+  const v = cleanCode(inp.value);
+  help.className = 'help';
+  if (!v) { help.textContent = '同一個商品在每家店條碼都一樣，存一次全家都能用。生鮮、秤重的通常沒有條碼，可以不填。'; return; }
+  if (/^\d{13}$/.test(v)) {
+    if (ean13ok(v)) { help.className = 'help ok'; help.textContent = '✓ 有效的 EAN-13' + (v.startsWith('471') ? '（台灣商品）' : ''); }
+    else { help.className = 'help warn'; help.textContent = '最後一碼對不上，請再核對一次數字。'; }
+  } else if (/^\d{8}$/.test(v) && ean8ok(v)) { help.className = 'help ok'; help.textContent = '✓ 有效的 EAN-8'; }
+  else if (/^\d{12}$/.test(v) && upcOk(v)) { help.className = 'help ok'; help.textContent = '✓ 有效的 UPC-A（美國商品）'; }
+  else help.textContent = '不是標準的 13 碼，會用一般條碼格式顯示給店員。';
+}
+function saveEditor() {
+  if (!ED) return;
+  const d = ED.d;
+  d.cat = $('#ed-cat').value; d.name = d.cat === 'other' ? $('#ed-name').value.trim() : catOf(d.cat).name; d.brand = $('#ed-brand').value.trim(); d.spec = $('#ed-spec').value.trim();
+  d.itemNo = cleanCode($('#ed-itemno').value); d.barcode = cleanCode($('#ed-barcode').value); d.note = $('#ed-note').value.trim();
+  if (!d.cat) { toast('請先選品類'); $('#ed-cat').focus(); return; }
+  if (!d.name) { toast('「其他」類請填品名'); $('#ed-name').focus(); return; }
+  if (!d.stores.length) { toast('請至少選一間店'); return; }
+  if (!d.stores.includes('costco')) { d.itemNo = ''; d.tagPhoto = ''; }
+  const id = ED.pid || uid();
+  const body = { cat: d.cat, name: d.name, brand: d.brand, spec: d.spec, stores: d.stores, itemNo: d.itemNo, barcode: d.barcode, sub: !!d.sub, note: d.note, photo: d.photo || '', tagPhoto: d.tagPhoto || '', sample: !!d.sample, createdAt: d.createdAt || Date.now() };
+  put('products', id, body);
+  // 同步清單項目上的名稱，避免商品被刪後紀錄只剩「已刪除的商品」
+  Object.keys(D.items).forEach(k => { const it = D.items[k]; if (it.productId === id && (it.name !== body.name || it.cat !== body.cat) && listStatus(D.lists[it.listId]) === 'active') patch('items', k, { name: body.name, cat: body.cat }); });
+  const o = ED.opts; ED = null;
+  closeSheet(true);
+  if (o.addTo && D.lists[o.addTo]) { addItem(o.addTo, id, body.stores.includes(o.store) ? o.store : body.stores[0]); toast('已加進清單'); openPicker(o.addTo); }
+  else { toast('已儲存'); if (o.reopen) openProduct(id); }
+}
+
+/* ───────── 給店員看／結帳畫面 ───────── */
+let wakeLock = null;
+function requestWake() { try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(w => { wakeLock = w; }).catch(() => {}); } catch (e) { /* 不支援 */ } }
+function releaseWake() { try { if (wakeLock) wakeLock.release(); } catch (e) { /* 忽略 */ } wakeLock = null; }
+function openClerk(listId, itemId, pid) {
+  let seq;
+  if (listId) {
+    let its = itemsOf(listId).filter(i => i.state !== 'bought');
+    if (!its.some(i => i._id === itemId)) its = itemsOf(listId);
+    seq = its.map(i => ({ itemId: i._id, pid: i.productId }));
+  } else seq = [{ pid }];
+  let idx = Math.max(0, seq.findIndex(s => s.itemId === itemId));
+  OVERLAY = { type: 'clerk', listId, seq, idx };
+  requestWake(); renderOverlay();
+}
+function openCheckout(listId) { OVERLAY = { type: 'checkout', listId }; requestWake(); renderOverlay(); }
+function closeOverlay() { OVERLAY = null; overlayRoot.innerHTML = ''; releaseWake(); lockBody(); }
+function renderOverlay() {
+  if (!OVERLAY) { overlayRoot.innerHTML = ''; return; }
+  overlayRoot.innerHTML = OVERLAY.type === 'clerk' ? clerkHtml() : checkoutHtml();
+  lockBody();
+  drawBarcodes(overlayRoot);
+  tickNow();
+  const top = overlayRoot.querySelector('.scan-top button'); if (top) top.focus({ preventScroll: true });
+}
+function clerkHtml() {
+  const o = OVERLAY, cur = o.seq[o.idx] || o.seq[0];
+  const it = cur.itemId ? D.items[cur.itemId] : null;
+  const p = it ? prodOf(it) : (D.products[cur.pid] || { name: '已刪除的商品', cat: 'other' });
+  const l = o.listId ? D.lists[o.listId] : null;
+  const showNo = p.itemNo && (!it || itemStore(it) === 'costco');
+  const n = o.seq.length;
+  return '<div class="scan" role="dialog" aria-modal="true" aria-label="給店員看" id="scan">' +
+    '<div class="scan-top"><button data-act="ov-close">完成</button>' +
+    (n > 1 ? '<div class="pager"><button data-act="clerk-prev" aria-label="上一個"' + (o.idx === 0 ? ' disabled' : '') + '>‹</button><span>' + (o.idx + 1) + ' / ' + n + '</span><button data-act="clerk-next" aria-label="下一個"' + (o.idx >= n - 1 ? ' disabled' : '') + '>›</button></div>' : '<span></span>') + '</div>' +
+    '<div class="scan-body"><p class="scan-hint">您好，請幫我找這個商品</p>' +
+    '<div class="scan-photo">' + thumbInner(p) + '</div>' +
+    '<h2 class="scan-name">' + esc(p.name) + '</h2>' +
+    '<p class="scan-sub">' + [subLine(p), it ? '要買 ' + it.qty + ' 個' : ''].filter(Boolean).join('・') + '</p>' +
+    (showNo ? '<div class="scan-itemno"><span>ITEM 編號</span><strong>' + esc(p.itemNo) + '</strong></div>' : '') +
+    (p.barcode ? '<div class="scan-bc"><svg data-bc="' + esc(p.barcode) + '" data-h="120" data-w="2.6"></svg></div>' : '<p class="scan-hint">這個商品沒有存條碼，請看照片' + (showNo ? '或 Item 編號' : '') + '。</p>') +
+    (p.tagPhoto && SAFE_IMG.test(p.tagPhoto) ? '<figure class="scan-tag"><img src="' + p.tagPhoto + '" alt="價籤照片"><figcaption>價籤照片</figcaption></figure>' : '') +
+    (p.note ? '<p class="scan-note">' + esc(p.note) + '</p>' : '') +
+    '<p class="scan-tip">螢幕調亮一點，掃描比較容易成功' + (n > 1 ? '・左右滑動換下一個' : '') + '</p></div></div>';
+}
+function checkoutHtml() {
+  const l0 = D.lists[OVERLAY.listId];
+  if (!l0) return '';
+  const l = Object.assign({}, l0, { _id: OVERLAY.listId });
+  const st = listStatus(l); OVERLAY.st = st;
+  const its = itemsOf(l._id), b = its.filter(i => i.state === 'bought'), nb = its.filter(i => i.state !== 'bought');
+  const creator = l.createdBy && l.createdBy !== ME ? nameOf(l.createdBy) : '';
+  let h = '<div class="scan" role="dialog" aria-modal="true" aria-label="結帳"><div class="scan-top"><span class="scan-title">' + esc(l.title) + '</span><button data-act="ov-close">關閉</button></div><div class="scan-body">';
+  if (l.carrier && MY_CARRIER && st === 'checkout') {
+    h += '<p class="scan-hint">請店員掃描手機條碼載具</p><div class="scan-bc"><svg data-bc="' + esc(MY_CARRIER) + '" data-fmt="CODE39" data-h="120" data-w="2.2"></svg></div>';
+  } else if (st === 'done') {
+    h += '<div class="done-mark">' + BIG_CHECK + '</div><h2 class="co-head">完成了</h2>';
+  } else {
+    h += '<h2 class="co-head">買好了</h2>';
+  }
+  h += '<div class="co-sum"><div><strong>' + b.length + '</strong><span>已買</span></div><div><strong>' + nb.length + '</strong><span>沒買到</span></div></div>';
+  if (nb.length) h += '<p class="co-miss">沒買到：' + nb.map(i => esc(prodOf(i).name) + (i.state === 'out' ? '（缺貨）' : '')).join('、') + '</p>';
+  if (st === 'checkout') {
+    const C = 2 * Math.PI * 56;
+    h += '<div class="ring" aria-hidden="true"><svg viewBox="0 0 128 128"><circle class="rbg" cx="64" cy="64" r="56"/><circle class="rfg" cx="64" cy="64" r="56" stroke-dasharray="' + C.toFixed(1) + '" data-ring="' + l.notifyAt + '" data-c="' + C.toFixed(1) + '"/></svg><span data-countdown="' + l.notifyAt + '">' + mmss(l.notifyAt - Date.now()) + '</span></div>' +
+      '<p class="scan-hint">倒數結束會存成購買紀錄' + (creator ? '，' + esc(creator) + ' 打開 App 就會看到' : '') + '。按錯了可以收回；確定沒問題就按「直接完成」，不用等。</p>' +
+      '<div class="co-btns"><button class="btn btn-secondary" data-act="co-undo" data-list="' + l._id + '">收回</button><button class="btn btn-finish" data-act="co-finish" data-list="' + l._id + '">直接完成</button></div>';
+  } else if (st === 'done') {
+    h += '<p class="scan-hint">' + (creator ? esc(creator) + ' 打開 App 就會看到完成通知。也可以直接傳 LINE 跟對方說。' : '已存成購買紀錄。') + '</p>' +
+      '<div class="cta-row" style="margin-top:8px"><a class="btn btn-primary" href="' + lineUrl(doneText(l)) + '" target="_blank" rel="noopener">用 LINE 回報</a><button class="btn btn-secondary" data-act="ov-close">回清單</button></div>';
+  }
+  h += '</div></div>';
+  return h;
+}
+function checkout(listId, useCarrier) {
+  if (!guard()) return;
+  const now = Date.now();
+  patch('lists', listId, { status: 'checkout', checkoutAt: now, checkoutBy: ME || 'local', notifyAt: now + COOLDOWN, carrier: !!useCarrier });
+  openCheckout(listId);
+}
+function undoCheckout(listId) {
+  const l = D.lists[listId]; if (!l) return;
+  if (listStatus(l) !== 'checkout') { toast('已經超過 2 分鐘，不能收回了。可以在清單裡「重新打開」。', 4000); return; }
+  patch('lists', listId, { status: 'active', checkoutAt: null, checkoutBy: null, notifyAt: null, carrier: false });
+  if (OVERLAY && OVERLAY.type === 'checkout') closeOverlay();
+  toast('已收回，可以繼續買');
+}
+function openCarrierSheet(listId) {
+  openSheet({
+    title: '設定手機條碼載具',
+    html: '<form class="form" data-carrier-form data-then="' + esc(listId || '') + '"><p class="muted">財政部的手機條碼，斜線開頭共 8 碼，在載具 App 或發票 App 裡可以找到。' + (MODE === 'cloud' && ME ? '只存在你自己的帳號，家人看不到。' : '') + '</p>' +
+      '<label class="field"><span>載具號碼</span><input id="sh-carrier" placeholder="/ABC1234" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><p class="help" id="sh-carrier-help"></p>' +
+      '<div class="form-actions"><button class="btn btn-primary btn-wide" type="submit">儲存並出示載具</button><button class="btn btn-secondary btn-wide" type="button" data-act="co-done">這次不用載具，直接完成</button></div></form>',
+    focusFirst: true
+  });
+}
+function normCarrier(v) {
+  v = String(v || '').trim().toUpperCase().replace(/\s/g, '');
+  if (v && v[0] !== '/') v = '/' + v;
+  return v;
+}
+
+/* ───────── 計時器（倒數、狀態轉換） ───────── */
+let lastSig = null;
+function sigNow() { return allLists().map(l => l._id + ':' + listStatus(l) + ':' + (isOverdue(l) ? 1 : 0)).join('|'); }
+function tickNow() {
+  const now = Date.now();
+  $$('[data-countdown]').forEach(el => { el.textContent = mmss(+el.getAttribute('data-countdown') - now); });
+  $$('[data-ring]').forEach(el => { const C = +el.getAttribute('data-c'), left = Math.max(0, +el.getAttribute('data-ring') - now); el.setAttribute('stroke-dashoffset', (C * (1 - left / COOLDOWN)).toFixed(1)); });
+}
+setInterval(() => {
+  tickNow();
+  if (!ready()) return;
+  const sig = sigNow();
+  if (lastSig !== null && sig !== lastSig) {
+    if (OVERLAY && OVERLAY.type === 'checkout') { const l = D.lists[OVERLAY.listId]; if (l && listStatus(l) !== OVERLAY.st) { renderOverlay(); if (listStatus(l) === 'done') toast('完成了，已存成購買紀錄'); } }
+    scheduleRender();
+  }
+  lastSig = sig;
+}, 1000);
+
+/* ───────── 範例資料 ───────── */
+function loadSamples() {
+  if (!guard()) return;
+  if (Object.keys(D.products).some(k => D.products[k].sample)) { toast('範例已經載入了'); return; }
+  const now = Date.now();
+  const P = [
+    ['milk', '鮮乳', '範例牧場', '1857ml × 2', ['costco', 'pxmart'], '123456', '4710000000004', true, '保存期限挑最後面的'],
+    ['tissue', '抽取式衛生紙', '範例品牌', '100 抽 × 24 包', ['costco'], '234567', '', false, '要綠色包裝那款，不是藍色'],
+    ['laundry', '洗衣精補充包', '範例品牌', '2L × 3 包', ['pxmart', 'hyper'], '', '', false, '抗菌款，不要香氛款'],
+    ['egg', '洗選蛋', '範例農場', '30 入', ['costco', 'pxmart'], '345678', '', true, ''],
+    ['water', '礦泉水', '範例品牌', '600ml × 24 瓶', ['costco', 'cvs'], '456789', '', true, ''],
+    ['toothpaste', '牙膏', '範例品牌', '160g × 4 條', ['costco', 'hyper'], '567890', '', false, '藍色牙齦護理款'],
+  ];
+  const ids = P.map((_, i) => 'sample-p' + i + '-' + uid());
+  P.forEach((r, i) => put('products', ids[i], { cat: r[0], name: r[1], brand: r[2], spec: r[3], stores: r[4], itemNo: r[5], barcode: r[6], sub: r[7], note: r[8], photo: '', tagPhoto: '', sample: true, createdAt: now + i }));
+  const lid = 'sample-l-' + uid();
+  put('lists', lid, { store: null, dueAt: fromDateInput(toDateInput(presets()[2][1])), title: '範例：週末補貨', remindAt: presets()[2][1], status: 'active', createdBy: ME || 'local', createdAt: now, sample: true });
+  [[0, 1, 'bought', 'costco'], [1, 1, 'todo', 'costco'], [3, 2, 'todo', 'pxmart'], [4, 1, 'todo', 'cvs'], [5, 1, 'todo', 'costco']].forEach((r, i) => put('items', 'sample-i' + i + '-' + uid(), { listId: lid, productId: ids[r[0]], store: r[3], name: P[r[0]][1], cat: P[r[0]][0], qty: r[1], state: r[2], subbed: false, createdAt: now + i, sample: true }));
+  addListMembers(lid, []);
+  toast('已載入範例，在「我的」可以一次清掉');
+}
+function clearSamples() {
+  const sampleLists = new Set(Object.keys(D.lists).filter(k => D.lists[k].sample));
+  Object.keys(D.items).forEach(k => { const it = D.items[k]; if (it.sample || sampleLists.has(it.listId)) remove('items', k); });
+  sampleLists.forEach(k => remove('lists', k));
+  Object.keys(D.products).forEach(k => { if (D.products[k].sample) remove('products', k); });
+  toast('範例已清除');
+}
+
+/* ───────── 提示 ───────── */
+let toastT = null;
+function toast(msg, ms) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms || 2600);
+}
+function copyText(text, ta) {
+  const fallback = () => { if (ta) { ta.focus(); ta.select(); } toast('已選取文字，請按複製'); };
+  try { navigator.clipboard.writeText(text).then(() => toast('已複製'), fallback); } catch (e) { fallback(); }
+}
+function arm(key) {
+  if (ARMED && ARMED.key === key && Date.now() < ARMED.until) { ARMED = null; return true; }
+  ARMED = { key, until: Date.now() + 4000 };
+  setTimeout(() => { if (ARMED && ARMED.key === key && Date.now() >= ARMED.until) { ARMED = null; scheduleRender(); refreshEditorDelete(); } }, 4100);
+  return false;
+}
+function refreshEditorDelete() {
+  const b = sheetRoot.querySelector('[data-act="ed-delete"]');
+  if (b && ED) b.textContent = (ARMED && ARMED.key === 'prod:' + ED.pid && Date.now() < ARMED.until) ? '再按一次，確定刪除' : '刪除這個商品';
+}
+function pickFile(cb) { const inp = $('#file-in'); inp.value = ''; FILE_CB = cb; inp.click(); }
+
+/* ───────── 事件 ───────── */
+const itemIdOf = el => { const r = el.closest('[data-item]'); return r ? r.getAttribute('data-item') : null; };
+const ACT = {
+  'new-list': () => openNewList(),
+  'samples-load': () => loadSamples(),
+  'samples-clear': () => { if (arm('samples')) clearSamples(); else scheduleRender(); },
+  'dismiss': a => { const s = seenSet(); s.add(a.dataset.list); try { localStorage.setItem(LS_SEEN, JSON.stringify(Array.from(s).slice(-200))); } catch (e) { /* 忽略 */ } scheduleRender(); },
+  'toggle': a => {
+    const id = itemIdOf(a), it = D.items[id]; if (!it) return;
+    const next = it.state === 'bought' ? 'todo' : 'bought';
+    patch('items', id, { state: next, subbed: false });
+    if (next === 'bought') { const rest = itemsOf(it.listId).filter(i => i._id !== id && i.state === 'todo').length; if (!rest) toast('都處理完了，按下方「載具」或「完成」結帳'); }
+  },
+  'inc': a => { const id = itemIdOf(a); const it = D.items[id]; if (it) setQty(id, it.qty + 1); },
+  'dec': a => { const id = itemIdOf(a); const it = D.items[id]; if (it) { if (it.qty <= 1) toast('最少 1 個；不要了請按「移除」'); else setQty(id, it.qty - 1); } },
+  'out': a => { const id = itemIdOf(a), it = D.items[id]; if (!it) return; patch('items', id, { state: 'out' }); const p = prodOf(it); toast(p.sub ? '標記缺貨。這項可以買別的牌子' : '標記缺貨。這項不可替代，這次先不買', 3500); },
+  'back-todo': a => patch('items', itemIdOf(a), { state: 'todo', subbed: false }),
+  'subbed': a => patch('items', itemIdOf(a), { state: 'bought', subbed: true }),
+  'remove': a => { const id = itemIdOf(a); const it = D.items[id]; if (it) { remove('items', id); toast('已移除「' + prodOf(it).name + '」'); } },
+  'clerk': a => { const id = itemIdOf(a), it = D.items[id]; if (it) openClerk(it.listId, id); },
+  'clerk-product': a => openClerk(null, null, a.dataset.pid),
+  'clerk-prev': () => { if (OVERLAY && OVERLAY.idx > 0) { OVERLAY.idx--; renderOverlay(); } },
+  'clerk-next': () => { if (OVERLAY && OVERLAY.idx < OVERLAY.seq.length - 1) { OVERLAY.idx++; renderOverlay(); } },
+  'ov-close': () => closeOverlay(),
+  'pick': () => openPicker(CUR_LIST),
+  'product': a => openProduct(a.dataset.pid),
+  'edit-product': a => openEditor(a.dataset.pid, { reopen: true }),
+  'new-product': a => openEditor(null, { cat: a.dataset.cat || (PF.cat !== 'all' ? PF.cat : ''), store: PF.store !== 'all' ? PF.store : '' }),
+  'add-to-cur': a => { addItem(CUR_LIST, a.dataset.pid, null); toast('已加進清單'); closeSheet(true); },
+  'co-carrier': () => { if (!MY_CARRIER) return openCarrierSheet(CUR_LIST); checkout(CUR_LIST, true); },
+  'co-done': () => { const id = CUR_LIST; closeSheet(true); if (id) checkout(id, false); },
+  'co-undo': a => undoCheckout(a.dataset.list),
+  'co-finish': a => {
+    const id = a.dataset.list, l = D.lists[id]; if (!l || listStatus(l) !== 'checkout') return;
+    patch('lists', id, { notifyAt: Date.now() });
+    if (OVERLAY && OVERLAY.type === 'checkout') renderOverlay();
+    toast('完成了，已存成購買紀錄');
+  },
+  'co-show': a => openCheckout(a.dataset.list),
+  'remind-preset': a => patch('lists', CUR_LIST, { remindAt: +a.dataset.ts }).then(() => toast('提醒時間：' + fmtRemind(+a.dataset.ts))),
+  'remind-clear': () => patch('lists', CUR_LIST, { remindAt: null }),
+  'copy-text': () => { const ta = $('#share-text'); if (ta) copyText(ta.value, ta); },
+  'list-leave': () => {
+    const id = CUR_LIST; if (!id) return;
+    if (!arm('list:' + id)) { scheduleRender(); return; }
+    SB.from('list_members').delete().match({ list_id: id, email: ME }).then(({ error }) => {
+      if (error) { onWriteError(error); return; }
+      const nl = Object.assign({}, D.lists); delete nl[id]; D.lists = nl;
+      const ni = {}; Object.keys(D.items).forEach(k => { if (D.items[k].listId !== id) ni[k] = D.items[k]; }); D.items = ni;
+      toast('已退出這張清單'); goView('lists'); loadLM().catch(() => {});
+    });
+  },
+  'lm-remove': a => {
+    const em = a.dataset.email, id = CUR_LIST;
+    if (!arm('lm:' + em)) { scheduleRender(); return; }
+    SB.from('list_members').delete().match({ list_id: id, email: em }).then(({ error }) => { if (error) onWriteError(error); else { toast('已移除 ' + em); loadLM().catch(() => {}); } });
+  },
+  'nl-inv-add': () => nlAddInvite(),
+  'nl-inv-del': a => { NL.invites.splice(+a.dataset.i, 1); $('#nl-invs').innerHTML = NL.invites.map((v, i) => '<button type="button" class="chip" data-act="nl-inv-del" data-i="' + i + '">' + esc((v.name ? v.name + '・' : '') + v.email) + '  ✕</button>').join(''); },
+  'copy-inv': () => { const t = $('#inv-text'); if (t) copyText(t.value, t); },
+  'list-delete': () => {
+    const id = CUR_LIST; if (!id) return;
+    if (!arm('list:' + id)) { scheduleRender(); return; }
+    itemsOf(id).forEach(i => remove('items', i._id)); remove('lists', id);
+    toast('清單已刪除'); goView('lists');
+  },
+  'list-rename': () => {
+    const l = D.lists[CUR_LIST]; if (!l || !guard()) return;
+    openSheet({ title: '重新命名', html: '<form class="form" id="rename-form"><label class="field"><span>清單名稱</span><input id="rename-in" value="' + esc(l.title) + '" maxlength="30" autocomplete="off"></label><button class="btn btn-primary btn-wide" type="submit">儲存</button></form>', focusFirst: true });
+  },
+  'reopen': a => { patch('lists', a.dataset.list, { status: 'active', checkoutAt: null, checkoutBy: null, notifyAt: null, carrier: false }); toast('清單已重新打開'); },
+  'rebuy': a => {
+    const src = D.lists[a.dataset.list]; if (!src || !guard()) return;
+    const nid = uid(), now = Date.now();
+    put('lists', nid, { store: src.store || null, dueAt: null, title: src.title, remindAt: null, status: 'active', createdBy: ME || 'local', createdAt: now, sample: !!src.sample });
+    itemsOf(a.dataset.list).forEach((it, i) => put('items', uid() + i, { listId: nid, productId: it.productId, store: itemStore(it), name: it.name || prodOf(it).name, cat: it.cat || prodOf(it).cat, qty: it.qty, state: 'todo', subbed: false, createdAt: now + i, sample: !!src.sample }));
+    addListMembers(nid, []);
+    toast('已建立新清單'); goList(nid);
+  },
+  'sheet-close': () => closeSheet(),
+  'pf-store': a => { PF.store = a.dataset.store; render(); },
+  'pf-cat': a => { PF.cat = a.dataset.cat; render(); },
+  'nl-remind': a => {
+    NL.remind = a.dataset.v === '1';
+    $$('[data-act="nl-remind"]', sheetRoot).forEach(b => b.setAttribute('aria-pressed', String(b === a)));
+    $('#nl-remind-wrap').hidden = !NL.remind;
+    const ri = $('#nl-remind'), due = fromDateInput($('#nl-due').value);
+    if (NL.remind && ri && !ri.value && due) { const d = new Date(due); d.setDate(d.getDate() - 1); d.setHours(20, 0, 0, 0); ri.value = toLocalInput(Math.max(d.getTime(), Date.now() + 3600000)); }
+  },
+  'pk-store': a => {
+    if (!PK) return; PK.store = LAST_STORE = a.dataset.store;
+    $$('[data-act="pk-store"]', sheetRoot).forEach(b => b.setAttribute('aria-pressed', String(b === a)));
+    const lb = $('#pk-all-label'); if (lb) lb.textContent = '也顯示沒標「' + storeOf(PK.store).name + '」的商品';
+    SHEET && SHEET.rerender && SHEET.rerender();
+  },
+  'nl-preset': a => { const i = $('#nl-remind'); if (i) i.value = toLocalInput(+a.dataset.ts); },
+  'pk-add': a => { addItem(PK.listId, a.dataset.pid, PK.store); },
+  'pk-inc': a => { const id = itemIdOf(a), it = D.items[id]; if (it) setQty(id, it.qty + 1); },
+  'pk-dec': a => { const id = itemIdOf(a), it = D.items[id]; if (!it) return; if (it.qty <= 1) remove('items', id); else setQty(id, it.qty - 1); },
+  'pk-newcat': a => { const l = D.lists[PK && PK.listId]; if (!l) return; openEditor(null, { cat: a.dataset.cat, store: PK.store, addTo: PK.listId }); },
+  'ed-store': a => {
+    if (!ED) return; const s = a.dataset.store, arr = ED.d.stores, i = arr.indexOf(s);
+    if (i >= 0) arr.splice(i, 1); else arr.push(s);
+    a.setAttribute('aria-pressed', String(arr.includes(s)));
+    const c = arr.includes('costco'); $('#ed-itemno-wrap').hidden = !c; $('#ed-tag-wrap').hidden = !c;
+  },
+  'ed-sub': a => { if (!ED) return; ED.d.sub = a.dataset.v === '1'; $$('[data-act="ed-sub"]', sheetRoot).forEach(b => b.setAttribute('aria-pressed', String(b === a))); },
+  'ed-photo': () => pickFile(async f => {
+    toast('處理照片中…');
+    try { const url = await compressImage(f, 720, 110000); if (!ED) return; ED.d.photo = url; $('#ed-photo').innerHTML = edPhoto(url); $('#ed-photo-clear').hidden = false; toast('照片已壓縮好（約 ' + Math.round(url.length * 0.75 / 1024) + ' KB）'); }
+    catch (e) { toast('這張照片讀不了，換一張試試（建議用 JPG）', 3500); }
+  }),
+  'ed-photo-clear': () => { if (!ED) return; ED.d.photo = ''; $('#ed-photo').innerHTML = edPhoto('', $('#ed-cat').value); $('#ed-photo-clear').hidden = true; },
+  'ed-tag': () => pickFile(async f => {
+    toast('處理照片中…');
+    try { const url = await compressImage(f, 640, 80000); if (!ED) return; ED.d.tagPhoto = url; $('#ed-tag').innerHTML = edPhoto(url); $('#ed-tag-clear').hidden = false; toast('價籤照片已存好'); }
+    catch (e) { toast('這張照片讀不了，換一張試試', 3500); }
+  }),
+  'ed-tag-clear': () => { if (!ED) return; ED.d.tagPhoto = ''; $('#ed-tag').innerHTML = edPhoto('', null, '價籤'); $('#ed-tag-clear').hidden = true; },
+  'ed-scan': async () => {
+    const r = await liveScan();
+    if (!ED) return;
+    if (r.code) { $('#ed-barcode').value = cleanCode(r.code); bcHelp(); toast('讀到條碼 ' + r.code); return; }
+    if (r.cancel) return;
+    pickFile(async f => {
+      toast('辨識條碼中…', 6000);
+      let code = null;
+      try { code = await decodeBarcode(f); } catch (e) { code = null; }
+      if (!ED) return;
+      if (code) { $('#ed-barcode').value = cleanCode(code); bcHelp(); toast('讀到條碼 ' + code); }
+      else toast('讀不到條碼。靠近一點、對準條碼、光線亮一點再拍一次，或直接輸入數字。', 5000);
+    });
+  },
+  'ics': () => { const l = D.lists[CUR_LIST]; if (l) { downloadIcs(Object.assign({}, l, { _id: CUR_LIST })); toast('已下載行事曆檔，打開它就能加到行事曆'); } },
+  'logout': () => { if (SB) SB.auth.signOut().then(() => location.reload()); },
+  'member-remove': a => {
+    const em = a.dataset.email;
+    if (!arm('mb:' + em)) { scheduleRender(); return; }
+    SB.from('members').delete().eq('email', em).then(({ error }) => { if (error) onWriteError(error); else { toast('已移除 ' + em); loadMembers().then(scheduleRender); } });
+  },
+  'ed-delete': () => {
+    if (!ED || !ED.pid) return;
+    const pr = D.products[ED.pid];
+    if (MODE === 'cloud' && pr && pr.owner && String(pr.owner).toLowerCase() !== ME) { toast('只有建立這個商品的人可以刪除'); return; }
+    if (!arm('prod:' + ED.pid)) { refreshEditorDelete(); return; }
+    const pid = ED.pid; ED = null; remove('products', pid); closeSheet(true); toast('商品已刪除');
+  },
+};
+
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (t.closest && t.closest('[data-scrim]') && t.hasAttribute && t.hasAttribute('data-scrim')) { closeSheet(); return; }
+  const go = t.closest('[data-go]'); if (go) { e.preventDefault(); goView(go.dataset.go); return; }
+  const a = t.closest('[data-act]');
+  const ol = t.closest('[data-open-list]');
+  if (ol && !a) { closeOverlay(); goList(ol.getAttribute('data-open-list')); return; }
+  if (!a) return;
+  if (a.disabled) return;
+  const fn = ACT[a.getAttribute('data-act')]; if (fn) { e.preventDefault(); fn(a, e); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (OVERLAY) closeOverlay(); else if (SHEET) closeSheet(); return; }
+  if (OVERLAY && OVERLAY.type === 'clerk') { if (e.key === 'ArrowRight') ACT['clerk-next'](); if (e.key === 'ArrowLeft') ACT['clerk-prev'](); }
+  const card = e.target.closest && e.target.closest('.list-card');
+  if (card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); goList(card.getAttribute('data-open-list')); }
+});
+let tx = null;
+overlayRoot.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+overlayRoot.addEventListener('touchend', e => {
+  if (tx == null || !OVERLAY || OVERLAY.type !== 'clerk') return;
+  const dx = e.changedTouches[0].clientX - tx; tx = null;
+  if (dx < -60) ACT['clerk-next'](); else if (dx > 60) ACT['clerk-prev']();
+}, { passive: true });
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'pd-q') { PF.q = t.value; const r = $('#pd-results'); if (r) r.innerHTML = productResults(); }
+  else if (t.id === 'pk-q' && PK) { PK.q = t.value; SHEET && SHEET.rerender && SHEET.rerender(); }
+  else if (t.id === 'ed-barcode') bcHelp();
+  else if (t.id === 'me-carrier' || t.id === 'sh-carrier') {
+    const v = normCarrier(t.value), help = $('#' + (t.id === 'me-carrier' ? 'me-carrier-help' : 'sh-carrier-help'));
+    if (help) { const ok = /^\/[0-9A-Z.+\-]{7}$/.test(v); help.className = 'help' + (v.length >= 8 ? (ok ? ' ok' : ' warn') : ''); help.textContent = v.length >= 8 ? (ok ? '✓ 格式正確' : '格式不對：斜線開頭，後面 7 碼是大寫英文、數字或 + - .') : ''; }
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'list-due') { const ts = fromDateInput(t.value); patch('lists', CUR_LIST, { dueAt: ts }); if (ts) toast('期限：' + fmtDue(ts)); }
+  else if (t.id === 'list-remind') { const ts = fromLocalInput(t.value); patch('lists', CUR_LIST, { remindAt: ts }); if (ts) toast('提醒時間：' + fmtRemind(ts)); }
+  else if (t.id === 'pk-all' && PK) { PK.all = t.checked; SHEET && SHEET.rerender && SHEET.rerender(); }
+  else if (t.id === 'ed-cat' && ED) { ED.d.cat = t.value; $('#ed-name-wrap').hidden = t.value !== 'other'; const s = $('#ed-spec'); if (s) s.placeholder = '例：' + catOf(t.value).hint; if (!ED.d.photo) $('#ed-photo').innerHTML = edPhoto('', t.value); }
+});
+document.addEventListener('submit', e => {
+  const f = e.target; e.preventDefault();
+  if (f.id === 'nl-form') createList();
+  else if (f.id === 'ed-form') saveEditor();
+  else if (f.id === 'login-form') {
+    const em = ($('#login-email').value || '').trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { toast('請輸入正確的 Email'); return; }
+    SB.auth.signInWithOtp({ email: em, options: { emailRedirectTo: location.origin + location.pathname } }).then(({ error }) => {
+      if (error) toast('寄送失敗：' + error.message, 5000); else toast('登入連結已寄到 ' + em + '，去信箱點連結', 6000);
+    });
+  }
+  else if (f.id === 'inv-form') {
+    const em = ($('#inv-email').value || '').trim().toLowerCase(), nm = ($('#inv-name').value || '').trim();
+    if (!validEmail(em)) { toast('請輸入正確的 Email'); return; }
+    if (em === ME) { toast('不用邀請自己'); return; }
+    const lid = CUR_LIST;
+    inviteToList(lid, em, nm).then(ok => { if (ok) openInviteDone(lid, em); });
+  }
+  else if (f.id === 'myname-form') {
+    const nm = ($('#myname-in').value || '').trim().slice(0, 20);
+    MY_NAME = nm;
+    Promise.all([SB.from('private_settings').upsert({ email: ME, display_name: nm }), SB.from('list_members').update({ name: nm }).eq('email', ME)])
+      .then(rs => { const err = rs.find(x => x.error); if (err) onWriteError(err.error); else toast('名字已儲存'); });
+  }
+  else if (f.id === 'member-form') {
+    const em = ($('#mb-email').value || '').trim().toLowerCase(), nm = ($('#mb-name').value || '').trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { toast('請輸入正確的 Email'); return; }
+    SB.from('members').insert({ email: em, display_name: nm || em.split('@')[0] }).then(({ error }) => {
+      if (error) toast(error.code === '23505' ? '這個信箱已經在家庭裡了' : '加入失敗：' + error.message, 5000);
+      else { toast('已加入 ' + em + '，把網址傳給對方登入就行'); loadMembers().then(scheduleRender); }
+    });
+  }
+  else if (f.id === 'rename-form') { const v = ($('#rename-in').value || '').trim(); if (v) { patch('lists', CUR_LIST, { title: v.slice(0, 30) }); toast('已重新命名'); } closeSheet(true); }
+  else if (f.hasAttribute('data-carrier-form')) {
+    const inp = f.querySelector('input'), v = normCarrier(inp.value);
+    if (!/^\/[0-9A-Z.+\-]{7}$/.test(v)) { toast('載具格式不對：斜線開頭共 8 碼'); inp.focus(); return; }
+    saveCarrier(v).then(() => {
+      const then = f.getAttribute('data-then');
+      if (then) { closeSheet(true); checkout(then, true); } else toast('載具已儲存');
+    });
+  }
+});
+$('#file-in').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; const cb = FILE_CB; FILE_CB = null;
+  if (f && cb) await cb(f);
+});
+
+/* ───────── 啟動 ───────── */
+async function boot() {
+  const h = (location.hash || '').slice(1);
+  if (['lists', 'products', 'history', 'me'].includes(h)) VIEW = h;
+  const configured = SUPABASE_URL && SUPABASE_ANON_KEY;
+  if (configured && !(window.supabase && window.supabase.createClient)) {
+    for (const src of ['https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js', 'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.45.4/supabase.min.js']) {
+      await new Promise(res => { const sc = document.createElement('script'); sc.src = src; sc.onload = res; sc.onerror = res; document.head.appendChild(sc); });
+      if (window.supabase && window.supabase.createClient) break;
+    }
+  }
+  if (!configured || !window.supabase || !window.supabase.createClient) {
+    if (configured) toast('載入不了 Supabase 程式庫（可能被瀏覽器的追蹤保護擋住），先用單機模式', 8000);
+    MODE = 'local'; ME = 'local'; loadLocalData(); loadCarrier(); render({ animate: true }); return;
+  }
+  render({ animate: true });
+  SB = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+  SB.auth.onAuthStateChange((ev, session) => {
+    if (ev === 'SIGNED_IN' && session && MODE === 'login') startCloud(session);
+    if (ev === 'SIGNED_OUT') location.reload();
+  });
+  const { data } = await SB.auth.getSession();
+  if (!data || !data.session) { MODE = 'login'; render({ animate: true }); return; }
+  await startCloud(data.session);
+}
+let started = false;
+async function startCloud(session) {
+  if (started) return; started = true;
+  ME = String(session.user.email || '').toLowerCase();
+  if (location.hash.includes('access_token')) history.replaceState(null, '', location.pathname);
+  MODE = 'cloud';
+  try { await loadLM(); } catch (e) { toast('讀取共用名單失敗，請確認已經執行過最新的 SQL：' + (e.message || ''), 8000); }
+  try { await cloudLoadAll(); } catch (e) { toast('讀取雲端資料失敗：' + (e.message || ''), 5000); }
+  subscribeRealtime();
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && MODE === 'cloud') cloudLoadAll().catch(() => {}); });
+  loadCarrier();
+  render({ animate: true });
+}
+boot();
+})();
+</script>
+</body>
+</html>
