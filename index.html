@@ -125,7 +125,7 @@ button:disabled,.btn[aria-disabled="true"]{opacity:.38;cursor:not-allowed;transf
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{min-height:36px;padding:6px 14px;border-radius:980px;background:var(--tile);font-size:14px;font-weight:500;color:var(--fg);transition:background .2s}
 .chip:hover{background:var(--tile-2)}
-.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.chip[aria-pressed="true"],.chip[aria-pressed="true"]:hover{background:var(--fg);color:var(--bg)}
 .chip.quiet{background:transparent;color:var(--fg-2)}
 .chip.quiet:hover{color:var(--danger);background:var(--tile)}
 
@@ -494,14 +494,12 @@ main.has-cobar ~ .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .item.bought{background:transparent}
 .stepper{background:var(--bg);border:1px solid var(--line);height:38px}
 .stepper button{color:var(--fg);width:36px;height:36px}
-.chip{background:var(--tile)}
-.chip:hover{background:var(--tile-2)}
 .check>span{border-color:var(--fg-3)}
 .store-sub{display:inline-block;background:var(--c2);color:var(--on-c);padding:4px 14px;border-radius:980px;font-size:14px;margin:22px 0 12px}
 .store-sub:first-of-type{margin-top:0}
 
 /* 底部結帳列：浮在黑色導覽膠囊上方的黑色圓角卡 */
-.cobar{left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--pill-bg);border:0;border-radius:24px;padding:12px 14px;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:var(--shadow);z-index:55}
+.cobar{left:50%;right:auto;transform:translateX(-50%);width:min(calc(100% - 24px),736px);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--pill-bg);border:0;border-radius:24px;padding:12px 14px;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:var(--shadow);z-index:55}
 .cobar .wrap{max-width:720px;padding:0}
 .cobar p{color:var(--pill-fg)}
 .cobar p strong{color:#fffbe0}
@@ -512,6 +510,12 @@ main.has-cobar{padding-bottom:90px}
 .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
 main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 .scrim{z-index:85}
+.pd-buy{position:sticky;bottom:0;margin:24px -4px 0;padding:14px 4px calc(6px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 70%,transparent)}
+.buy-rows{display:grid;gap:8px}
+.buy-row{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;font-size:20px}
+.buy-row strong{display:block;font-size:17px;font-weight:600}
+.buy-row small{display:block;font-size:13px;color:var(--fg-2)}
+.buy-row:hover{background:var(--tile)}
 .sheet{background:var(--bg)}
 .tile,.band.alt .tile{background:var(--surface);border:1px solid var(--line)}
 .pk-row{background:var(--surface);border:1px solid var(--line)}
@@ -810,7 +814,7 @@ function enqueue(path, fn) { const p = (qChain.all || Promise.resolve()).catch((
 function guard() { if (!CAN_WRITE) { toast('你目前只能看，不能修改。請擁有者把你設成可編輯。', 4000); return false; } return true; }
 function onWriteError(e) {
   const c = e && String(e.code || '');
-  if (c === '42501') toast('沒有存到：你沒有這張清單的編輯權限。', 4500);
+  if (c === '42501') toast('沒有存到：你沒有這張清單的編輯權限。' + (e.message ? '（' + e.message + '）' : ''), 6000);
   else toast('沒有存到，請檢查網路後再試一次。' + (e && e.message ? '（' + e.message + '）' : ''), 4500);
 }
 function saveLocal() {
@@ -926,9 +930,15 @@ function membersOf(lid) { return LM.filter(m => m.list_id === lid); }
 function listOwner(l) { return String(l.owner || l.createdBy || '').toLowerCase(); }
 function addListMembers(lid, invites) {
   if (MODE !== 'cloud') return;
-  const rows = [{ list_id: lid, email: ME, name: MY_NAME || '', role: 'owner', invited_by: ME }]
-    .concat((invites || []).filter(v => v.email !== ME).map(v => ({ list_id: lid, email: v.email, name: v.name || v.email.split('@')[0], role: 'editor', invited_by: ME })));
-  enqueue('lm', async () => { const { error } = await SB.from('list_members').upsert(rows, { onConflict: 'list_id,email', ignoreDuplicates: true }); if (error) throw error; await loadLM(); }).catch(onWriteError);
+  const up = rows => SB.from('list_members').upsert(rows, { onConflict: 'list_id,email', ignoreDuplicates: true });
+  const own = [{ list_id: lid, email: ME, name: MY_NAME || '', role: 'owner', invited_by: ME }];
+  const inv = (invites || []).filter(v => v.email !== ME).map(v => ({ list_id: lid, email: v.email, name: v.name || v.email.split('@')[0], role: 'editor', invited_by: ME }));
+  // 建立者本人的名單列只用來顯示「建立者」；清單的擁有權在 docs.owner，所以這一列寫不進去不影響使用，只記在 console
+  enqueue('lm', async () => {
+    const r = await up(own); if (r.error) console.warn('list_members owner row', r.error);
+    if (inv.length) { const r2 = await up(inv); if (r2.error) throw r2.error; }
+    await loadLM();
+  }).catch(onWriteError);
 }
 function inviteText(l, em) {
   return '我邀請你一起編輯補貨清單「' + l.title + '」' + (l.dueAt ? '（' + fmtDue(l.dueAt) + ' 前要買好）' : '') + '\n用這個信箱登入就看得到：' + em + (APP_URL ? '\n網址：' + APP_URL : '');
@@ -1436,9 +1446,9 @@ function closeSheet(silent) {
   if (s && s.onClose && !silent) s.onClose();
 }
 
-function openNewList() {
+function openNewList(pid) {
   if (!guard()) return;
-  NL = { remind: false, invites: [] };
+  NL = { remind: false, invites: [], pid: typeof pid === 'string' ? pid : null };
   openSheet({
     title: '新建清單',
     focusFirst: true,
@@ -1465,6 +1475,7 @@ function createList() {
   addListMembers(id, NL.invites);
   if (NL.invites.length) setTimeout(() => toast('已邀請 ' + NL.invites.length + ' 人，記得把網址傳給對方（清單最下面可以再傳）', 5000), 600);
   closeSheet(true);
+  if (NL.pid && D.products[NL.pid]) { addItem(id, NL.pid, null); goList(id); toast('已建立清單，並加入「' + D.products[NL.pid].name + '」'); return; }
   goList(id);
   setTimeout(() => openPicker(id), 120);
 }
@@ -1552,7 +1563,23 @@ function productHtml(pid) {
     (p.note ? '<div class="fact"><dt>備註</dt><dd>' + esc(p.note) + '</dd></div>' : '') +
     (p.tagPhoto && SAFE_IMG.test(p.tagPhoto) ? '<div class="fact"><dt>價籤照片</dt><dd><img class="tag-img" src="' + p.tagPhoto + '" alt="價籤照片"></dd></div>' : '') +
     (byText(p) ? '<div class="fact"><dt>最後修改</dt><dd class="muted">' + byText(p) + '</dd></div>' : '') +
-    '</dl></div>';
+    '</dl>' +
+    '<div class="pd-buy"><button class="btn btn-primary btn-wide" data-act="buy-product" data-pid="' + esc(pid) + '">加入購買清單</button></div></div>';
+}
+function openBuyChooser(pid) {
+  if (!guard()) return;
+  const p = D.products[pid]; if (!p) return;
+  const act = allLists().filter(l => listStatus(l) === 'active').sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const rows = act.map(l => {
+    const its = itemsOf(l._id), b = its.filter(i => i.state === 'bought').length, has = its.some(i => i.productId === pid);
+    return '<button class="buy-row" data-act="buy-into" data-list="' + l._id + '" data-pid="' + esc(pid) + '"><span><strong>' + esc(l.title) + '</strong><small>' + esc(storesLabel(l)) + '・已買 ' + b + ' / ' + its.length + (has ? '・已有這項，會再加 1' : '') + '</small></span><span aria-hidden="true">＋</span></button>';
+  }).join('');
+  openSheet({
+    title: '加入購買清單',
+    html: '<div class="buy-pick"><p class="muted">「' + esc(p.name) + '」要加到哪裡？</p>' +
+      (rows ? '<h4 class="pk-cat">進行中的清單</h4><div class="buy-rows">' + rows + '</div>' : '<p class="muted" style="margin-top:12px">目前沒有進行中的清單。</p>') +
+      '<div class="form-actions" style="margin-top:20px"><button class="btn btn-secondary btn-wide" data-act="buy-newlist" data-pid="' + esc(pid) + '">＋ 新建一張清單</button></div></div>'
+  });
 }
 
 /* 商品編輯 */
@@ -1844,6 +1871,9 @@ const ACT = {
   'product': a => openProduct(a.dataset.pid),
   'edit-product': a => openEditor(a.dataset.pid, { reopen: true }),
   'new-product': a => openEditor(null, { cat: a.dataset.cat || (PF.cat !== 'all' ? PF.cat : ''), store: PF.store !== 'all' ? PF.store : '' }),
+  'buy-product': a => openBuyChooser(a.dataset.pid),
+  'buy-into': a => { const t = (D.lists[a.dataset.list] || {}).title || ''; addItem(a.dataset.list, a.dataset.pid, null); goList(a.dataset.list); toast('已加進「' + t + '」'); },
+  'buy-newlist': a => openNewList(a.dataset.pid),
   'add-to-cur': a => { addItem(CUR_LIST, a.dataset.pid, null); toast('已加進清單'); closeSheet(true); },
   'co-carrier': () => { if (!MY_CARRIER) return openCarrierSheet(CUR_LIST); checkout(CUR_LIST, true); },
   'co-done': () => { const id = CUR_LIST; closeSheet(true); if (id) checkout(id, false); },
