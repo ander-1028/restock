@@ -305,7 +305,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .cat-btn{flex:none;display:grid;justify-items:center;gap:6px;width:74px;padding:6px 0;border-radius:14px;scroll-snap-align:start;position:relative}
 .mono-tile{width:56px;height:56px;border-radius:16px;background:var(--tile);display:grid;place-items:center;font-size:22px;font-weight:600;color:var(--fg-2);transition:background .2s,color .2s,transform .2s}
 .cat-btn:hover .mono-tile{transform:scale(1.05)}
-.cat-btn>span:not(.mono-tile){font-size:12px;color:var(--fg-2);white-space:nowrap}
+.cat-btn{align-content:start}
+.cat-btn>span:not(.mono-tile){font-size:12px;color:var(--fg-2);text-align:center;line-height:1.25;max-width:100%;overflow-wrap:anywhere}
+.cat-grid .cat-btn{width:auto}
 .cat-btn[aria-pressed="true"] .mono-tile{background:var(--fg);color:var(--bg)}
 .cat-btn[aria-pressed="true"]>span:not(.mono-tile){color:var(--fg);font-weight:600}
 .cat-btn .n{position:absolute;top:2px;right:6px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--on-accent);font-size:11px;font-weight:600;display:grid;place-items:center;padding:0 5px;font-variant-numeric:tabular-nums}
@@ -563,7 +565,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.0（10/24 品類圖示）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.1（10/24 品類圖示）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
