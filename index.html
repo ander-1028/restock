@@ -460,21 +460,18 @@ main.has-cobar ~ .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .sum-card.done{background:#a9bfa5}
 
 /* 清單卡：四色輪流（珊瑚／淡藍／黃／薄荷），字永遠深色 */
-.list-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:14px}
-.list-card{background:var(--c4);color:var(--on-c);border-radius:var(--r-md);padding:20px 20px 18px}
+/* 首頁清單：一張一條，依期限排序 */
+.list-grid{grid-template-columns:1fr;gap:8px}
+.list-card{background:var(--c4);color:var(--on-c);border-radius:16px;padding:12px 18px;flex-direction:row;align-items:center;justify-content:space-between;gap:6px 16px;flex-wrap:wrap}
 .list-card:nth-child(4n+1){background:var(--c2)}
 .list-card:nth-child(4n+2){background:var(--c3)}
 .list-card:nth-child(4n+3){background:var(--c4)}
 .list-card:nth-child(4n+4){background:var(--c1)}
 .list-card.list-card.done{background:#a9bfa5}
-.list-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
-.lc-store,.lc-meta{color:rgba(26,26,23,.7)}
-.lc-title{font-size:24px}
-.lc-stack .th{border-color:transparent;background:rgba(255,255,255,.55);border-radius:18px;box-shadow:0 0 0 3px rgba(255,255,255,.55)}
-.lc-stack .th .mono{color:var(--on-c)}
-.list-card .progress{background:rgba(0,0,0,.14);height:6px}
-.list-card .progress>i{background:var(--on-c)}
-.list-card .pill{background:rgba(255,255,255,.6);color:var(--on-c)}
+.list-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.lc-meta{color:rgba(26,26,23,.7);margin:0;font-size:13px}
+.lc-title{font-size:17px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.list-card .pill{background:rgba(255,255,255,.6);color:var(--on-c);font-size:12px}
 .banner{border:1px solid var(--line);box-shadow:none}
 .empty{border:1px solid var(--line)}
 
@@ -540,7 +537,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 0.3（10/24 新清單修正）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 0.4（10/24 首頁清單改成一條）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -1053,7 +1050,8 @@ function goList(id) { VIEW = 'list'; CUR_LIST = id; closeSheet(true); window.scr
 /* ── 首頁：清單 ── */
 function viewLists() {
   const lists = allLists();
-  const active = lists.filter(l => listStatus(l) !== 'done').sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  // 期限近的在前，沒期限的排最後（再依新舊）
+  const active = lists.filter(l => listStatus(l) !== 'done').sort((a, b) => (a.dueAt || Infinity) - (b.dueAt || Infinity) || (b.createdAt || 0) - (a.createdAt || 0));
   const nOver = active.filter(isOverdue).length;
   let status;
   if (!ready()) status = '正在讀取家裡的清單…';
@@ -1105,23 +1103,18 @@ function emptyLists() {
     '<div class="cta-row"><button class="btn btn-primary" data-act="new-list">新建清單</button>' + (hasSample ? '' : '<button class="btn btn-secondary" data-act="samples-load">先看範例</button>') + '</div></div>';
 }
 function listCard(l) {
-  const its = itemsOf(l._id), b = its.filter(i => i.state === 'bought').length, pct = its.length ? Math.round(b / its.length * 100) : 0;
+  const its = itemsOf(l._id), left = its.filter(i => i.state === 'todo').length;
   const st = listStatus(l), pills = [];
   if (st === 'checkout') pills.push('<span class="pill accent">結帳中</span>');
   if (isOverdue(l)) pills.push('<span class="pill warn">' + (l.dueAt && Date.now() > dueEnd(l) ? '已過期限' : '已過提醒時間') + '</span>');
   if (l.sample) pills.push('<span class="pill">範例</span>');
-  const th = its.slice(0, 5).map(it => '<span class="th">' + thumbInner(prodOf(it)) + '</span>').join('') || '<span class="th"><span class="mono">空</span></span>';
-  const meta = ['已買 ' + b + ' / ' + its.length];
-  if (l.dueAt) meta.push('期限 ' + fmtDue(l.dueAt));
-  if (l.remindAt) meta.push('提醒 ' + fmtRemind(l.remindAt));
-  const by = nameOf(l.createdBy);
   const all = its.length && its.every(i => i.state === 'bought');
+  const people = Math.max(1, membersOf(l._id).length);
   return '<article class="list-card' + (all ? ' done' : '') + ' reveal" data-open-list="' + l._id + '" tabindex="0" role="button" aria-label="打開清單 ' + esc(l.title) + '">' +
-    '<div class="lc-top"><span class="lc-store">' + esc(storesLabel(l)) + '</span><span class="lc-pills">' + pills.join('') + '</span></div>' +
-    '<h3 class="lc-title">' + esc(l.title) + '</h3>' +
-    '<div class="lc-stack" aria-hidden="true">' + th + '</div>' +
-    '<div class="progress" aria-hidden="true"><i style="width:' + pct + '%"></i></div>' +
-    '<p class="lc-meta"><span>' + meta.join('</span><span>') + '</span>' + (by ? '<span>' + esc(whoSp(by)) + '建立</span>' : '') + '</p></article>';
+    '<h3 class="lc-title">' + esc(l.title) + pills.join('') + '</h3>' +
+    '<p class="lc-meta"><span>' + (all ? '全部買齊' : '還要買 ' + left + ' 項') + '</span>' +
+    '<span>' + (l.dueAt ? '期限 ' + fmtDue(l.dueAt) : '沒有期限') + '</span>' +
+    '<span>' + people + ' 人編輯</span></p></article>';
 }
 
 /* ── 清單詳情 ── */
