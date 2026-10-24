@@ -825,10 +825,11 @@ function saveLocal() {
 function put(col, id, obj) {
   if (!guard()) return Promise.resolve();
   const body = Object.assign({}, obj, { by: ME || 'local', at: Date.now() });
+  const isNew = !D[col][id];
   if (!body.owner) body.owner = (D[col][id] && (D[col][id].owner || D[col][id].createdBy)) || ME || 'local';
   D[col] = Object.assign({}, D[col], { [id]: body });
   scheduleRender();
-  if (MODE === 'cloud') return enqueue(col + '/' + id, () => sbUpsert(col, id, body)).catch(onWriteError);
+  if (MODE === 'cloud') return enqueue(col + '/' + id, () => sbUpsert(col, id, body, isNew && col === 'lists')).catch(onWriteError);
   saveLocal(); return Promise.resolve();
 }
 function patch(col, id, fields) {
@@ -858,10 +859,12 @@ function setQty(itemId, qty) {
 }
 
 /* ───────── Supabase 雲端 ───────── */
-async function sbUpsert(col, id, data) {
+async function sbUpsert(col, id, data, insertOnly) {
   const owner = String(data.owner || data.createdBy || ME).toLowerCase();
   const list_id = col === 'lists' ? id : col === 'items' ? data.listId : null;
-  const { error } = await SB.from('docs').upsert({ col, id, data, owner, list_id, updated_at: new Date().toISOString() });
+  const row = { col, id, data, owner, list_id, updated_at: new Date().toISOString() };
+  // 新清單要用一般 insert：upsert 會再用讀取權限檢查新的那列，而「看得到這張清單」要等清單存進去後才成立，所以一定被擋
+  const { error } = await (insertOnly ? SB.from('docs').insert(row) : SB.from('docs').upsert(row));
   if (error) throw error;
 }
 async function sbDelete(col, id) {
@@ -930,15 +933,9 @@ function membersOf(lid) { return LM.filter(m => m.list_id === lid); }
 function listOwner(l) { return String(l.owner || l.createdBy || '').toLowerCase(); }
 function addListMembers(lid, invites) {
   if (MODE !== 'cloud') return;
-  const up = rows => SB.from('list_members').upsert(rows, { onConflict: 'list_id,email', ignoreDuplicates: true });
-  const own = [{ list_id: lid, email: ME, name: MY_NAME || '', role: 'owner', invited_by: ME }];
-  const inv = (invites || []).filter(v => v.email !== ME).map(v => ({ list_id: lid, email: v.email, name: v.name || v.email.split('@')[0], role: 'editor', invited_by: ME }));
-  // 建立者本人的名單列只用來顯示「建立者」；清單的擁有權在 docs.owner，所以這一列寫不進去不影響使用，只記在 console
-  enqueue('lm', async () => {
-    const r = await up(own); if (r.error) console.warn('list_members owner row', r.error);
-    if (inv.length) { const r2 = await up(inv); if (r2.error) throw r2.error; }
-    await loadLM();
-  }).catch(onWriteError);
+  const rows = [{ list_id: lid, email: ME, name: MY_NAME || '', role: 'owner', invited_by: ME }]
+    .concat((invites || []).filter(v => v.email !== ME).map(v => ({ list_id: lid, email: v.email, name: v.name || v.email.split('@')[0], role: 'editor', invited_by: ME })));
+  enqueue('lm', async () => { const { error } = await SB.from('list_members').upsert(rows, { onConflict: 'list_id,email', ignoreDuplicates: true }); if (error) throw error; await loadLM(); }).catch(onWriteError);
 }
 function inviteText(l, em) {
   return '我邀請你一起編輯補貨清單「' + l.title + '」' + (l.dueAt ? '（' + fmtDue(l.dueAt) + ' 前要買好）' : '') + '\n用這個信箱登入就看得到：' + em + (APP_URL ? '\n網址：' + APP_URL : '');
