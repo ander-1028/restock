@@ -550,7 +550,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 0.6（10/24 商品卡簡化、規格下拉）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 0.7（10/24 商品卡顯示規格）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -1338,7 +1338,7 @@ function productResults() {
     h += '<div class="prod-grid">' + list.map(p => '<button class="prod-card reveal" data-act="product" data-pid="' + esc(p._id) + '">' +
       '<span class="ph">' + thumbInner(p) + '</span><span class="pc-body">' +
       (p.sample || (p.photo && !p.barcode) ? '<span class="pc-cat">' + (p.sample ? '<span class="pill">範例</span>' : '') + (p.photo && !p.barcode ? '<span class="pill accent">可補條碼</span>' : '') + '</span>' : '') +
-      '<span class="pc-name">' + esc(p.name) + '</span>' + (p.brand ? '<span class="pc-sub">' + esc(p.brand) + '</span>' : '') +
+      '<span class="pc-name">' + esc(p.name) + '</span>' + (subLine(p) ? '<span class="pc-sub">' + subLine(p) + '</span>' : '') +
       '</span></button>').join('') + '</div>';
   }
   return h;
