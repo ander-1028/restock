@@ -565,7 +565,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.4（10/24 清單項目可編輯）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.5（10/24 帳號資料隔離）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -587,7 +587,7 @@ var EN = {
   // 導覽、頁尾
   '補貨清單': 'Restock', '主要頁面': 'Main pages', '清單': 'Lists', '商品': 'Products', '紀錄': 'History', '我的': 'Me',
   '同步狀態': 'Sync status', '連線中': 'Connecting', '正在連線…': 'Connecting…', '已同步': 'Synced', '僅本機': 'This device only', '未登入': 'Signed out',
-  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items',
+  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items', '帳號資料隔離': 'account privacy',
   '只改這張清單裡的這一項。品牌、規格、照片要改的話：': 'Only changes this item in this list. To change brand, size or photo:',
   '編輯商品資料 ›': 'Edit product details ›', '這一項改到': 'Store changed to',
   '清單和商品存在 Supabase 雲端，家庭成員即時同步。': 'Lists and products are stored in the Supabase cloud and sync live with your family.',
@@ -1221,6 +1221,11 @@ function subscribeRealtime() {
         if (n.col === 'items' && PENDING_QTY[n.id]) data = Object.assign({}, data, { qty: PENDING_QTY[n.id] });
         try { announceOne(n.col, D[n.col][n.id], data, p.eventType); } catch (e) { /* 忽略 */ }
         D[n.col] = Object.assign({}, D[n.col], { [n.id]: data });
+        // 別人放進共用清單的新商品：加進清單之後才有權限看，所以這時候再去拿
+        const pid = n.col === 'items' && data && data.productId;
+        if (pid && !D.products[pid]) SB.from('docs').select('data').match({ col: 'products', id: pid }).maybeSingle().then(({ data: r }) => {
+          if (r && r.data) { D.products = Object.assign({}, D.products, { [pid]: r.data }); scheduleRender(); }
+        });
       }
       scheduleRender();
     })
@@ -1286,8 +1291,10 @@ function loadLocalData() {
     if (raw) { const o = JSON.parse(raw); D.products = o.products || {}; D.lists = o.lists || {}; D.items = o.items || {}; }
   } catch (e) { /* 沒有本機資料 */ }
 }
+// 雲端版每個帳號各自一份，換帳號登入不會看到上一個人的載具
+function carrierKey() { return MODE === 'cloud' ? LS_CARRIER + ':' + ME : LS_CARRIER; }
 async function loadCarrier() {
-  try { MY_CARRIER = localStorage.getItem(LS_CARRIER) || ''; } catch (e) { MY_CARRIER = ''; }
+  try { MY_CARRIER = localStorage.getItem(carrierKey()) || ''; } catch (e) { MY_CARRIER = ''; }
   if (MODE === 'cloud') {
     try { const { data } = await SB.from('private_settings').select('carrier,display_name').eq('email', ME).maybeSingle(); if (data && data.carrier) MY_CARRIER = data.carrier; if (data && data.display_name) MY_NAME = data.display_name; } catch (e) { /* 用本機的 */ }
   }
@@ -1295,7 +1302,7 @@ async function loadCarrier() {
 }
 async function saveCarrier(code) {
   MY_CARRIER = code;
-  try { localStorage.setItem(LS_CARRIER, code); } catch (e) { /* 忽略 */ }
+  try { localStorage.setItem(carrierKey(), code); } catch (e) { /* 忽略 */ }
   if (MODE === 'cloud') {
     const { error } = await SB.from('private_settings').upsert({ email: ME, carrier: code });
     if (error) toast('載具只存在這台裝置（雲端沒存到）');
