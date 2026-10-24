@@ -3,47 +3,54 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#f6f2cd">
 <title>家庭補貨清單</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: Apple 官網節奏 — 白／淺灰交錯的滿版色帶、980px 內容欄、置中超大標題、毛玻璃導覽列、從底部浮起的面板 */
+/* Layout: 奶油黃底、彩色圓角卡片、底部黑色膠囊導覽列（外觀覆蓋層在樣式表最後面） */
 :root{
-  --bg:#ffffff; --bg-alt:#f5f5f7; --surface:#ffffff; --tile:#f5f5f7; --tile-2:#e8e8ed; --seg-on:#ffffff;
-  --fg:#1d1d1f; --fg-2:#6e6e73; --fg-3:#86868b; --line:#d2d2d7; --line-soft:#e8e8ed;
-  --accent:#0071e3; --accent-press:#0062c4; --link:#0066cc; --on-accent:#ffffff; --accent-soft:rgba(0,113,227,.10);
-  --ok:#248a3d; --ok-soft:rgba(36,138,61,.12); --warn:#b64400; --warn-soft:rgba(201,52,0,.10); --danger:#d70015;
-  --glass:rgba(255,255,255,.74); --scrim:rgba(0,0,0,.36);
-  --shadow:0 12px 40px rgba(0,0,0,.08); --shadow-sm:0 2px 12px rgba(0,0,0,.05);
+  --bg:#f6f2cd; --bg-alt:#f6f2cd; --surface:#fffdea; --tile:#ece6b4; --tile-2:#e2dba0; --seg-on:#fffdea;
+  --fg:#1a1a17; --fg-2:#5f5c44; --fg-3:#8a8668; --line:#e0d99c; --line-soft:#e9e3b0;
+  --accent:#ff8a65; --accent-press:#f2764f; --link:#b8431f; --on-accent:#1a1a17; --accent-soft:rgba(255,138,101,.20);
+  --btn:#141412; --on-btn:#fffbe0; --btn-press:#33332e;
+  --ok:#2f7d4f; --ok-soft:rgba(47,125,79,.16); --warn:#a84a08; --warn-soft:rgba(214,110,20,.16); --danger:#c42b1c;
+  --glass:rgba(246,242,205,.82); --scrim:rgba(20,20,10,.4);
+  --shadow:0 12px 32px rgba(70,60,0,.12); --shadow-sm:none;
+  --c1:#ff8a65; --c2:#b9cdf7; --c3:#fff46e; --c4:#bdeedd; --on-c:#1a1a17;
+  --pill-bg:#141412; --pill-fg:#bdb99a; --pill-on-bg:#ffd75e; --pill-on-fg:#141412;
   /* 給店員掃描的畫面永遠白底黑字，兩種主題都一樣 */
   --scan-bg:#ffffff; --scan-fg:#000000; --scan-fg-2:#515154; --scan-tile:#f5f5f7; --scan-line:#d2d2d7; --scan-link:#0066cc; --scan-accent:#0071e3;
   --finish:#248a3d; --finish-press:#1e7533;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
   --mono:"SF Mono",ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;
-  --t-hero:clamp(48px,11vw,104px); --t-h1:clamp(36px,6.4vw,64px); --t-h2:clamp(26px,3.8vw,40px);
-  --r-lg:28px; --r-md:18px; --r-sm:12px;
+  --t-hero:clamp(34px,8vw,46px); --t-h1:clamp(30px,6vw,42px); --t-h2:22px;
+  --r-lg:28px; --r-md:22px; --r-sm:14px;
   --ease:cubic-bezier(.22,.8,.24,1);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#000000; --bg-alt:#101011; --surface:#1c1c1e; --tile:#2c2c2e; --tile-2:#3a3a3c; --seg-on:#636366;
-    --fg:#f5f5f7; --fg-2:#a1a1a6; --fg-3:#86868b; --line:#424245; --line-soft:#2c2c2e;
-    --accent:#0071e3; --accent-press:#0a84ff; --link:#2997ff; --on-accent:#ffffff; --accent-soft:rgba(41,151,255,.16);
-    --ok:#30d158; --ok-soft:rgba(48,209,88,.16); --warn:#ff9f0a; --warn-soft:rgba(255,159,10,.16); --danger:#ff453a;
-    --glass:rgba(22,22,23,.74); --scrim:rgba(0,0,0,.6);
-    --shadow:0 12px 40px rgba(0,0,0,.5); --shadow-sm:0 2px 12px rgba(0,0,0,.4);
+    --bg:#1c1c1a; --bg-alt:#1c1c1a; --surface:#2a2a27; --tile:#363632; --tile-2:#44443e; --seg-on:#55554d;
+    --fg:#f6f2d8; --fg-2:#bdb99a; --fg-3:#8f8b72; --line:#46463f; --line-soft:#363632;
+    --accent:#ff8a65; --accent-press:#ff9d7e; --link:#ffa27f; --on-accent:#1a1a17; --accent-soft:rgba(255,138,101,.22);
+    --btn:#ffd75e; --on-btn:#141412; --btn-press:#ffe385;
+    --ok:#6fd79a; --ok-soft:rgba(111,215,154,.18); --warn:#ffb25e; --warn-soft:rgba(255,178,94,.18); --danger:#ff7a6b;
+    --glass:rgba(28,28,26,.82); --scrim:rgba(0,0,0,.6);
+    --shadow:0 12px 32px rgba(0,0,0,.5); --shadow-sm:none;
+    --pill-bg:#0d0d0c; --pill-fg:#a8a48a; --pill-on-bg:#ffd75e; --pill-on-fg:#141412;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#000000; --bg-alt:#101011; --surface:#1c1c1e; --tile:#2c2c2e; --tile-2:#3a3a3c; --seg-on:#636366;
-  --fg:#f5f5f7; --fg-2:#a1a1a6; --fg-3:#86868b; --line:#424245; --line-soft:#2c2c2e;
-  --accent:#0071e3; --accent-press:#0a84ff; --link:#2997ff; --on-accent:#ffffff; --accent-soft:rgba(41,151,255,.16);
-  --ok:#30d158; --ok-soft:rgba(48,209,88,.16); --warn:#ff9f0a; --warn-soft:rgba(255,159,10,.16); --danger:#ff453a;
-  --glass:rgba(22,22,23,.74); --scrim:rgba(0,0,0,.6);
-  --shadow:0 12px 40px rgba(0,0,0,.5); --shadow-sm:0 2px 12px rgba(0,0,0,.4);
+  --bg:#1c1c1a; --bg-alt:#1c1c1a; --surface:#2a2a27; --tile:#363632; --tile-2:#44443e; --seg-on:#55554d;
+  --fg:#f6f2d8; --fg-2:#bdb99a; --fg-3:#8f8b72; --line:#46463f; --line-soft:#363632;
+  --accent:#ff8a65; --accent-press:#ff9d7e; --link:#ffa27f; --on-accent:#1a1a17; --accent-soft:rgba(255,138,101,.22);
+  --btn:#ffd75e; --on-btn:#141412; --btn-press:#ffe385;
+  --ok:#6fd79a; --ok-soft:rgba(111,215,154,.18); --warn:#ffb25e; --warn-soft:rgba(255,178,94,.18); --danger:#ff7a6b;
+  --glass:rgba(28,28,26,.82); --scrim:rgba(0,0,0,.6);
+  --shadow:0 12px 32px rgba(0,0,0,.5); --shadow-sm:none;
+  --pill-bg:#0d0d0c; --pill-fg:#a8a48a; --pill-on-bg:#ffd75e; --pill-on-fg:#141412;
   color-scheme:dark;
 }
 
@@ -413,6 +420,103 @@ main.has-cobar ~ .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
   *,*::before,*::after{animation:none!important;transition:none!important}
   .reveal.pre{opacity:1;transform:none}
 }
+
+/* ══ 新版外觀：奶油黃底、彩色圓角卡片、底部黑色膠囊導覽列 ══ */
+.wrap{max-width:760px}
+.band,.band.alt{background:none}
+.band{padding-block:14px}
+.band.tight{padding-block:8px 0}
+.hero,.hero.sm{padding-block:8px 6px;text-align:left}
+.hero-title,.list-title{font-size:var(--t-hero);letter-spacing:-.02em;line-height:1.12}
+.tagline{font-size:16px;font-weight:500;color:var(--fg-2);margin-top:6px}
+.hero-status{margin-top:4px}
+.cta-row{justify-content:flex-start;margin-top:16px}
+.section-title{font-size:22px;margin:6px 0 14px}
+.sec-head h2,.sec-head h3{font-size:20px}
+.eyebrow{font-size:14px}
+.btn-primary{background:var(--btn);color:var(--on-btn)}
+.btn-primary:hover{background:var(--btn-press)}
+.btn-link{color:var(--link)}
+.pill.accent{color:var(--link)}
+.foot{background:none;border:0;padding-block:12px 120px}
+
+/* 頂列：品牌 + 同步狀態；導覽列變成底部黑色膠囊 */
+.nav{position:static;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+.nav .wrap{height:44px}
+.brand{font-size:14px;font-weight:500;color:var(--fg-2)}
+.nav-links{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:65;background:var(--pill-bg);border-radius:980px;padding:7px;gap:4px;box-shadow:var(--shadow)}
+.nav-links button{white-space:nowrap;color:var(--pill-fg);font-size:15px;font-weight:500;padding:11px 18px;min-height:44px}
+.nav-links button:hover{color:var(--pill-on-fg);background:none}
+.nav-links button[aria-current="page"]{background:var(--pill-on-bg);color:var(--pill-on-fg)}
+.nav-links button:not([aria-current="page"]):hover{color:#ffffff}
+
+/* 首頁摘要卡（珊瑚色，像範例的 Balance 卡） */
+.sum-card{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;background:var(--c1);color:var(--on-c);border-radius:var(--r-md);padding:20px 22px;margin-top:16px}
+.sum-card small{display:block;font-size:14px;font-weight:500;opacity:.75}
+.sum-card strong{display:block;font-size:44px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.sum-card .sum-r{text-align:right;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.sum-card .progress{background:rgba(0,0,0,.14);margin-top:12px;height:6px}
+.sum-card .progress>i{background:var(--on-c)}
+.sum-card.done{background:#a9bfa5}
+
+/* 清單卡：四色輪流（珊瑚／淡藍／黃／薄荷），字永遠深色 */
+.list-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:14px}
+.list-card{background:var(--c4);color:var(--on-c);border-radius:var(--r-md);padding:20px 20px 18px}
+.list-card:nth-child(4n+1){background:var(--c2)}
+.list-card:nth-child(4n+2){background:var(--c3)}
+.list-card:nth-child(4n+3){background:var(--c4)}
+.list-card:nth-child(4n+4){background:var(--c1)}
+.list-card.list-card.done{background:#a9bfa5}
+.list-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.lc-store,.lc-meta{color:rgba(26,26,23,.7)}
+.lc-title{font-size:24px}
+.lc-stack .th{border-color:transparent;background:rgba(255,255,255,.55);border-radius:18px;box-shadow:0 0 0 3px rgba(255,255,255,.55)}
+.lc-stack .th .mono{color:var(--on-c)}
+.list-card .progress{background:rgba(0,0,0,.14);height:6px}
+.list-card .progress>i{background:var(--on-c)}
+.list-card .pill{background:rgba(255,255,255,.6);color:var(--on-c)}
+.banner{border:1px solid var(--line);box-shadow:none}
+.empty{border:1px solid var(--line)}
+
+/* 清單詳情（購買頁）：進度卡、圓角商品卡、膠囊數量器 */
+.prog-card{background:var(--c1);color:var(--on-c);border-radius:var(--r-md);padding:18px 22px;margin-top:16px;display:grid;gap:10px}
+.prog-card .pc-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.prog-card strong{font-size:34px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.prog-card span{font-size:14px;font-weight:600;opacity:.8}
+.prog-card .progress{background:rgba(0,0,0,.14);height:8px}
+.prog-card .progress>i{background:var(--on-c)}
+.prog-card.done{background:#a9bfa5}
+.items{gap:12px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px}
+.item .th{background:var(--tile);border-radius:18px}
+.item-name{font-size:18px}
+.item-note{background:var(--c3);color:var(--on-c)}
+.item.bought{background:transparent}
+.stepper{background:var(--bg);border:1px solid var(--line);height:38px}
+.stepper button{color:var(--fg);width:36px;height:36px}
+.chip{background:var(--tile)}
+.chip:hover{background:var(--tile-2)}
+.check>span{border-color:var(--fg-3)}
+.store-sub{display:inline-block;background:var(--c2);color:var(--on-c);padding:4px 14px;border-radius:980px;font-size:14px;margin:22px 0 12px}
+.store-sub:first-of-type{margin-top:0}
+
+/* 底部結帳列：浮在黑色導覽膠囊上方的黑色圓角卡 */
+.cobar{left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--pill-bg);border:0;border-radius:24px;padding:12px 14px;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:var(--shadow);z-index:55}
+.cobar .wrap{max-width:720px;padding:0}
+.cobar p{color:var(--pill-fg)}
+.cobar p strong{color:#fffbe0}
+.cobar .btn-primary{background:var(--pill-on-bg);color:var(--pill-on-fg)}
+.cobar .btn-secondary{background:rgba(255,255,255,.14);color:#fffbe0}
+main.has-cobar{padding-bottom:90px}
+@media (max-width:520px){.cobar p{display:none}.cobar .btns{flex:1 1 100%;max-width:none}.cobar .btns .btn{max-width:none}}
+.toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
+.scrim{z-index:85}
+.sheet{background:var(--bg)}
+.tile,.band.alt .tile{background:var(--surface);border:1px solid var(--line)}
+.pk-row{background:var(--surface);border:1px solid var(--line)}
+.prod-card{border:1px solid var(--line)}
+.hist-card{border:1px solid var(--line)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -951,7 +1055,7 @@ function viewLists() {
   let h = '<section class="band hero"><div class="wrap">' +
     '<h1 class="hero-title' + R() + '">補貨清單</h1>' +
     '<p class="tagline' + R(1) + '">說清楚哪一罐，就不會買錯。</p>' +
-    '<p class="hero-status' + R(2) + '">' + esc(status) + '</p>' +
+    (ready() && active.length ? sumCard(active) : '<p class="hero-status' + R(2) + '">' + esc(status) + '</p>') +
     '<div class="cta-row' + R(2) + '"><button class="btn btn-primary" data-act="new-list">新建清單</button><button class="btn-link" data-go="products">管理商品 ›</button></div>' +
     '</div></section>';
   let body;
@@ -960,6 +1064,13 @@ function viewLists() {
   else body = '<div class="list-grid">' + active.map(listCard).join('') + '</div>';
   h += '<section class="band alt"><div class="wrap">' + homeBanners(lists) + '<h2 class="section-title reveal">進行中</h2>' + body + '</div></section>';
   return h;
+}
+function sumCard(active) {
+  const all = active.flatMap(l => itemsOf(l._id)), left = all.filter(i => i.state === 'todo').length;
+  const nOver = active.filter(isOverdue).length;
+  const done = all.length && all.every(i => i.state === 'bought');
+  return '<div class="sum-card' + (done ? ' done' : '') + ' rise"><div><small>進行中的清單</small><strong>' + active.length + '</strong></div>' +
+    '<div class="sum-r">' + (done ? '全部買齊' : '還要買 ' + left + ' 項') + (nOver ? '<br>' + nOver + ' 張已過提醒時間' : '') + '</div></div>';
 }
 function seenSet() { try { return new Set(JSON.parse(localStorage.getItem(LS_SEEN) || '[]')); } catch (e) { return new Set(); } }
 function homeBanners(lists) {
@@ -997,7 +1108,8 @@ function listCard(l) {
   if (l.dueAt) meta.push('期限 ' + fmtDue(l.dueAt));
   if (l.remindAt) meta.push('提醒 ' + fmtRemind(l.remindAt));
   const by = nameOf(l.createdBy);
-  return '<article class="list-card reveal" data-open-list="' + l._id + '" tabindex="0" role="button" aria-label="打開清單 ' + esc(l.title) + '">' +
+  const all = its.length && its.every(i => i.state === 'bought');
+  return '<article class="list-card' + (all ? ' done' : '') + ' reveal" data-open-list="' + l._id + '" tabindex="0" role="button" aria-label="打開清單 ' + esc(l.title) + '">' +
     '<div class="lc-top"><span class="lc-store">' + esc(storesLabel(l)) + '</span><span class="lc-pills">' + pills.join('') + '</span></div>' +
     '<h3 class="lc-title">' + esc(l.title) + '</h3>' +
     '<div class="lc-stack" aria-hidden="true">' + th + '</div>' +
@@ -1022,7 +1134,7 @@ function viewList() {
     '<p class="eyebrow' + R() + '">' + esc(storesLabel(l)) + (l.sample ? '・範例' : '') + '</p>' +
     '<h1 class="list-title' + R(1) + '">' + esc(l.title) + '</h1>' +
     '<p class="hero-status' + R(2) + '">' + (creator ? esc(whoSp(creator)) + '建立・' : '') + fmtTime(l.createdAt) + (l.dueAt ? '・期限 ' + fmtDue(l.dueAt) : '') + (l.remindAt ? '・提醒 ' + fmtRemind(l.remindAt) : '') + '</p>' +
-    '<div class="cta-row' + R(2) + '" style="max-width:420px;margin-inline:auto;flex-direction:column;gap:10px"><div class="progress" style="width:100%"><i style="width:' + pct + '%"></i></div><p class="muted" style="font-size:14px">已買 ' + bought.length + ' / ' + its.length + ' 項' + (out.length ? '・缺貨 ' + out.length + ' 項' : '') + '</p></div>' +
+    '<div class="prog-card' + (its.length && !todo.length && !out.length ? ' done' : '') + R(2) + '"><div class="pc-row"><strong>' + bought.length + ' / ' + its.length + '</strong><span>' + (its.length && !todo.length && !out.length ? '全部買齊' : '已買') + (out.length ? '・缺貨 ' + out.length + ' 項' : '') + '</span></div><div class="progress" aria-hidden="true"><i style="width:' + pct + '%"></i></div></div>' +
     (!locked ? '<div class="cta-row"><button class="btn btn-primary" data-act="pick">加商品</button><button class="btn-link" data-act="list-rename">重新命名 ›</button></div>' : '') +
     '</div></section>';
   h += '<section class="band alt"><div class="wrap">';
@@ -1448,7 +1560,7 @@ function productTip(p, pid) {
   const miss = [];
   if (!p.photo) miss.push('照片'); if (!p.barcode) miss.push('條碼'); if (!p.brand) miss.push('品牌'); if (!p.spec) miss.push('規格'); if (!(p.stores || []).length) miss.push('在哪買');
   if (!miss.length) return '';
-  const msg = (p.photo && !p.barcode) ? '已經有照片了。再拍一張商品背面的條碼，之後請店員找東西會更方便。' : '還可以補上：' + miss.join('、') + '。資料越完整，代買的人越不會拿錯。';
+  const msg = (p.photo && !p.barcode) ? '已經有照片了。再拍一張商品背面的條碼，之後請店員找東西會更方便。' : '還可以補上：' + miss.join('、') ;
   return '<div class="hint" style="text-align:left;margin-top:20px"><span style="flex:1 1 200px">' + msg + '</span><button class="btn btn-sm btn-primary" data-act="edit-product" data-pid="' + esc(pid) + '">補充資料</button></div>';
 }
 function edHint() {
