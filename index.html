@@ -550,7 +550,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 0.5（10/24 待採買卡片）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 0.6（10/24 商品卡簡化、規格下拉）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -811,6 +811,7 @@ function thumbInner(p) {
   if (p && p.photo && SAFE_IMG.test(p.photo)) return '<img src="' + p.photo + '" alt="">';
   return '<span class="mono" aria-hidden="true">' + esc(catOf(p && p.cat).mono) + '</span>';
 }
+const SIZES = ['大', '中', '小', '其他'];
 function subLine(p) { return [p.brand, p.spec].filter(Boolean).map(esc).join('・'); }
 function byText(o) {
   if (!o || !o.at) return '';
@@ -1335,9 +1336,10 @@ function productResults() {
     else h += '<div class="empty"><h3>找不到符合的商品</h3><p class="muted">換個關鍵字，或切回「全部」看看。</p></div>';
   } else {
     h += '<div class="prod-grid">' + list.map(p => '<button class="prod-card reveal" data-act="product" data-pid="' + esc(p._id) + '">' +
-      '<span class="ph">' + thumbInner(p) + '</span><span class="pc-body"><span class="pc-cat">' + esc(catOf(p.cat).name) + (p.sample ? '<span class="pill">範例</span>' : '') + (p.photo && !p.barcode ? '<span class="pill accent">可補條碼</span>' : '') + '</span>' +
-      '<span class="pc-name">' + esc(p.name) + '</span>' + (subLine(p) ? '<span class="pc-sub">' + subLine(p) + '</span>' : '') +
-      '<span class="pc-stores">' + esc((p.stores || []).map(s => storeOf(s).name).join('・')) + '' + '</span></span></button>').join('') + '</div>';
+      '<span class="ph">' + thumbInner(p) + '</span><span class="pc-body">' +
+      (p.sample || (p.photo && !p.barcode) ? '<span class="pc-cat">' + (p.sample ? '<span class="pill">範例</span>' : '') + (p.photo && !p.barcode ? '<span class="pill accent">可補條碼</span>' : '') + '</span>' : '') +
+      '<span class="pc-name">' + esc(p.name) + '</span>' + (p.brand ? '<span class="pc-sub">' + esc(p.brand) + '</span>' : '') +
+      '</span></button>').join('') + '</div>';
   }
   return h;
 }
@@ -1614,8 +1616,9 @@ function openEditor(pid, opts) {
   const d = src ? JSON.parse(JSON.stringify(src)) : { cat: opts.cat || '', name: '', brand: '', spec: '', stores: opts.store ? [opts.store] : [], itemNo: '', barcode: '', sub: true, note: '', photo: '', tagPhoto: '', backPhoto: '' };
   d.stores = Array.isArray(d.stores) ? d.stores.slice() : [];
   ED = { pid: src ? pid : null, d, opts };
-  const hint = d.cat ? catOf(d.cat).hint : '例：1857ml × 2';
+  const hint = d.cat ? catOf(d.cat).hint : '1857ml × 2';
   const costco = d.stores.includes('costco');
+  const specSel = !d.spec ? '' : SIZES.includes(d.spec) ? d.spec : '其他';  // 舊的自由文字規格歸到「其他」
   const armed = ARMED && ARMED.key === 'prod:' + pid && Date.now() < ARMED.until;
   openSheet({
     title: ED.pid ? '編輯商品' : '新增商品',
@@ -1624,8 +1627,9 @@ function openEditor(pid, opts) {
       '<div id="ed-hint"></div>' +
       '<label class="field"><span>品類</span><select id="ed-cat"><option value="">選一個品類</option>' + CATS.map(c => '<option value="' + c.id + '"' + (d.cat === c.id ? ' selected' : '') + '>' + c.name + '</option>').join('') + '</select></label>' +
       '<label class="field" id="ed-name-wrap"' + (d.cat === 'other' ? '' : ' hidden') + '><span>品名（「其他」類才需要填）</span><input id="ed-name" value="' + esc(d.cat === 'other' ? d.name : '') + '" placeholder="例：燈泡、拖把" maxlength="40" autocomplete="off"></label>' +
-      '<div class="field-row"><label class="field"><span>品牌</span><input id="ed-brand" value="' + esc(d.brand) + '" placeholder="例：Kirkland" maxlength="40" autocomplete="off"></label>' +
-      '<label class="field"><span>規格</span><input id="ed-spec" value="' + esc(d.spec) + '" placeholder="例：' + esc(hint) + '" maxlength="40" autocomplete="off"></label></div>' +
+      '<div class="field-row"><label class="field"><span>品牌或品名</span><input id="ed-brand" value="' + esc(d.brand) + '" placeholder="例：Kirkland、拿鐵" maxlength="40" autocomplete="off"></label>' +
+      '<label class="field"><span>規格</span><select id="ed-size"><option value="">不指定</option>' + SIZES.map(s => '<option' + (specSel === s ? ' selected' : '') + '>' + s + '</option>').join('') + '</select></label></div>' +
+      '<label class="field" id="ed-spec-wrap"' + (specSel === '其他' ? '' : ' hidden') + '><span>其他規格</span><input id="ed-spec" value="' + esc(specSel === '其他' ? d.spec : '') + '" placeholder="例：' + esc(hint) + '" maxlength="40" autocomplete="off"></label>' +
       '<fieldset class="field"><legend>在哪裡買（可複選，之後再補也行）</legend><div class="chips">' + STORES.map(s => '<button type="button" class="chip" data-act="ed-store" data-store="' + s.id + '" aria-pressed="' + d.stores.includes(s.id) + '">' + s.name + '</button>').join('') + '</div></fieldset>' +
       '<div class="field"><span>缺貨時可以買別的牌子嗎？</span><div class="seg" role="group"><button type="button" data-act="ed-sub" data-v="1" aria-pressed="' + !!d.sub + '">可以替代</button><button type="button" data-act="ed-sub" data-v="0" aria-pressed="' + !d.sub + '">不可替代</button></div></div>' +
       '<label class="field"><span>備註</span><textarea id="ed-note" rows="2" maxlength="120" placeholder="例：要綠色包裝那款，不是藍色">' + esc(d.note) + '</textarea></label>' +
@@ -1665,7 +1669,7 @@ function bcHelp0() {
 function saveEditor() {
   if (!ED) return;
   const d = ED.d;
-  d.cat = $('#ed-cat').value; d.name = d.cat === 'other' ? $('#ed-name').value.trim() : catOf(d.cat).name; d.brand = $('#ed-brand').value.trim(); d.spec = $('#ed-spec').value.trim();
+  d.cat = $('#ed-cat').value; d.name = d.cat === 'other' ? $('#ed-name').value.trim() : catOf(d.cat).name; d.brand = $('#ed-brand').value.trim(); const sz = $('#ed-size').value; d.spec = sz === '其他' ? $('#ed-spec').value.trim() : sz;
   d.itemNo = cleanCode($('#ed-itemno').value); d.barcode = cleanCode($('#ed-barcode').value); d.note = $('#ed-note').value.trim();
   if (!d.cat) { toast('請先選品類'); $('#ed-cat').focus(); return; }
   if (!d.name) { toast('「其他」類請填品名'); $('#ed-name').focus(); return; }
@@ -2065,6 +2069,7 @@ document.addEventListener('change', e => {
   if (t.id === 'list-due') { const ts = fromDateInput(t.value); patch('lists', CUR_LIST, { dueAt: ts }); if (ts) toast('期限：' + fmtDue(ts)); }
   else if (t.id === 'list-remind') { const ts = fromLocalInput(t.value); patch('lists', CUR_LIST, { remindAt: ts }); if (ts) toast('提醒時間：' + fmtRemind(ts)); }
   else if (t.id === 'pk-all' && PK) { PK.all = t.checked; SHEET && SHEET.rerender && SHEET.rerender(); }
+  else if (t.id === 'ed-size' && ED) { $('#ed-spec-wrap').hidden = t.value !== '其他'; if (t.value === '其他') $('#ed-spec').focus(); }
   else if (t.id === 'ed-cat' && ED) { ED.d.cat = t.value; $('#ed-name-wrap').hidden = t.value !== 'other'; const s = $('#ed-spec'); if (s) s.placeholder = '例：' + catOf(t.value).hint; if (!ED.d.photo) $('#ed-photo').innerHTML = edPhoto('', t.value); }
 });
 document.addEventListener('submit', e => {
