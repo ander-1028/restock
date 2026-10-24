@@ -565,7 +565,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.3（10/24 品類圖示）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.4（10/24 清單項目可編輯）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -587,7 +587,9 @@ var EN = {
   // 導覽、頁尾
   '補貨清單': 'Restock', '主要頁面': 'Main pages', '清單': 'Lists', '商品': 'Products', '紀錄': 'History', '我的': 'Me',
   '同步狀態': 'Sync status', '連線中': 'Connecting', '正在連線…': 'Connecting…', '已同步': 'Synced', '僅本機': 'This device only', '未登入': 'Signed out',
-  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons',
+  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items',
+  '只改這張清單裡的這一項。品牌、規格、照片要改的話：': 'Only changes this item in this list. To change brand, size or photo:',
+  '編輯商品資料 ›': 'Edit product details ›', '這一項改到': 'Store changed to',
   '清單和商品存在 Supabase 雲端，家庭成員即時同步。': 'Lists and products are stored in the Supabase cloud and sync live with your family.',
   '還沒設定雲端，資料只存在這台裝置的瀏覽器。': 'Cloud is not set up. Data is stored only in this browser.',
   '登入後才看得到家裡的清單。': 'Sign in to see your family’s lists.',
@@ -1505,6 +1507,7 @@ function itemRow(it, locked) {
       '<button class="chip" data-act="clerk">給店員看</button>' +
       (it.state === 'todo' ? '<button class="chip" data-act="out">缺貨</button>' : '') +
       (it.state === 'out' ? '<button class="chip" data-act="back-todo">找到了</button>' + (p.sub ? '<button class="chip" data-act="subbed">買了替代品</button>' : '') : '') +
+      '<button class="chip" data-act="item-edit">編輯</button>' +
       '<button class="chip quiet" data-act="remove">移除</button></div>';
   }
   const by = byText(it);
@@ -1846,6 +1849,18 @@ function pickerResults() {
   });
   return h;
 }
+/* 清單裡的一項：改去哪家買，或跳去改商品資料 */
+function openItemEdit(id) {
+  const it = D.items[id]; if (!it) return;
+  const p = prodOf(it), cur = itemStore(it);
+  openSheet({
+    title: '編輯「' + p.name + '」',
+    html: '<div class="form" data-item="' + esc(id) + '"><fieldset class="field"><legend>這次去哪裡買</legend><div class="chips">' +
+      STORES.map(s => '<button type="button" class="chip" data-act="item-store" data-store="' + s.id + '" aria-pressed="' + (cur === s.id) + '">' + s.name + '</button>').join('') + '</div></fieldset>' +
+      '<p class="help">只改這張清單裡的這一項。品牌、規格、照片要改的話：</p>' +
+      '<button type="button" class="btn btn-secondary" data-act="item-edit-product">編輯商品資料 ›</button></div>'
+  });
+}
 function addItem(listId, pid, store) {
   const l = D.lists[listId], p = D.products[pid]; if (!l || !p) return;
   store = store || (p.stores || [])[0] || 'other';
@@ -2179,6 +2194,18 @@ const ACT = {
   'out': a => { const id = itemIdOf(a), it = D.items[id]; if (!it) return; patch('items', id, { state: 'out' }); const p = prodOf(it); toast(p.sub ? '標記缺貨。這項可以買別的牌子' : '標記缺貨。這項不可替代，這次先不買', 3500); },
   'back-todo': a => patch('items', itemIdOf(a), { state: 'todo', subbed: false }),
   'subbed': a => patch('items', itemIdOf(a), { state: 'bought', subbed: true }),
+  'item-edit': a => openItemEdit(itemIdOf(a)),
+  'item-store': a => {
+    const id = itemIdOf(a), it = D.items[id], s = a.dataset.store; if (!it) return;
+    closeSheet(true);
+    if (itemStore(it) === s) return;
+    // 同一張清單已經有這個商品、這家店：數量併過去，不留兩列
+    const dup = itemsOf(it.listId).find(i => i._id !== id && i.productId === it.productId && itemStore(i) === s);
+    if (dup) { setQty(dup._id, dup.qty + it.qty); remove('items', id); }
+    else patch('items', id, { store: s });
+    toast('這一項改到「' + storeOf(s).name + '」');
+  },
+  'item-edit-product': a => { const it = D.items[itemIdOf(a)]; if (it) openEditor(it.productId); },
   'remove': a => { const id = itemIdOf(a); const it = D.items[id]; if (it) { remove('items', id); toast('已移除「' + prodOf(it).name + '」'); } },
   'clerk': a => { const id = itemIdOf(a), it = D.items[id]; if (it) openClerk(it.listId, id); },
   'clerk-product': a => openClerk(null, null, a.dataset.pid),
