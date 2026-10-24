@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f2cd">
 <title>家庭補貨清單</title>
+<script>try { var t = localStorage.getItem('restock.theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap">
@@ -528,6 +529,15 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 .buy-row:hover{background:var(--tile)}
 .sheet{background:var(--bg)}
 .tile,.band.alt .tile{background:var(--surface);border:1px solid var(--line)}
+/* 我的 → 設定：每一列左邊說明、右邊控制，窄螢幕上下排 */
+.settings{gap:0}
+.set-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 20px;padding:16px 0;border-top:1px solid var(--line)}
+.settings h3+.set-row{border-top:0}
+.set-row>div:first-child{flex:1 1 220px;min-width:0}
+.set-row p{margin:2px 0 0;font-size:14px;color:var(--fg-2)}
+.set-row .form{flex:1 1 260px}
+.set-row .input-row input{flex:1;min-width:0}
+.set-mail{overflow-wrap:anywhere}
 .pk-row{background:var(--surface);border:1px solid var(--line)}
 .prod-card{border:1px solid var(--line)}
 .hist-card{border:1px solid var(--line)}
@@ -550,7 +560,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 0.7（10/24 商品卡顯示規格）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 0.8（10/24 我的頁設定）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -568,7 +578,7 @@ const SUPABASE_URL = 'https://hrgzbugycehfprqavlyt.supabase.co';       // 例：
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyZ3pidWd5Y2VoZnBycWF2bHl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3NTQyMDAsImV4cCI6MjEwODMzMDIwMH0.gCLZdBEcVALics6q40gCF-gBuMTH2iiYrXpJ3_Cf5UQ';  // Project API keys 裡的 anon / publishable key（可以公開的那把，不是 service_role）
 const APP_URL = /^https?:$/.test(location.protocol) ? location.origin + location.pathname : '';
 const FEATURES = { premium: false }; // 付費功能開關（預留，目前沒有任何付費功能）
-const LS_DATA = 'restock.local.v1', LS_CARRIER = 'restock.carrier', LS_SEEN = 'restock.seen';
+const LS_DATA = 'restock.local.v1', LS_CARRIER = 'restock.carrier', LS_SEEN = 'restock.seen', LS_THEME = 'restock.theme';
 const COOLDOWN = 120000;            // 結帳後可收回的時間：2 分鐘
 
 const STORES = [
@@ -1373,7 +1383,12 @@ function viewMe() {
     '<form class="form" data-carrier-form><div class="input-row"><input id="me-carrier" value="' + esc(MY_CARRIER) + '" placeholder="/ABC1234" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="載具號碼"><button class="btn btn-primary" type="submit">儲存</button></div><p class="help" id="me-carrier-help"></p></form>' +
     (MY_CARRIER ? '<div class="bc-box" style="max-width:360px;margin-top:6px"><svg data-bc="' + esc(MY_CARRIER) + '" data-fmt="CODE39" data-h="70" data-w="1.6"></svg></div>' : '') + '</div>' +
     '<div class="tile reveal"><h3>' + (MODE === 'cloud' ? '雲端同步中' : MODE === 'local' ? '只存在這台裝置' : '連線中') + '</h3>' + share + '</div>' +
-    (MODE === 'cloud' ? '<div class="tile reveal"><h3>我的名字</h3><p>一起編輯清單的人會看到這個名字。</p><form class="form" id="myname-form" novalidate><div class="input-row"><input id="myname-in" value="' + esc(MY_NAME) + '" placeholder="例：Anderson" maxlength="20" autocomplete="off" aria-label="我的名字"><button class="btn btn-primary" type="submit">儲存</button></div></form><button class="btn-link" data-act="logout" style="align-self:flex-start">登出（' + esc(ME) + '）</button></div>' : '') +
+    '<div class="tile span2 reveal settings"><h3>設定</h3>' +
+      (MODE === 'cloud' ? '<div class="set-row"><div><strong>我的名字</strong><p>一起編輯清單的人會看到這個名字。</p></div><form class="form" id="myname-form" novalidate><div class="input-row"><input id="myname-in" value="' + esc(MY_NAME) + '" placeholder="例：Anderson" maxlength="20" autocomplete="off" aria-label="我的名字"><button class="btn btn-primary" type="submit">儲存</button></div></form></div>' : '') +
+      '<div class="set-row"><div><strong>外觀</strong><p>深色或淺色，只影響這台裝置。</p></div><div class="seg" role="group" aria-label="外觀">' +
+        [['', '跟隨系統'], ['light', '淺色'], ['dark', '深色']].map(t => '<button type="button" data-act="theme" data-v="' + t[0] + '" aria-pressed="' + ((document.documentElement.dataset.theme || '') === t[0]) + '">' + t[1] + '</button>').join('') + '</div></div>' +
+      (MODE === 'cloud' ? '<div class="set-row"><div><strong>帳號</strong><p class="set-mail">' + esc(ME) + '</p></div><button class="btn btn-sm btn-secondary" data-act="logout">登出</button></div>' : '') +
+    '</div>' +
     '<div class="tile reveal"><h3>範例資料</h3><p>6 項範例商品和 1 張範例清單，都會標上「範例」。看完可以一次清掉，不會動到你自己建的東西。</p><div class="chips">' + (hasSample ? '<button class="btn btn-sm btn-danger" data-act="samples-clear">' + (ARMED && ARMED.key === 'samples' && Date.now() < ARMED.until ? '再按一次確定清除' : '清除範例') + '</button>' : '<button class="btn btn-sm btn-secondary" data-act="samples-load">載入範例</button>') + '</div></div>' +
     '<div class="tile reveal"><h3>這一版能做什麼</h3><p>清單、商品、打勾、缺貨處理、給店員看、載具結帳、相機掃條碼、LINE、Email、行事曆都可以用。</p><p>還沒有：手機推播通知。之後再加。</p></div>' +
     '</div></div></section>';
@@ -2015,6 +2030,12 @@ const ACT = {
     });
   },
   'ics': () => { const l = D.lists[CUR_LIST]; if (l) { downloadIcs(Object.assign({}, l, { _id: CUR_LIST })); toast('已下載行事曆檔，打開它就能加到行事曆'); } },
+  'theme': a => {
+    const v = a.dataset.v;
+    if (v) document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme;
+    try { v ? localStorage.setItem(LS_THEME, v) : localStorage.removeItem(LS_THEME); } catch (e) {}
+    render();
+  },
   'logout': () => { if (SB) SB.auth.signOut().then(() => location.reload()); },
   'member-remove': a => {
     const em = a.dataset.email;
