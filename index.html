@@ -560,7 +560,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 0.8（10/24 我的頁設定）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 0.9（10/24 中英文切換）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -568,6 +568,255 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="file-in" accept="image/*" hidden>
 
+<script>
+/* ── English：選了 English 時，把畫面上的中文換成英文。中文版不經過這裡。
+   整段對得上字典就換；夾著字典以外的中文（使用者自己打的名稱）就整段保留原文；「」裡的字當作名稱。
+   分享出去的清單文字（LINE、Email、複製）維持中文。 ── */
+(function () {
+var lang = 'zh'; try { lang = localStorage.getItem('restock.lang') || 'zh'; } catch (e) {}
+if (lang !== 'en') return;
+var EN = {
+  // 標點與星期
+  '（': ' (', '）': ') ', '，': ', ', '。': '. ', '・': ' · ', '：': ': ', '；': '; ', '、': ', ', '｜': ' | ', '？': '? ', '！': '! ',
+  '（日）': ' (Sun) ', '（一）': ' (Mon) ', '（二）': ' (Tue) ', '（三）': ' (Wed) ', '（四）': ' (Thu) ', '（五）': ' (Fri) ', '（六）': ' (Sat) ',
+  // 導覽、頁尾
+  '補貨清單': 'Restock', '主要頁面': 'Main pages', '清單': 'Lists', '商品': 'Products', '紀錄': 'History', '我的': 'Me',
+  '同步狀態': 'Sync status', '連線中': 'Connecting', '正在連線…': 'Connecting…', '已同步': 'Synced', '僅本機': 'This device only', '未登入': 'Signed out',
+  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option',
+  '清單和商品存在 Supabase 雲端，家庭成員即時同步。': 'Lists and products are stored in the Supabase cloud and sync live with your family.',
+  '還沒設定雲端，資料只存在這台裝置的瀏覽器。': 'Cloud is not set up. Data is stored only in this browser.',
+  '登入後才看得到家裡的清單。': 'Sign in to see your family’s lists.',
+  // 店家
+  '好事多': 'Costco', 'Item 編號・大包裝': 'Item number · bulk packs', '全聯': 'PX Mart', '品牌・規格・照片': 'Brand · size · photo',
+  '量販店': 'Hypermarket', '家樂福・大潤發': 'Carrefour · RT-Mart', '超商': 'Convenience store', '7-ELEVEN・全家': '7-ELEVEN · FamilyMart',
+  '其他': 'Other', '自由填寫': 'Anything else',
+  // 品類（名稱、圖示字、規格範例）
+  '牛奶': 'Milk', '優格': 'Yogurt', '雞蛋': 'Eggs', '起司': 'Cheese', '米': 'Rice', '吐司麵包': 'Bread', '麵條': 'Noodles', '燕麥穀片': 'Cereal',
+  '食用油': 'Cooking oil', '醬油調味': 'Soy sauce & seasoning', '礦泉水': 'Water', '咖啡': 'Coffee', '茶飲': 'Tea', '水果': 'Fruit', '蔬菜': 'Vegetables',
+  '肉品': 'Meat', '冷凍食品': 'Frozen food', '衛生紙': 'Toilet paper', '廚房紙巾': 'Paper towels', '洗衣精': 'Laundry detergent', '洗碗精': 'Dish soap',
+  '垃圾袋': 'Trash bags', '保鮮膜': 'Cling wrap', '沐浴乳': 'Body wash', '洗髮精': 'Shampoo', '牙膏牙刷': 'Toothpaste & brushes', '衛生棉': 'Sanitary pads',
+  '寵物用品': 'Pet supplies', '電池': 'Batteries',
+  '奶': 'M', '優': 'Y', '蛋': 'E', '起': 'C', '吐': 'B', '麵': 'N', '燕': 'O', '油': 'O', '醬': 'S', '水': 'W', '咖': 'C', '茶': 'T', '果': 'F', '菜': 'V',
+  '肉': 'M', '凍': 'F', '紙': 'T', '巾': 'P', '衣': 'L', '碗': 'D', '袋': 'B', '膜': 'W', '浴': 'B', '髮': 'S', '牙': 'T', '棉': 'P', '寵': 'P', '電': 'B',
+  '其': 'O', '照': 'P', '全': 'All',
+  '無糖 900g': 'Unsweetened 900g', '洗選蛋 30 入': 'Washed eggs, 30', '切片 24 片': '24 slices', '全麥吐司 1 條': '1 whole-wheat loaf',
+  '薄鹽 1L': 'Low sodium 1L', '600ml × 24 瓶': '600ml × 24 bottles', '咖啡豆 1.13kg': 'Coffee beans 1.13kg', '無糖綠茶 × 24 瓶': 'Unsweetened green tea × 24',
+  '香蕉 1 串': '1 bunch of bananas', '高麗菜 1 顆': '1 cabbage', '豬梅花 1kg': 'Pork shoulder 1kg', '水餃 50 入': 'Dumplings, 50',
+  '100 抽 × 24 包': '100 sheets × 24 packs', '大捲 × 12': 'Large rolls × 12', '補充包 2L × 3': 'Refill 2L × 3', '中型 × 3 包': 'Medium × 3 packs',
+  '30cm × 2 捲': '30cm × 2 rolls', '1L 壓頭': '1L pump', '160g × 4 條': '160g × 4 tubes', '日用 23cm': 'Day use 23cm', '貓砂 10L': 'Cat litter 10L',
+  '3 號 × 40 顆': 'AA × 40', '寫清楚規格': 'Write the exact size',
+  // 時間
+  '今天': 'Today', '今晚 8 點': 'Tonight 8 pm', '明晚 8 點': 'Tomorrow 8 pm', '明早 10 點': 'Tomorrow 10 am', '週六早上 10 點': 'Saturday 10 am',
+  '期限': 'Due', '已經過了': 'already passed', '提醒時間': 'Reminder', '還沒選店家': 'No store yet',
+  // 規格
+  '大': 'Large', '中': 'Medium', '小': 'Small', '不指定': 'Not specified', '其他規格': 'Other size',
+  // 共用、通知
+  '你': 'You', '我': 'Me', '家人': 'Family', '更新': 'Updated', '個': '', '項': 'items',
+  '你目前只能看，不能修改。請擁有者把你設成可編輯。': 'You can only view this. Ask the owner to let you edit.',
+  '沒有存到：你沒有這張清單的編輯權限。': 'Not saved: you don’t have permission to edit this list.',
+  '沒有存到，請檢查網路後再試一次。': 'Not saved. Check your connection and try again.',
+  '這台裝置的空間不夠，照片可能沒存到。': 'This device is out of space; the photo may not have been saved.',
+  '加了': 'added', '買到了': 'bought', '把': '', '改成': 'changed to', '開了新清單': 'started a new list', '正在結帳': 'is checking out',
+  '即時同步斷線，重新整理頁面試試。': 'Live sync disconnected. Try reloading the page.',
+  // 邀請
+  '通知對方': 'Let them know', '已邀請': 'Invited',
+  '對方用這個信箱登入，就看得到也改得到這張清單，看不到你的其他清單。': 'They sign in with this email to see and edit this list. They can’t see your other lists.',
+  '用 LINE 傳網址': 'Send link via LINE', '寄 Email': 'Send email', '邀請文字': 'Invite text', '複製文字': 'Copy text',
+  '現在的網址是 localhost，只有你這台電腦打得開。放上正式網址後，對方才連得到。': 'This address is localhost, so only this computer can open it. Publish the app first so others can reach it.',
+  '這個人已經可以編輯這張清單了': 'This person can already edit this list', '邀請失敗：': 'Invite failed: ', '邀請失敗': 'Invite failed',
+  '登入雲端版之後，才能邀請別人一起編輯這張清單。': 'Sign in to the cloud version to invite others to this list.',
+  '建立者': 'Owner', '再按一次移除': 'Tap again to remove', '移除': 'Remove', '可編輯': 'Can edit', '目前只有你。': 'Only you for now.',
+  '可以編輯這張清單的人': 'People who can edit this list',
+  '只有這裡的人看得到、改得到這張清單，你的其他清單不會被看到。': 'Only these people can see and edit this list. Your other lists stay private.',
+  '對方的 Email': 'Their email', '名字，例如：老婆': 'Name, e.g. Mom', '邀請一起編輯': 'Invite to edit', '一起編輯': 'Edit together',
+  '載具只存在這台裝置（雲端沒存到）': 'Carrier saved on this device only (cloud save failed)',
+  // 首頁
+  '正在讀取家裡的清單…': 'Loading your lists…', '目前沒有要買的東西。': 'Nothing to buy right now.',
+  '張清單待採買': 'lists to buy', '張已過提醒時間': 'past reminder', '說清楚哪一罐，就不會買錯。': 'Say exactly which one, and nobody buys the wrong thing.',
+  '新建清單': 'New list', '管理商品 ›': 'Manage products ›', '讀取中…': 'Loading…', '待採買': 'To buy', '待採買的清單': 'Lists to buy',
+  '全部買齊': 'All bought', '還要買': 'To buy', '買好了': 'finished', '完成・已買': 'done · bought', '・沒買到': ' · missed', '看明細': 'Details', '知道了': 'Got it',
+  '結帳中': 'Checking out', '後存成紀錄並通知': 'until saved to history and notified', '結帳': 'checking out', '收回': 'Undo', '還沒買完': 'not finished',
+  '，還有': ', still', '項沒買': 'items left', '打開清單': 'Open list', '還沒有要買的清單': 'No lists yet', '三步就能讓代買的人買對。': 'Three steps so whoever shops gets it right.',
+  '建好商品': 'Add products', '品牌、規格、照片、條碼，全家共用': 'Brand, size, photo and barcode, shared with the family',
+  '開一張清單': 'Start a list', '選店家，挑商品，填數量': 'Pick stores, products and amounts', '傳給對方': 'Send it',
+  'LINE、Email 或加到行事曆': 'LINE, email or calendar', '先看範例': 'See an example', '已過期限': 'Overdue', '已過提醒時間': 'Past reminder',
+  '範例': 'Example', '沒有期限': 'No due date', '跑': 'Visit', '個地方': 'places', '人編輯': 'editor(s)',
+  // 清單頁
+  '這張清單已經被刪除了': 'This list was deleted', '‹ 所有清單': '‹ All lists', '・範例': ' · Example', '建立・': 'created · ', '建立': 'created',
+  '・期限': ' · Due', '・提醒': ' · Reminder', '已買': 'Bought', '・缺貨': ' · Out of stock', '加商品': 'Add products', '重新命名 ›': 'Rename ›', '要買': 'To buy',
+  '＋ 加商品': '+ Add products', '全部處理完了。按下方「載具」或「完成」結帳。': 'All done. Tap “Carrier” or “Done” below to check out.',
+  '還沒有商品，按「加商品」開始挑。': 'No products yet. Tap “Add products” to start.', '缺貨・沒找到': 'Out of stock · not found',
+  '再按一次，確定刪除': 'Tap again to delete', '再按一次，確定退出': 'Tap again to leave', '刪除這張清單': 'Delete this list', '退出這張清單': 'Leave this list',
+  '已結帳，': 'Checked out, ', '後完成': 'until done', '時間到會存成購買紀錄並通知': 'Saved to history and notified when time is up', '發起人': 'the owner',
+  '。按錯了可以收回。': '. Tap Undo if it was a mistake.', '直接完成': 'Finish now', '出示載具': 'Show carrier', '已完成・': 'Done · ',
+  '，沒買到的已列在下面': ', missed items are listed below', '・有用載具': ' · used carrier', '用 LINE 回報': 'Report via LINE', '再買一次': 'Buy again',
+  '重新打開': 'Reopen', '・還有': ' · still', '可替代': 'Substitutes OK', '不可替代': 'No substitutes', '缺貨・可買別牌': 'Out · other brand OK',
+  '缺貨・這次不買': 'Out · skip this time', '買了替代品': 'Bought a substitute', '數量': 'Quantity', '減少一個': 'One less', '增加一個': 'One more',
+  '給店員看': 'Show to staff', '缺貨': 'Out of stock', '找到了': 'Found it', '取消已買：': 'Unmark bought: ', '標記已買：': 'Mark bought: ', '看': 'View',
+  '的詳細資料': 'details', '期限與通知': 'Due date & reminders', '什麼時候要買好': 'When it’s needed by',
+  '前。過了還沒買完，首頁會提醒。': '. If it’s not done by then, the home page will remind you.', '還沒設定期限。': 'No due date yet.',
+  '。時間到還沒買完，首頁會一直顯示提醒。': '. If it’s not done by then, the home page keeps reminding you.',
+  '設定後可以加到日曆；過了時間還沒買完，首頁會提醒。': 'Once set you can add it to your calendar; if it’s not done in time, the home page reminds you.',
+  '清除': 'Clear', '把整張清單傳給對方': 'Send the whole list', '，對方點連結就能一起打勾': ', they can tick items from the link',
+  '用 LINE 傳送': 'Send via LINE', '用手機的郵件 App 或 Gmail 開一封寫好的信，填對方信箱就能寄。': 'Opens a ready-made email in your mail app or Gmail. Just add their address.',
+  '郵件 App': 'Mail app', '行事曆': 'Calendar', '加到手機行事曆，時間到會跳通知；沒買完過幾小時會再提醒一次。': 'Add to your phone calendar for a notification; it reminds you again a few hours later if not done.',
+  '先設定期限或提醒時間，才能加到行事曆。': 'Set a due date or reminder first to add it to a calendar.', 'Apple／手機行事曆': 'Apple / phone calendar',
+  'Google 日曆': 'Google Calendar', '加到行事曆': 'Add to calendar', '清單文字': 'List text', '複製': 'Copy',
+  // 商品頁
+  '哪個牌子、什麼規格，拍張照存起來。': 'Which brand, which size: snap a photo and save it.', '項商品，全家共用': 'products, shared with family',
+  '新增商品': 'New product', '搜尋品名、品牌、條碼': 'Search name, brand, barcode', '搜尋商品': 'Search products', '店家': 'Stores', '全部店家': 'All stores',
+  '品類': 'Category', '全部': 'All', '還沒有': 'No', '例如：': 'e.g. ', '。寫清楚規格，代買的人才不會拿錯。': ' yet. Write the exact size so nobody grabs the wrong one.',
+  '新增': 'Add', '商品庫是空的': 'No products yet', '先從家裡最常補的東西開始，例如衛生紙、牛奶。': 'Start with what you restock most, like toilet paper or milk.',
+  '找不到符合的商品': 'No matching products', '換個關鍵字，或切回「全部」看看。': 'Try another word, or switch back to “All”.', '可補條碼': 'Add barcode',
+  // 紀錄頁
+  '購買紀錄': 'Purchase history', '買過的清單，一鍵再買一次。': 'Past lists. Buy again in one tap.', '還沒有紀錄': 'No history yet',
+  '清單結帳後過 2 分鐘，就會出現在這裡。': 'Lists show up here 2 minutes after checkout.', '結帳・': 'checked out · ', '・用載具': ' · carrier', '查看 ›': 'View ›',
+  // 我的
+  '清單和商品存在 Supabase 雲端，登入後在哪支手機都能用。': 'Lists and products are stored in the Supabase cloud. Sign in on any phone to use them.',
+  '每張清單各自決定誰能編輯：打開清單，在最下面「一起編輯」輸入對方的 Email。對方只看得到你邀請他的那幾張。': 'Each list has its own editors: open a list and enter their email under “Edit together” at the bottom. They only see the lists you invite them to.',
+  '還沒設定雲端，資料只存在這台裝置的瀏覽器，換手機或換瀏覽器就看不到。': 'Cloud is not set up. Data is stored only in this browser and won’t appear on other phones or browsers.',
+  '在 index.html 最上面填好 Supabase 的網址和金鑰，就會改成全家同步。': 'Fill in the Supabase URL and key at the top of index.html to sync with your family.',
+  '載具、共用方式和範例資料。': 'Carrier, settings and example data.', '我的手機條碼載具': 'My mobile barcode carrier', '斜線開頭共 8 碼。': '8 characters starting with a slash.',
+  '只存在你自己的帳號裡，家人看不到。': 'Stored only in your account; family can’t see it.', '存在這台裝置。': 'Stored on this device.', '載具號碼': 'Carrier number',
+  '儲存': 'Save', '雲端同步中': 'Cloud sync on', '只存在這台裝置': 'This device only', '設定': 'Settings', '我的名字': 'My name',
+  '一起編輯清單的人會看到這個名字。': 'People you share lists with see this name.', '例：Anderson': 'e.g. Anderson', '外觀': 'Appearance',
+  '深色或淺色，只影響這台裝置。': 'Dark or light. Only affects this device.', '跟隨系統': 'System', '淺色': 'Light', '深色': 'Dark',
+  '語言': 'Language', '介面文字的語言，只影響這台裝置。分享出去的清單文字維持中文。': 'Interface language for this device. Shared list text stays in Chinese.',
+  '帳號': 'Account', '登出': 'Sign out', '範例資料': 'Example data',
+  '6 項範例商品和 1 張範例清單，都會標上「範例」。看完可以一次清掉，不會動到你自己建的東西。': '6 example products and 1 example list, all marked “Example”. Clear them in one go without touching your own items.',
+  '再按一次確定清除': 'Tap again to clear', '清除範例': 'Clear examples', '載入範例': 'Load examples', '這一版能做什麼': 'What this version does',
+  '清單、商品、打勾、缺貨處理、給店員看、載具結帳、相機掃條碼、LINE、Email、行事曆都可以用。': 'Lists, products, ticking off, out-of-stock handling, showing staff, carrier checkout, barcode scanning, LINE, email and calendar all work.',
+  '還沒有：手機推播通知。之後再加。': 'Not yet: phone push notifications. Coming later.',
+  // 登入
+  '登入後，全家共用同一份清單。': 'Sign in to share the same lists with your family.', '用 Email 登入': 'Sign in with email',
+  '輸入信箱，我們寄一封登入連結給你，點了就登入，不用密碼。': 'Enter your email and we’ll send a sign-in link. No password needed.',
+  '寄登入連結': 'Send sign-in link', '只有加入「家庭成員」的信箱才看得到清單。': 'Only emails added as family members can see lists.',
+  '這個信箱還沒加入家庭': 'This email isn’t in the family yet',
+  '還不是家庭成員。請已經加入的家人到「我的」→「家庭成員」新增你的信箱，再重新整理這頁。': 'is not a family member yet. Ask a family member to add your email, then reload this page.',
+  '換一個信箱登入': 'Use another email',
+  // 掃描、結帳列
+  '掃描條碼': 'Scan barcode', '把條碼放在畫面中間，拿穩': 'Center the barcode and hold steady', '改用拍照': 'Take a photo instead', '取消': 'Cancel',
+  '・沒買到的也會一起通知': ' · missed items are included', '載具': 'Carrier', '完成': 'Done', '關閉': 'Close',
+  // 新清單
+  '1　名稱': '1  Name', '例：聚會、10/28 補貨': 'e.g. Party, 10/28 restock', '2　什麼時候要買好': '2  When it’s needed by', '3　要不要提醒': '3  Reminder',
+  '不用提醒': 'No reminder', '要提醒': 'Remind me', '4　邀請一起編輯（選填）': '4  Invite editors (optional)', '＋ 加入': '+ Add',
+  '之後也可以在清單最下面再邀請別人。': 'You can also invite people later at the bottom of the list.',
+  '建好之後再挑商品，每樣東西可以各自選要去好事多、全聯還是超商買。': 'Pick products after creating it. Each item can be from Costco, PX Mart or a convenience store.',
+  '建立，開始挑商品': 'Create and pick products', '請填名稱，例如「聚會」': 'Enter a name, e.g. “Party”', '請選什麼時候要買好': 'Choose when it’s needed by',
+  '請選提醒時間，或改成「不用提醒」': 'Choose a reminder time, or pick “No reminder”', '人，記得把網址傳給對方（清單最下面可以再傳）': 'people. Remember to send them the link (also at the bottom of the list)',
+  '已建立清單，並加入「': 'List created and added “', '已建立清單，並加入': 'List created and added', '請輸入正確的 Email': 'Enter a valid email', '不用邀請自己': 'No need to invite yourself',
+  // 挑商品
+  '加到': 'Add to', '這次去哪裡買': 'Where are you shopping', '搜尋商品、品牌': 'Search products, brands', '也顯示沒標': 'Also show products not tagged',
+  '的商品': '','沒有想要的？': 'Not here?', '點品類新增商品，存好會直接加進這張清單。': 'Tap a category to add a product; it goes straight into this list.',
+  '還沒有標記': 'Nothing tagged', '勾選上面的選項，看看其他店的商品。': 'Tick the option above to see other stores’ products.', '從下面的品類新增一個。': 'Add one from the categories below.',
+  '減少': 'Less', '增加': 'More', '加入': 'Add',
+  // 商品詳情
+  '商品資料': 'Product details', '這個商品已經被刪除了。': 'This product was deleted.', '編輯': 'Edit', '加到這張清單 ›': 'Add to this list ›', '在哪買': 'Where to buy',
+  'Item 編號': 'Item number', '條碼': 'Barcode', '缺貨時': 'If out of stock', '可以買同品類其他牌子': 'Another brand is fine', '不可替代，缺貨就先不買': 'No substitutes; skip if out',
+  '備註': 'Notes', '價籤照片': 'Price tag photo', '最後修改': 'Last edited', '加入購買清單': 'Add to a shopping list', '・已買': ' · bought',
+  '・已有這項，會再加 1': ' · already there, adds 1 more', '要加到哪裡？': 'add to which list?', '目前沒有待採買的清單。': 'No lists to buy right now.',
+  '＋ 新建一張清單': '+ New list', '照片': 'Photo', '品牌': 'Brand', '規格': 'Size',
+  '已經有照片了。再拍一張商品背面的條碼，之後請店員找東西會更方便。': 'Photo saved. A photo of the barcode on the back makes it easier for staff to find.',
+  '還可以補上：': 'You can still add: ', '補充資料': 'Add details',
+  // 商品編輯
+  '先拍一張商品照片就能存，品牌、規格、條碼都可以之後慢慢補。': 'A photo is enough to save. Brand, size and barcode can come later.',
+  '✓ 已經有條碼，店員可以直接掃。': '✓ Barcode saved; staff can scan it.',
+  '照片存好了。也可以再拍一張商品背面的條碼，之後請店員找東西會更方便。': 'Photo saved. You can also snap the barcode on the back to help staff find it.',
+  '拍條碼': 'Snap barcode', '編輯商品': 'Edit product', '換一張照片': 'Change photo', '拍照或選照片': 'Take or choose a photo', '移除照片': 'Remove photo',
+  '選一個品類': 'Choose a category', '品名（「其他」類才需要填）': 'Name (only for “Other”)', '例：燈泡、拖把': 'e.g. light bulb, mop',
+  '品牌或品名': 'Brand or name', '例：Kirkland、拿鐵': 'e.g. Kirkland, latte', '例：': 'e.g. ', '在哪裡買（可複選，之後再補也行）': 'Where to buy (pick any, or add later)',
+  '缺貨時可以買別的牌子嗎？': 'Another brand OK if out of stock?', '可以替代': 'Substitutes OK', '例：要綠色包裝那款，不是藍色': 'e.g. the green pack, not the blue one',
+  '更多資料：條碼、Item 編號': 'More: barcode, item number', '商品背面（有條碼的那面）': 'Back of product (barcode side)', '背面照': 'Back photo',
+  '拍條碼那面': 'Snap barcode side', '條碼數字（拍照會自動帶入）': 'Barcode number (filled in from photos)', '通常不用自己打': 'Usually no need to type',
+  '相機掃描': 'Scan with camera', '好事多 Item 編號（標籤上的「品號」）': 'Costco item number (on the shelf tag)', '店員最常用這個查': 'Staff look this up most',
+  '價籤照片（選填）': 'Price tag photo (optional)', '價籤': 'Price tag', '拍價籤': 'Snap price tag', '儲存並加進清單': 'Save and add to list',
+  '儲存（之後可以再補）': 'Save (add more later)', '刪除這個商品': 'Delete this product',
+  '拍商品照片或背面照時會自動讀條碼。生鮮、秤重的通常沒有條碼，不用填。': 'Barcodes are read from photos automatically. Fresh and weighed goods usually have none.',
+  '✓ 有效的 EAN-13': '✓ Valid EAN-13', '（台灣商品）': ' (Taiwan product)', '最後一碼對不上，請再核對一次數字。': 'The check digit doesn’t match. Please recheck the number.',
+  '✓ 有效的 EAN-8': '✓ Valid EAN-8', '✓ 有效的 UPC-A（美國商品）': '✓ Valid UPC-A (US product)',
+  '不是標準的 13 碼，會用一般條碼格式顯示給店員。': 'Not a standard 13-digit code; staff will see a generic barcode.',
+  '請先選品類': 'Choose a category first', '「其他」類請填品名': 'Enter a name for “Other”', '已加進清單': 'Added to list', '已儲存': 'Saved',
+  // 給店員看
+  '上一個': 'Previous', '下一個': 'Next', '您好，請幫我找這個商品': 'Hello, could you help me find this item?', 'ITEM 編號': 'ITEM NO.', '商品背面': 'Back of product',
+  '螢幕調亮一點，掃描比較容易成功': 'Turn up the screen brightness for easier scanning', '・左右滑動換下一個': ' · swipe for next',
+  '請店員掃描手機條碼載具': 'Please scan my mobile barcode carrier',
+  // 完成結帳
+  '完成了': 'Done', '沒買到': 'Missed', '沒買到：': 'Missed: ', '倒數結束會存成購買紀錄': 'Saved to history when the countdown ends',
+  '倒數結束會存成購買紀錄。按錯了可以收回；確定沒問題就按「直接完成」，不用等。': 'Saved to history when the countdown ends. Tap Undo if it was a mistake, or “Finish now” to skip the wait.', '打開 App 就會看到': 'will see it when they open the app',
+  '。按錯了可以收回；確定沒問題就按「直接完成」，不用等。': '. Tap Undo if it was a mistake, or “Finish now” to skip the wait.',
+  '打開 App 就會看到完成通知。也可以直接傳 LINE 跟對方說。': 'They’ll see it when they open the app. You can also tell them on LINE.',
+  '已存成購買紀錄。': 'Saved to history.', '回清單': 'Back to lists',
+  '已經超過 2 分鐘，不能收回了。可以在清單裡「重新打開」。': 'More than 2 minutes have passed, so it can’t be undone. You can “Reopen” it from the list.',
+  '已收回，可以繼續買': 'Undone, keep shopping', '設定手機條碼載具': 'Set up mobile barcode carrier',
+  '財政部的手機條碼，斜線開頭共 8 碼，在載具 App 或發票 App 裡可以找到。': 'Taiwan’s mobile invoice barcode: 8 characters starting with a slash, found in your invoice app.',
+  '只存在你自己的帳號，家人看不到。': 'Stored only in your account; family can’t see it.', '儲存並出示載具': 'Save and show carrier', '這次不用載具，直接完成': 'Skip the carrier this time and finish',
+  '完成了，已存成購買紀錄': 'Done, saved to history',
+  // 範例資料
+  '範例已經載入了': 'Examples already loaded', '鮮乳': 'Fresh milk', '範例牧場': 'Example Dairy', '保存期限挑最後面的': 'Pick the latest expiry date',
+  '抽取式衛生紙': 'Tissue packs', '範例品牌': 'Example Brand', '要綠色包裝那款，不是藍色': 'The green pack, not the blue one', '洗衣精補充包': 'Detergent refill',
+  '2L × 3 包': '2L × 3 packs', '抗菌款，不要香氛款': 'Antibacterial, not scented', '洗選蛋': 'Washed eggs', '範例農場': 'Example Farm', '30 入': '30 count',
+  '牙膏': 'Toothpaste', '藍色牙齦護理款': 'Blue gum-care one', '範例：週末補貨': 'Example: weekend restock',
+  '已載入範例，在「我的」可以一次清掉': 'Examples loaded. Clear them anytime under “Me”.', '範例已清除': 'Examples cleared',
+  // 提示
+  '已選取文字，請按複製': 'Text selected, please copy', '已複製': 'Copied', '都處理完了，按下方「載具」或「完成」結帳': 'All done. Tap “Carrier” or “Done” below to check out',
+  '最少 1 個；不要了請按「移除」': 'At least 1. Tap “Remove” if you don’t need it', '標記缺貨。這項可以買別的牌子': 'Marked out of stock. Another brand is fine',
+  '標記缺貨。這項不可替代，這次先不買': 'Marked out of stock. No substitutes, skipped this time', '已移除': 'Removed', '已加進': 'Added to',
+  '提醒時間：': 'Reminder: ', '已退出這張清單': 'You left this list', '清單已刪除': 'List deleted', '重新命名': 'Rename', '清單名稱': 'List name',
+  '清單已重新打開': 'List reopened', '已建立新清單': 'New list created', '處理照片中…': 'Processing photo…',
+  '這張照片讀不了，換一張試試（建議用 JPG）': 'Can’t read this photo. Try another (JPG works best)', '✓ 從照片讀到條碼': '✓ Barcode read from photo',
+  '照片存好了': 'Photo saved', '這張照片讀不了，換一張試試': 'Can’t read this photo. Try another', '✓ 讀到條碼': '✓ Barcode read',
+  '這張讀不到條碼，照片先存著，店員可以看照片找。想再試就靠近一點重拍。': 'No barcode found. The photo is saved so staff can use it. Move closer and retake to try again.',
+  '價籤照片已存好': 'Price tag photo saved', '讀到條碼': 'Barcode read', '辨識條碼中…': 'Reading barcode…',
+  '讀不到條碼。靠近一點、對準條碼、光線亮一點再拍一次，或直接輸入數字。': 'Can’t read the barcode. Move closer, aim at it, use more light, or type the number.',
+  '已下載行事曆檔，打開它就能加到行事曆': 'Calendar file downloaded. Open it to add to your calendar',
+  '只有建立這個商品的人可以刪除': 'Only the person who created this product can delete it', '商品已刪除': 'Product deleted', '✓ 格式正確': '✓ Format looks right',
+  '格式不對：斜線開頭，後面 7 碼是大寫英文、數字或 + - .': 'Wrong format: a slash followed by 7 capital letters, digits or + - .',
+  '寄送失敗：': 'Sending failed: ', '登入連結已寄到': 'Sign-in link sent to', '，去信箱點連結': '. Check your inbox and tap the link', '名字已儲存': 'Name saved',
+  '這個信箱已經在家庭裡了': 'This email is already in the family', '加入失敗：': 'Couldn’t add: ', '已加入': 'Added', '，把網址傳給對方登入就行': '. Send them the link to sign in',
+  '已重新命名': 'Renamed', '載具格式不對：斜線開頭共 8 碼': 'Wrong carrier format: 8 characters starting with a slash', '載具已儲存': 'Carrier saved',
+  '載入不了 Supabase 程式庫（可能被瀏覽器的追蹤保護擋住），先用單機模式': 'Couldn’t load the Supabase library (maybe blocked by tracking protection). Using offline mode',
+  '讀取共用名單失敗，請確認已經執行過最新的 SQL：': 'Couldn’t load shared members. Make sure the latest SQL has been run: ', '讀取雲端資料失敗：': 'Couldn’t load cloud data: ',
+  '已刪除的商品': 'Deleted product', '例如': 'e.g.'
+};
+var HAN = /[㐀-鿿]/;
+var keys = Object.keys(EN).filter(function (k) { return k.length; }).sort(function (a, b) { return b.length - a.length; });
+var RE = new RegExp(keys.map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|'), 'g');
+// 回傳英文；對不上（例如使用者自己打的中文）回傳 null，保留原文
+function tr(s) {
+  var k = s.trim();
+  if (!HAN.test(k)) return null;
+  var lead = s.match(/^\s*/)[0], tail = s.match(/\s*$/)[0];
+  if (EN[k] != null) return lead + EN[k] + tail;
+  var q = [];
+  var r = k.replace(/「([^」]*)」/g, function (m, x) { q.push(EN[x] != null ? EN[x] : x); return '\u0001' + (q.length - 1) + '\u0001'; });
+  r = r.replace(RE, function (m) { return ' ' + EN[m] + ' '; });
+  if (HAN.test(r)) return null;
+  r = r.replace(/\u0001(\d+)\u0001/g, function (m, i) { return ' “' + q[i] + '” '; })
+    .replace(/\s+/g, ' ').replace(/\s+([,.:;!?)”])/g, '$1').replace(/([(“])\s+/g, '$1').trim();
+  return lead + r + tail;
+}
+var ATTRS = ['placeholder', 'aria-label', 'title', 'alt'], SKIP = /^(SCRIPT|STYLE|TEXTAREA)$/;
+function doText(n) { var p = n.parentNode; if (!p || SKIP.test(p.nodeName)) return; var t = tr(n.data); if (t != null && t !== n.data) n.data = t; }
+function doEl(el) { ATTRS.forEach(function (a) { var v = el.getAttribute(a); if (v) { var t = tr(v); if (t != null && t !== v) el.setAttribute(a, t); } }); }
+function walk(root) {
+  if (root.nodeType === 3) return doText(root);
+  if (root.nodeType !== 1 || SKIP.test(root.nodeName)) return;
+  doEl(root);
+  var w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+  for (var n = w.nextNode(); n; n = w.nextNode()) { if (n.nodeType === 3) doText(n); else doEl(n); }
+}
+document.documentElement.lang = 'en';
+document.title = 'Family Restock List';
+walk(document.body);
+new MutationObserver(function (ms) {
+  ms.forEach(function (m) {
+    if (m.type === 'childList') m.addedNodes.forEach(walk);
+    else if (m.type === 'characterData') doText(m.target);
+    else doEl(m.target);
+  });
+}).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS });
+})();
+</script>
 <script>
 (function () {
 'use strict';
@@ -1387,6 +1636,8 @@ function viewMe() {
       (MODE === 'cloud' ? '<div class="set-row"><div><strong>我的名字</strong><p>一起編輯清單的人會看到這個名字。</p></div><form class="form" id="myname-form" novalidate><div class="input-row"><input id="myname-in" value="' + esc(MY_NAME) + '" placeholder="例：Anderson" maxlength="20" autocomplete="off" aria-label="我的名字"><button class="btn btn-primary" type="submit">儲存</button></div></form></div>' : '') +
       '<div class="set-row"><div><strong>外觀</strong><p>深色或淺色，只影響這台裝置。</p></div><div class="seg" role="group" aria-label="外觀">' +
         [['', '跟隨系統'], ['light', '淺色'], ['dark', '深色']].map(t => '<button type="button" data-act="theme" data-v="' + t[0] + '" aria-pressed="' + ((document.documentElement.dataset.theme || '') === t[0]) + '">' + t[1] + '</button>').join('') + '</div></div>' +
+      '<div class="set-row"><div><strong>語言</strong><p>介面文字的語言，只影響這台裝置。分享出去的清單文字維持中文。</p></div><div class="seg" role="group" aria-label="Language">' +
+        [['zh', '中文'], ['en', 'English']].map(t => '<button type="button" data-act="lang" data-v="' + t[0] + '" aria-pressed="' + (document.documentElement.lang === 'en' ? t[0] === 'en' : t[0] === 'zh') + '">' + t[1] + '</button>').join('') + '</div></div>' +
       (MODE === 'cloud' ? '<div class="set-row"><div><strong>帳號</strong><p class="set-mail">' + esc(ME) + '</p></div><button class="btn btn-sm btn-secondary" data-act="logout">登出</button></div>' : '') +
     '</div>' +
     '<div class="tile reveal"><h3>範例資料</h3><p>6 項範例商品和 1 張範例清單，都會標上「範例」。看完可以一次清掉，不會動到你自己建的東西。</p><div class="chips">' + (hasSample ? '<button class="btn btn-sm btn-danger" data-act="samples-clear">' + (ARMED && ARMED.key === 'samples' && Date.now() < ARMED.until ? '再按一次確定清除' : '清除範例') + '</button>' : '<button class="btn btn-sm btn-secondary" data-act="samples-load">載入範例</button>') + '</div></div>' +
@@ -1643,7 +1894,7 @@ function openEditor(pid, opts) {
       '<label class="field"><span>品類</span><select id="ed-cat"><option value="">選一個品類</option>' + CATS.map(c => '<option value="' + c.id + '"' + (d.cat === c.id ? ' selected' : '') + '>' + c.name + '</option>').join('') + '</select></label>' +
       '<label class="field" id="ed-name-wrap"' + (d.cat === 'other' ? '' : ' hidden') + '><span>品名（「其他」類才需要填）</span><input id="ed-name" value="' + esc(d.cat === 'other' ? d.name : '') + '" placeholder="例：燈泡、拖把" maxlength="40" autocomplete="off"></label>' +
       '<div class="field-row"><label class="field"><span>品牌或品名</span><input id="ed-brand" value="' + esc(d.brand) + '" placeholder="例：Kirkland、拿鐵" maxlength="40" autocomplete="off"></label>' +
-      '<label class="field"><span>規格</span><select id="ed-size"><option value="">不指定</option>' + SIZES.map(s => '<option' + (specSel === s ? ' selected' : '') + '>' + s + '</option>').join('') + '</select></label></div>' +
+      '<label class="field"><span>規格</span><select id="ed-size"><option value="">不指定</option>' + SIZES.map(s => '<option value="' + s + '"' + (specSel === s ? ' selected' : '') + '>' + s + '</option>').join('') + '</select></label></div>' +
       '<label class="field" id="ed-spec-wrap"' + (specSel === '其他' ? '' : ' hidden') + '><span>其他規格</span><input id="ed-spec" value="' + esc(specSel === '其他' ? d.spec : '') + '" placeholder="例：' + esc(hint) + '" maxlength="40" autocomplete="off"></label>' +
       '<fieldset class="field"><legend>在哪裡買（可複選，之後再補也行）</legend><div class="chips">' + STORES.map(s => '<button type="button" class="chip" data-act="ed-store" data-store="' + s.id + '" aria-pressed="' + d.stores.includes(s.id) + '">' + s.name + '</button>').join('') + '</div></fieldset>' +
       '<div class="field"><span>缺貨時可以買別的牌子嗎？</span><div class="seg" role="group"><button type="button" data-act="ed-sub" data-v="1" aria-pressed="' + !!d.sub + '">可以替代</button><button type="button" data-act="ed-sub" data-v="0" aria-pressed="' + !d.sub + '">不可替代</button></div></div>' +
@@ -2036,6 +2287,8 @@ const ACT = {
     try { v ? localStorage.setItem(LS_THEME, v) : localStorage.removeItem(LS_THEME); } catch (e) {}
     render();
   },
+  // 換語言要重新載入：已經換成英文的字沒辦法原地換回中文
+  'lang': a => { try { localStorage.setItem('restock.lang', a.dataset.v); } catch (e) {} location.reload(); },
   'logout': () => { if (SB) SB.auth.signOut().then(() => location.reload()); },
   'member-remove': a => {
     const em = a.dataset.email;
