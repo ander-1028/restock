@@ -547,6 +547,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 .prod-card{border:1px solid var(--line)}
 .hist-card{border:1px solid var(--line)}
 /* 使用教學：用動畫在假手機上示範操作 */
+.inv-one{display:grid;gap:10px;padding-top:12px;border-top:1px solid var(--line-soft)}
 .tour{display:grid;gap:14px;justify-items:center;padding-bottom:4px}
 .tour [hidden]{display:none!important}
 .tour-bars{display:flex;gap:6px;width:100%;max-width:440px}
@@ -625,7 +626,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.6（10/25 使用教學）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.7（10/25 邀請自動填信箱）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -647,7 +648,7 @@ var EN = {
   // 導覽、頁尾
   '補貨清單': 'Restock', '主要頁面': 'Main pages', '清單': 'Lists', '商品': 'Products', '紀錄': 'History', '我的': 'Me',
   '同步狀態': 'Sync status', '連線中': 'Connecting', '正在連線…': 'Connecting…', '已同步': 'Synced', '僅本機': 'This device only', '未登入': 'Signed out',
-  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items', '帳號資料隔離': 'account privacy', '使用教學': 'tutorial',
+  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items', '帳號資料隔離': 'account privacy', '使用教學': 'tutorial', '邀請自動填信箱': 'invite email prefill',
   '只改這張清單裡的這一項。品牌、規格、照片要改的話：': 'Only changes this item in this list. To change brand, size or photo:',
   '編輯商品資料 ›': 'Edit product details ›', '這一項改到': 'Store changed to',
   '清單和商品存在 Supabase 雲端，家庭成員即時同步。': 'Lists and products are stored in the Supabase cloud and sync live with your family.',
@@ -841,6 +842,9 @@ var EN = {
   '載入不了 Supabase 程式庫（可能被瀏覽器的追蹤保護擋住），先用單機模式': 'Couldn’t load the Supabase library (maybe blocked by tracking protection). Using offline mode',
   '讀取共用名單失敗，請確認已經執行過最新的 SQL：': 'Couldn’t load shared members. Make sure the latest SQL has been run: ', '讀取雲端資料失敗：': 'Couldn’t load cloud data: ',
   '已刪除的商品': 'Deleted product', '例如': 'e.g.',
+  'App 不會自己寄信，請用 LINE 或 Email 把網址傳給對方。對方點網址，信箱會自動填好。': 'The app doesn’t send emails itself. Send the link by LINE or email; when they open it, their email is already filled in.',
+  '你被邀請的信箱已經填好了，按「寄登入連結」，再去信箱點信裡的連結就登入了。': 'Your invited email is already filled in. Tap “Send sign-in link”, then open the link in that email to sign in.',
+  '這個人已經在名單裡了': 'This person is already on the list',
   // 使用教學
   '使用教學': 'Tutorial', '播放教學': 'Play tutorial', '看使用教學': 'Watch tutorial', '載具、設定和使用教學。': 'Carrier, settings and tutorial.',
   '半分鐘的操作示範：怎麼開清單、加要買的東西，還有拍照、讀條碼讓東西買得更準。': 'A 30-second demo: create a list, add what to buy, and use photos and barcodes so the right thing gets bought.',
@@ -1324,17 +1328,22 @@ function addListMembers(lid, invites) {
   enqueue('lm', async () => { const { error } = await SB.from('list_members').upsert(rows, { onConflict: 'list_id,email', ignoreDuplicates: true }); if (error) throw error; await loadLM(); }).catch(onWriteError);
 }
 function inviteText(l, em) {
-  return '我邀請你一起編輯補貨清單「' + l.title + '」' + (l.dueAt ? '（' + fmtDue(l.dueAt) + ' 前要買好）' : '') + '\n用這個信箱登入就看得到：' + em + (APP_URL ? '\n網址：' + APP_URL : '');
+  return '我邀請你一起編輯補貨清單「' + l.title + '」' + (l.dueAt ? '（' + fmtDue(l.dueAt) + ' 前要買好）' : '') + '\n用這個信箱登入就看得到：' + em + (APP_URL ? '\n網址：' + APP_URL + '#login=' + enc(em) : '');
 }
-function openInviteDone(lid, em) {
+function openInviteDone(lid, ems, onClose) {
   const l = D.lists[lid]; if (!l) return;
-  const t = inviteText(l, em);
-  openSheet({ title: '通知對方', html: '<div class="form"><p>已邀請 <strong>' + esc(em) + '</strong>。對方用這個信箱登入，就看得到也改得到這張清單，看不到你的其他清單。</p>' +
-    '<div class="chips"><a class="btn btn-primary" href="' + lineUrl(t) + '" target="_blank" rel="noopener">用 LINE 傳網址</a><a class="btn btn-secondary" href="mailto:' + enc(em) + '?subject=' + enc('一起編輯補貨清單：' + l.title) + '&body=' + enc(t) + '">寄 Email</a></div>' +
-    '<textarea id="inv-text" readonly rows="4" aria-label="邀請文字">' + esc(t) + '</textarea><button class="btn btn-secondary btn-sm" data-act="copy-inv" style="justify-self:start">複製文字</button>' +
+  openSheet({ title: '通知對方', onClose, html: '<div class="form"><p>已邀請 <strong>' + ems.map(e => esc(e)).join('、') + '</strong>。對方用這個信箱登入，就看得到也改得到這張清單，看不到你的其他清單。</p>' +
+    '<p class="help">App 不會自己寄信，請用 LINE 或 Email 把網址傳給對方。對方點網址，信箱會自動填好。</p>' +
+    ems.map(em => {
+      const t = inviteText(l, em);
+      return '<div class="inv-one">' + (ems.length > 1 ? '<strong>' + esc(em) + '</strong>' : '') +
+        '<div class="chips"><a class="btn btn-primary" href="' + lineUrl(t) + '" target="_blank" rel="noopener">用 LINE 傳網址</a><a class="btn btn-secondary" href="mailto:' + enc(em) + '?subject=' + enc('一起編輯補貨清單：' + l.title) + '&body=' + enc(t) + '">寄 Email</a></div>' +
+        '<textarea readonly rows="4" aria-label="邀請文字">' + esc(t) + '</textarea><button class="btn btn-secondary btn-sm" data-act="copy-inv" style="justify-self:start">複製文字</button></div>';
+    }).join('') +
     (/localhost|127\.0\.0\.1/.test(APP_URL) ? '<p class="help warn">現在的網址是 localhost，只有你這台電腦打得開。放上正式網址後，對方才連得到。</p>' : '') + '</div>' });
 }
 async function inviteToList(lid, em, nm) {
+  if (membersOf(lid).some(m => m.email === em)) { toast('這個人已經可以編輯這張清單了', 4000); return false; }
   const { error } = await SB.from('list_members').insert({ list_id: lid, email: em, name: nm || em.split('@')[0], role: 'editor', invited_by: ME });
   if (error) { toast(error.code === '23505' ? '這個人已經可以編輯這張清單了' : '邀請失敗：' + error.message, 5000); return false; }
   await loadLM(); return true;
@@ -1765,10 +1774,12 @@ function viewMe() {
 }
 
 /* ── 登入 ── */
+// 邀請網址 #login=對方信箱：登入頁直接填好
+let LOGIN_HINT = '';
 function viewLogin() {
   return '<section class="band hero"><div class="wrap"><h1 class="hero-title' + R() + '">補貨清單</h1><p class="tagline' + R(1) + '">登入後，全家共用同一份清單。</p></div></section>' +
-    '<section class="band alt"><div class="wrap"><div class="empty" style="max-width:520px;margin:0 auto"><h3>用 Email 登入</h3><p class="muted">輸入信箱，我們寄一封登入連結給你，點了就登入，不用密碼。</p>' +
-    '<form id="login-form" class="form" style="width:100%" novalidate><input id="login-email" type="email" placeholder="you@example.com" autocomplete="email"><button class="btn btn-primary btn-wide" type="submit">寄登入連結</button></form>' +
+    '<section class="band alt"><div class="wrap"><div class="empty" style="max-width:520px;margin:0 auto"><h3>用 Email 登入</h3><p class="muted">' + (LOGIN_HINT ? '你被邀請的信箱已經填好了，按「寄登入連結」，再去信箱點信裡的連結就登入了。' : '輸入信箱，我們寄一封登入連結給你，點了就登入，不用密碼。') + '</p>' +
+    '<form id="login-form" class="form" style="width:100%" novalidate><input id="login-email" type="email" placeholder="you@example.com" autocomplete="email" value="' + esc(LOGIN_HINT) + '"><button class="btn btn-primary btn-wide" type="submit">寄登入連結</button></form>' +
     '<p class="help">只有加入「家庭成員」的信箱才看得到清單。</p></div></div></section>';
 }
 function viewDenied() {
@@ -1869,11 +1880,12 @@ function createList() {
   const pe = $('#nl-inv-email'); if (pe && validEmail(pe.value)) nlAddInvite();
   put('lists', id, { store: null, dueAt, title: title.slice(0, 30), remindAt, status: 'active', createdBy: ME || 'local', createdAt: Date.now(), sample: false });
   addListMembers(id, NL.invites);
-  if (NL.invites.length) setTimeout(() => toast('已邀請 ' + NL.invites.length + ' 人，記得把網址傳給對方（清單最下面可以再傳）', 5000), 600);
   closeSheet(true);
-  if (NL.pid && D.products[NL.pid]) { addItem(id, NL.pid, null); goList(id); toast('已建立清單，並加入「' + D.products[NL.pid].name + '」'); return; }
+  const ems = NL.invites.map(v => v.email);
+  if (NL.pid && D.products[NL.pid]) { addItem(id, NL.pid, null); goList(id); toast('已建立清單，並加入「' + D.products[NL.pid].name + '」'); if (ems.length) openInviteDone(id, ems); return; }
   goList(id);
-  setTimeout(() => openPicker(id), 120);
+  if (ems.length) openInviteDone(id, ems, () => openPicker(id));
+  else setTimeout(() => openPicker(id), 120);
 }
 
 const validEmail = v => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v || '').trim());
@@ -1882,7 +1894,8 @@ function nlAddInvite() {
   const em = e.value.trim().toLowerCase();
   if (!validEmail(em)) { toast('請輸入正確的 Email'); return; }
   if (em === ME) { toast('不用邀請自己'); return; }
-  if (!NL.invites.some(v => v.email === em)) NL.invites.push({ email: em, name: n.value.trim() });
+  if (NL.invites.some(v => v.email === em)) { toast('這個人已經在名單裡了'); return; }
+  NL.invites.push({ email: em, name: n.value.trim() });
   e.value = ''; n.value = '';
   $('#nl-invs').innerHTML = NL.invites.map((v, i) => '<button type="button" class="chip" data-act="nl-inv-del" data-i="' + i + '">' + esc((v.name ? v.name + '・' : '') + v.email) + '  ✕</button>').join('');
 }
@@ -2399,7 +2412,7 @@ const ACT = {
   },
   'nl-inv-add': () => nlAddInvite(),
   'nl-inv-del': a => { NL.invites.splice(+a.dataset.i, 1); $('#nl-invs').innerHTML = NL.invites.map((v, i) => '<button type="button" class="chip" data-act="nl-inv-del" data-i="' + i + '">' + esc((v.name ? v.name + '・' : '') + v.email) + '  ✕</button>').join(''); },
-  'copy-inv': () => { const t = $('#inv-text'); if (t) copyText(t.value, t); },
+  'copy-inv': a => { const t = a.parentNode.querySelector('textarea'); if (t) copyText(t.value, t); },
   'list-delete': () => {
     const id = CUR_LIST; if (!id) return;
     if (!arm('list:' + id)) { scheduleRender(); return; }
@@ -2576,7 +2589,7 @@ document.addEventListener('submit', e => {
     if (!validEmail(em)) { toast('請輸入正確的 Email'); return; }
     if (em === ME) { toast('不用邀請自己'); return; }
     const lid = CUR_LIST;
-    inviteToList(lid, em, nm).then(ok => { if (ok) openInviteDone(lid, em); });
+    inviteToList(lid, em, nm).then(ok => { if (ok) openInviteDone(lid, [em]); });
   }
   else if (f.id === 'myname-form') {
     const nm = ($('#myname-in').value || '').trim().slice(0, 20);
@@ -2611,6 +2624,11 @@ $('#file-in').addEventListener('change', async e => {
 async function boot() {
   const h = (location.hash || '').slice(1);
   if (['lists', 'products', 'history', 'me'].includes(h)) VIEW = h;
+  if (h.startsWith('login=')) {
+    try { LOGIN_HINT = decodeURIComponent(h.slice(6)).trim().toLowerCase(); } catch (e) { /* 網址壞掉就不填 */ }
+    if (!validEmail(LOGIN_HINT)) LOGIN_HINT = '';
+    history.replaceState(null, '', location.pathname);
+  }
   const configured = SUPABASE_URL && SUPABASE_ANON_KEY;
   if (configured && !(window.supabase && window.supabase.createClient)) {
     for (const src of ['https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js', 'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.45.4/supabase.min.js']) {
