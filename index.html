@@ -546,6 +546,66 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 .pk-row{background:var(--surface);border:1px solid var(--line)}
 .prod-card{border:1px solid var(--line)}
 .hist-card{border:1px solid var(--line)}
+/* 使用教學：用動畫在假手機上示範操作 */
+.tour{display:grid;gap:14px;justify-items:center;padding-bottom:4px}
+.tour [hidden]{display:none!important}
+.tour-bars{display:flex;gap:6px;width:100%;max-width:440px}
+.tour-bars button{flex:1;padding:9px 0;background:none;border:0;cursor:pointer}
+.tour-bars i{display:block;height:4px;border-radius:4px;background:var(--line);overflow:hidden}
+.tour-bars i>b{display:block;height:100%;width:0;background:var(--accent)}
+.tour-bars .done i>b{width:100%}
+.tour-bars .now i>b{animation:tourbar linear forwards}
+@keyframes tourbar{to{width:100%}}
+.tour-phone{position:relative;width:min(100%,280px);height:460px;border-radius:38px;border:8px solid var(--fg);background:var(--bg);overflow:hidden;box-shadow:var(--shadow);flex:none}
+.tour-screen{position:absolute;inset:0;padding:24px 16px 16px;display:flex;flex-direction:column;gap:10px;font-size:14px;line-height:1.4;text-align:left}
+.tp-top b{display:block;font-size:22px;font-weight:700}
+.tp-top small,.tp-sub{color:var(--fg-3);font-size:12px}
+.tp-empty{color:var(--fg-3);font-size:13px;margin:4px 0}
+.tp-btn{margin-top:auto;display:block;background:var(--accent);color:var(--on-accent);border-radius:980px;padding:11px;text-align:center;font-weight:600}
+.tp-btn.ghost{background:var(--tile);color:var(--fg)}
+.tp-card,.tp-row{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 14px;display:grid;gap:3px}
+.tp-card b{font-size:17px}
+.tp-card em{justify-self:start;font-style:normal;font-size:12px;background:var(--accent-soft);color:var(--link);border-radius:980px;padding:2px 10px;margin-top:4px}
+.tp-pop{animation:rise .5s var(--ease) both}
+.tp-sheet{position:absolute;left:0;right:0;bottom:0;z-index:3;background:var(--surface);border-radius:24px 24px 0 0;padding:18px 16px 16px;display:flex;flex-direction:column;gap:10px;transform:translateY(105%);transition:transform .45s var(--ease);box-shadow:0 -8px 30px rgba(0,0,0,.14)}
+.tp-sheet.on{transform:none}
+.tp-sheet>strong{font-size:17px}
+.tp-lab{display:grid;gap:4px;font-size:12px;color:var(--fg-2)}
+.tp-in{display:block;min-height:36px;border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:var(--bg);color:var(--fg);font-size:14px}
+.tp-in.focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.tp-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 6px;text-align:center;font-size:12px}
+.tp-cats>span{display:grid;justify-items:center;gap:4px}
+.tp-cats .mono-tile{width:48px;height:48px;border-radius:14px}
+.tp-cats .on .mono-tile{background:var(--fg);color:var(--bg)}
+.tp-row{display:flex;align-items:center;gap:10px}
+.tp-row>div{flex:1;min-width:0}
+.tp-th{width:40px;height:40px;border-radius:12px;background:var(--tile);display:grid;place-items:center;color:var(--fg-2)}
+.tp-qty{display:flex;align-items:center;gap:8px;font-weight:600}
+.tp-qty i{font-style:normal;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center}
+.tp-photo{position:relative;height:120px;border-radius:18px;border:2px dashed var(--line);display:grid;place-items:center;align-content:center;gap:4px;color:var(--fg-3);font-size:12px;overflow:hidden;flex:none}
+.tp-photo .ic{width:34px;height:34px}
+.tp-photo.on{border:2px solid transparent;background:var(--accent-soft);color:var(--link)}
+.tp-photo.on .ic{width:64px;height:64px}
+.tp-photo.on>span{display:none}
+.tp-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.tp-flash.on{animation:tpflash .6s ease-out}
+@keyframes tpflash{from{opacity:.95}to{opacity:0}}
+.tp-bc{display:grid;gap:3px;font-size:12px}
+.tp-bc i{display:block;height:30px;border-radius:4px;background:repeating-linear-gradient(90deg,var(--fg) 0 2px,transparent 2px 4px,var(--fg) 4px 5px,transparent 5px 8px,var(--fg) 8px 11px,transparent 11px 12px)}
+.tp-bc b{color:var(--link);font-weight:600}
+.tp-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:13px;color:transparent;transition:background .2s,border-color .2s}
+.tp-row.on .tp-check{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.tp-row.on b{text-decoration:line-through;color:var(--fg-3)}
+.tp-toast{position:absolute;left:50%;bottom:76px;z-index:4;transform:translate(-50%,10px);background:var(--fg);color:var(--bg);border-radius:980px;padding:8px 14px;font-size:12px;white-space:nowrap;opacity:0;transition:opacity .3s,transform .3s}
+.tp-toast.on{opacity:1;transform:translate(-50%,0)}
+.tour-tap{position:absolute;z-index:6;left:75%;top:85%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:rgba(255,138,101,.35);border:2px solid var(--accent);opacity:0;pointer-events:none;transition:left .5s var(--ease),top .5s var(--ease),opacity .3s}
+.tour-tap.on{opacity:1}
+.tour-tap.press{animation:tppress .4s ease-out}
+@keyframes tppress{50%{transform:scale(.65)}}
+.tour-cap{text-align:center;max-width:440px;display:grid;gap:4px;min-height:100px}
+.tour-cap h3{font-size:20px;margin:0}
+.tour-cap p{margin:0;color:var(--fg-2);line-height:1.6}
+.tour-ctl{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -565,7 +625,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.5（10/24 帳號資料隔離）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.6（10/25 使用教學）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -587,7 +647,7 @@ var EN = {
   // 導覽、頁尾
   '補貨清單': 'Restock', '主要頁面': 'Main pages', '清單': 'Lists', '商品': 'Products', '紀錄': 'History', '我的': 'Me',
   '同步狀態': 'Sync status', '連線中': 'Connecting', '正在連線…': 'Connecting…', '已同步': 'Synced', '僅本機': 'This device only', '未登入': 'Signed out',
-  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items', '帳號資料隔離': 'account privacy',
+  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items', '帳號資料隔離': 'account privacy', '使用教學': 'tutorial',
   '只改這張清單裡的這一項。品牌、規格、照片要改的話：': 'Only changes this item in this list. To change brand, size or photo:',
   '編輯商品資料 ›': 'Edit product details ›', '這一項改到': 'Store changed to',
   '清單和商品存在 Supabase 雲端，家庭成員即時同步。': 'Lists and products are stored in the Supabase cloud and sync live with your family.',
@@ -780,7 +840,17 @@ var EN = {
   '已重新命名': 'Renamed', '載具格式不對：斜線開頭共 8 碼': 'Wrong carrier format: 8 characters starting with a slash', '載具已儲存': 'Carrier saved',
   '載入不了 Supabase 程式庫（可能被瀏覽器的追蹤保護擋住），先用單機模式': 'Couldn’t load the Supabase library (maybe blocked by tracking protection). Using offline mode',
   '讀取共用名單失敗，請確認已經執行過最新的 SQL：': 'Couldn’t load shared members. Make sure the latest SQL has been run: ', '讀取雲端資料失敗：': 'Couldn’t load cloud data: ',
-  '已刪除的商品': 'Deleted product', '例如': 'e.g.'
+  '已刪除的商品': 'Deleted product', '例如': 'e.g.',
+  // 使用教學
+  '使用教學': 'Tutorial', '播放教學': 'Play tutorial', '看使用教學': 'Watch tutorial', '載具、設定和使用教學。': 'Carrier, settings and tutorial.',
+  '半分鐘的操作示範：怎麼開清單、加要買的東西，還有拍照、讀條碼讓東西買得更準。': 'A 30-second demo: create a list, add what to buy, and use photos and barcodes so the right thing gets bought.',
+  '‹ 上一段': '‹ Back', '下一段 ›': 'Next ›', '開始使用': 'Get started', '使用教學影片': 'Tutorial video',
+  '建立購物清單': 'Create a shopping list', '按「新建清單」，取個名字、選好什麼時候要買好。全家打開都看得到同一張。': 'Tap “New list”, give it a name and pick when it’s needed by. Everyone in the family sees the same list.',
+  '加要買的東西': 'Add what to buy', '按「加商品」挑品類，加進清單；數量用＋－調整，也能指定要去哪家店買。': 'Tap “Add products”, pick a category and add it. Change the amount with + and −, and choose which store to buy it at.',
+  '讓東西買得更精確': 'Make it precise', '幫商品拍張照片，會自動讀出條碼；再補上品牌和規格，代買的人就不會買錯。': 'Snap a photo of the product and the barcode is read automatically. Add the brand and size so whoever shops buys the right one.',
+  '到店裡照著買': 'Shop from the list', '買到一項就打勾。找不到的話按「給店員看」，店員看照片和條碼就知道要拿哪一個。': 'Tick items off as you go. Can’t find something? Tap “Show to staff” and they’ll know which one from the photo and barcode.',
+  '週末補貨': 'Weekend restock', '這週六': 'This Saturday', '週六前要買好': 'Needed by Saturday', '建立清單': 'Create list', '名稱': 'Name',
+  '挑一個品類': 'Pick a category', '拍商品照片': 'Take a product photo', '請幫我找這個商品': 'Please help me find this'
 };
 var HAN = /[㐀-鿿]/;
 var keys = Object.keys(EN).filter(function (k) { return k.length; }).sort(function (a, b) { return b.length - a.length; });
@@ -799,6 +869,7 @@ function tr(s) {
     .replace(/\s+/g, ' ').replace(/\s+([,.:;!?)”])/g, '$1').replace(/([(“])\s+/g, '$1').trim();
   return lead + r + tail;
 }
+window.trEN = tr;
 var ATTRS = ['placeholder', 'aria-label', 'title', 'alt'], SKIP = /^(SCRIPT|STYLE|TEXTAREA)$/;
 function doText(n) { var p = n.parentNode; if (!p || SKIP.test(p.nodeName)) return; var t = tr(n.data); if (t != null && t !== n.data) n.data = t; }
 function doEl(el) { ATTRS.forEach(function (a) { var v = el.getAttribute(a); if (v) { var t = tr(v); if (t != null && t !== v) el.setAttribute(a, t); } }); }
@@ -831,7 +902,7 @@ const SUPABASE_URL = 'https://hrgzbugycehfprqavlyt.supabase.co';       // 例：
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyZ3pidWd5Y2VoZnBycWF2bHl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3NTQyMDAsImV4cCI6MjEwODMzMDIwMH0.gCLZdBEcVALics6q40gCF-gBuMTH2iiYrXpJ3_Cf5UQ';  // Project API keys 裡的 anon / publishable key（可以公開的那把，不是 service_role）
 const APP_URL = /^https?:$/.test(location.protocol) ? location.origin + location.pathname : '';
 const FEATURES = { premium: false }; // 付費功能開關（預留，目前沒有任何付費功能）
-const LS_DATA = 'restock.local.v1', LS_CARRIER = 'restock.carrier', LS_SEEN = 'restock.seen', LS_THEME = 'restock.theme';
+const LS_DATA = 'restock.local.v1', LS_CARRIER = 'restock.carrier', LS_SEEN = 'restock.seen', LS_THEME = 'restock.theme', LS_TOUR = 'restock.tour';
 const COOLDOWN = 120000;            // 結帳後可收回的時間：2 分鐘
 
 const STORES = [
@@ -1415,12 +1486,11 @@ function homeBanners(lists) {
   return out.length ? '<div class="banners">' + out.join('') + '</div>' : '';
 }
 function emptyLists() {
-  const hasSample = Object.keys(D.products).some(k => D.products[k].sample);
   return '<div class="empty reveal"><h3>還沒有要買的清單</h3><p class="muted">三步就能讓代買的人買對。</p>' +
     '<ol class="steps"><li class="step"><b>1</b><strong>建好商品</strong><span>品牌、規格、照片、條碼，全家共用</span></li>' +
     '<li class="step"><b>2</b><strong>開一張清單</strong><span>選店家，挑商品，填數量</span></li>' +
     '<li class="step"><b>3</b><strong>傳給對方</strong><span>LINE、Email 或加到行事曆</span></li></ol>' +
-    '<div class="cta-row"><button class="btn btn-primary" data-act="new-list">新建清單</button>' + (hasSample ? '' : '<button class="btn btn-secondary" data-act="samples-load">先看範例</button>') + '</div></div>';
+    '<div class="cta-row"><button class="btn btn-primary" data-act="new-list">新建清單</button><button class="btn btn-secondary" data-act="tour">看使用教學</button></div></div>';
 }
 function listCard(l) {
   const its = itemsOf(l._id), left = its.filter(i => i.state === 'todo').length;
@@ -1639,7 +1709,7 @@ function productResults() {
   else if (!list.length) {
     const c = PF.cat !== 'all' ? catOf(PF.cat) : null;
     if (c && !PF.q) h += '<div class="empty"><h3>還沒有「' + c.name + '」</h3><p class="muted">例如：' + c.hint + '。寫清楚規格，代買的人才不會拿錯。</p><div class="cta-row"><button class="btn btn-primary" data-act="new-product" data-cat="' + c.id + '">新增' + c.name + '</button></div></div>';
-    else if (!total) h += '<div class="empty"><h3>商品庫是空的</h3><p class="muted">先從家裡最常補的東西開始，例如衛生紙、牛奶。</p><div class="cta-row"><button class="btn btn-primary" data-act="new-product">新增商品</button><button class="btn btn-secondary" data-act="samples-load">先看範例</button></div></div>';
+    else if (!total) h += '<div class="empty"><h3>商品庫是空的</h3><p class="muted">先從家裡最常補的東西開始，例如衛生紙、牛奶。</p><div class="cta-row"><button class="btn btn-primary" data-act="new-product">新增商品</button><button class="btn btn-secondary" data-act="tour">看使用教學</button></div></div>';
     else h += '<div class="empty"><h3>找不到符合的商品</h3><p class="muted">換個關鍵字，或切回「全部」看看。</p></div>';
   } else {
     h += '<div class="prod-grid">' + list.map(p => '<button class="prod-card reveal" data-act="product" data-pid="' + esc(p._id) + '">' +
@@ -1674,7 +1744,7 @@ function viewMe() {
   if (MODE === 'cloud') share = '<p>清單和商品存在 Supabase 雲端，登入後在哪支手機都能用。</p><p>每張清單各自決定誰能編輯：打開清單，在最下面「一起編輯」輸入對方的 Email。對方只看得到你邀請他的那幾張。</p>';
   else if (MODE === 'local') share = '<p>還沒設定雲端，資料只存在這台裝置的瀏覽器，換手機或換瀏覽器就看不到。</p><p>在 index.html 最上面填好 Supabase 的網址和金鑰，就會改成全家同步。</p>';
   else share = '<p>正在連線…</p>';
-  let h = '<section class="band hero sm"><div class="wrap"><h1 class="hero-title' + R() + '">我的</h1><p class="tagline' + R(1) + '">載具、共用方式和範例資料。</p></div></section>';
+  let h = '<section class="band hero sm"><div class="wrap"><h1 class="hero-title' + R() + '">我的</h1><p class="tagline' + R(1) + '">載具、設定和使用教學。</p></div></section>';
   h += '<section class="band alt"><div class="wrap"><div class="tiles">' +
     '<div class="tile span2 reveal"><h3>我的手機條碼載具</h3><p>斜線開頭共 8 碼。' + (MODE === 'cloud' && ME ? '只存在你自己的帳號裡，家人看不到。' : '存在這台裝置。') + '</p>' +
     '<form class="form" data-carrier-form><div class="input-row"><input id="me-carrier" value="' + esc(MY_CARRIER) + '" placeholder="/ABC1234" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="載具號碼"><button class="btn btn-primary" type="submit">儲存</button></div><p class="help" id="me-carrier-help"></p></form>' +
@@ -1688,7 +1758,7 @@ function viewMe() {
         [['zh', '中文'], ['en', 'English']].map(t => '<button type="button" data-act="lang" data-v="' + t[0] + '" aria-pressed="' + (document.documentElement.lang === 'en' ? t[0] === 'en' : t[0] === 'zh') + '">' + t[1] + '</button>').join('') + '</div></div>' +
       (MODE === 'cloud' ? '<div class="set-row"><div><strong>帳號</strong><p class="set-mail">' + esc(ME) + '</p></div><button class="btn btn-sm btn-secondary" data-act="logout">登出</button></div>' : '') +
     '</div>' +
-    '<div class="tile reveal"><h3>範例資料</h3><p>6 項範例商品和 1 張範例清單，都會標上「範例」。看完可以一次清掉，不會動到你自己建的東西。</p><div class="chips">' + (hasSample ? '<button class="btn btn-sm btn-danger" data-act="samples-clear">' + (ARMED && ARMED.key === 'samples' && Date.now() < ARMED.until ? '再按一次確定清除' : '清除範例') + '</button>' : '<button class="btn btn-sm btn-secondary" data-act="samples-load">載入範例</button>') + '</div></div>' +
+    '<div class="tile reveal"><h3>使用教學</h3><p>半分鐘的操作示範：怎麼開清單、加要買的東西，還有拍照、讀條碼讓東西買得更準。</p><div class="chips"><button class="btn btn-sm btn-primary" data-act="tour">播放教學</button>' + (hasSample ? '<button class="btn btn-sm btn-danger" data-act="samples-clear">' + (ARMED && ARMED.key === 'samples' && Date.now() < ARMED.until ? '再按一次確定清除' : '清除範例') + '</button>' : '') + '</div></div>' +
     '<div class="tile reveal"><h3>這一版能做什麼</h3><p>清單、商品、打勾、缺貨處理、給店員看、載具結帳、相機掃條碼、LINE、Email、行事曆都可以用。</p><p>還沒有：手機推播通知。之後再加。</p></div>' +
     '</div></div></section>';
   return h;
@@ -2133,26 +2203,95 @@ setInterval(() => {
 }, 1000);
 
 /* ───────── 範例資料 ───────── */
-function loadSamples() {
-  if (!guard()) return;
-  if (Object.keys(D.products).some(k => D.products[k].sample)) { toast('範例已經載入了'); return; }
-  const now = Date.now();
-  const P = [
-    ['milk', '鮮乳', '範例牧場', '1857ml × 2', ['costco', 'pxmart'], '123456', '4710000000004', true, '保存期限挑最後面的'],
-    ['tissue', '抽取式衛生紙', '範例品牌', '100 抽 × 24 包', ['costco'], '234567', '', false, '要綠色包裝那款，不是藍色'],
-    ['laundry', '洗衣精補充包', '範例品牌', '2L × 3 包', ['pxmart', 'hyper'], '', '', false, '抗菌款，不要香氛款'],
-    ['egg', '洗選蛋', '範例農場', '30 入', ['costco', 'pxmart'], '345678', '', true, ''],
-    ['water', '礦泉水', '範例品牌', '600ml × 24 瓶', ['costco', 'cvs'], '456789', '', true, ''],
-    ['toothpaste', '牙膏', '範例品牌', '160g × 4 條', ['costco', 'hyper'], '567890', '', false, '藍色牙齦護理款'],
+/* ───────── 使用教學（模擬操作影片） ───────── */
+// 每段：畫面 html + 時間軸 [毫秒, 動作, data-k, 值]；動作有 tap／on／off／show／hide／set／type
+function tourScenes() {
+  const cat = (id, k) => '<span data-k="' + k + '"><span class="mono-tile">' + catIcon(id) + '</span>' + esc(catOf(id).name) + '</span>';
+  const row = (id, name, sub, k) => '<div class="tp-row" data-k="' + k + '">' + (k ? '<span class="tp-check">✓</span>' : '') + '<span class="tp-th">' + catIcon(id) + '</span><div><b>' + name + '</b><div class="tp-sub">' + sub + '</div></div></div>';
+  const milk = esc(catOf('milk').name), costco = esc(storeOf('costco').name);
+  return [
+    { t: '建立購物清單', d: '按「新建清單」，取個名字、選好什麼時候要買好。全家打開都看得到同一張。', len: 6800,
+      html: '<div class="tp-top"><b>待採買</b></div><p class="tp-empty" data-k="empty">目前沒有要買的東西。</p>' +
+        '<div class="tp-card" data-k="card" hidden><b>週末補貨</b><span class="tp-sub">週六前要買好</span><em>還要買 0 項</em></div>' +
+        '<span class="tp-btn" data-k="new">新建清單</span>' +
+        '<div class="tp-sheet" data-k="sheet"><strong>新建清單</strong><span class="tp-lab">名稱<span class="tp-in" data-k="title"></span></span>' +
+        '<span class="tp-lab">什麼時候要買好<span class="tp-in" data-k="due"></span></span><span class="tp-btn" data-k="ok">建立清單</span></div>',
+      steps: [[600, 'tap', 'new'], [1000, 'on', 'sheet'], [1600, 'tap', 'title'], [1900, 'type', 'title', '週末補貨'], [3000, 'tap', 'due'], [3400, 'type', 'due', '這週六'], [4300, 'tap', 'ok'], [4700, 'off', 'sheet'], [4800, 'hide', 'empty'], [4800, 'show', 'card']] },
+    { t: '加要買的東西', d: '按「加商品」挑品類，加進清單；數量用＋－調整，也能指定要去哪家店買。', len: 6400,
+      html: '<div class="tp-top"><b>週末補貨</b><small>週六前要買好</small></div><p class="tp-empty" data-k="empty">還沒有商品，按「加商品」開始挑。</p>' +
+        '<div class="tp-row" data-k="row" hidden><span class="tp-th">' + catIcon('milk') + '</span><div><b>' + milk + '</b><div class="tp-sub">' + costco + '</div></div><span class="tp-qty"><i>−</i><span data-k="qty">1</span><i data-k="plus">＋</i></span></div>' +
+        '<span class="tp-btn" data-k="add">加商品</span><span class="tp-toast" data-k="toast">已加進清單</span>' +
+        '<div class="tp-sheet" data-k="sheet"><strong>挑一個品類</strong><div class="tp-cats">' + cat('milk', 'c1') + cat('egg', 'c2') + cat('bread', 'c3') + cat('tissue', 'c4') + cat('water', 'c5') + cat('fruit', 'c6') + '</div></div>',
+      steps: [[600, 'tap', 'add'], [1000, 'on', 'sheet'], [1900, 'tap', 'c1'], [2200, 'on', 'c1'], [2800, 'off', 'sheet'], [2900, 'hide', 'empty'], [2900, 'show', 'row'], [2900, 'on', 'toast'], [4000, 'off', 'toast'], [4300, 'tap', 'plus'], [4600, 'set', 'qty', '2']] },
+    { t: '讓東西買得更精確', d: '幫商品拍張照片，會自動讀出條碼；再補上品牌和規格，代買的人就不會買錯。', len: 7400,
+      html: '<div class="tp-top"><b>新增商品</b></div>' +
+        '<div class="tp-photo" data-k="photo">' + catIcon('photo') + '<span>拍商品照片</span><i class="tp-flash" data-k="flash"></i></div>' +
+        '<div class="tp-bc" data-k="bc" hidden><i></i><span>4710000000004</span><b>✓ 從照片讀到條碼</b></div>' +
+        '<span class="tp-lab">品牌<span class="tp-in" data-k="brand"></span></span><span class="tp-lab">規格<span class="tp-in" data-k="spec"></span></span>' +
+        '<span class="tp-btn" data-k="save">儲存</span><span class="tp-toast" data-k="toast">已儲存</span>',
+      steps: [[600, 'tap', 'photo'], [1000, 'on', 'flash'], [1100, 'set', 'photo'], [2000, 'show', 'bc'], [3000, 'tap', 'brand'], [3300, 'type', 'brand', '範例牧場'], [4400, 'tap', 'spec'], [4800, 'type', 'spec', '大'], [5600, 'tap', 'save'], [6000, 'on', 'toast']] },
+    { t: '到店裡照著買', d: '買到一項就打勾。找不到的話按「給店員看」，店員看照片和條碼就知道要拿哪一個。', len: 7000,
+      html: '<div class="tp-top"><b>週末補貨</b><small data-k="left">還要買 3 項</small></div>' +
+        row('milk', milk + ' × 2', costco, 'r1') + row('egg', esc(catOf('egg').name), costco, 'r2') + row('tissue', esc(catOf('tissue').name), esc(storeOf('pxmart').name), 'r3') +
+        '<span class="tp-btn ghost" data-k="clerk">給店員看</span>' +
+        '<div class="tp-sheet" data-k="sheet"><strong>請幫我找這個商品</strong>' + row('tissue', esc(catOf('tissue').name), '範例品牌・100 抽 × 24 包', '') + '<div class="tp-bc"><i></i><span>4710000000011</span></div></div>',
+      steps: [[700, 'tap', 'r1'], [1000, 'on', 'r1'], [1050, 'set', 'left', '還要買 2 項'], [1800, 'tap', 'r2'], [2100, 'on', 'r2'], [2150, 'set', 'left', '還要買 1 項'], [3100, 'tap', 'clerk'], [3500, 'on', 'sheet'], [3600, 'off', 'tap']] }
   ];
-  const ids = P.map((_, i) => 'sample-p' + i + '-' + uid());
-  P.forEach((r, i) => put('products', ids[i], { cat: r[0], name: r[1], brand: r[2], spec: r[3], stores: r[4], itemNo: r[5], barcode: r[6], sub: r[7], note: r[8], photo: '', tagPhoto: '', sample: true, createdAt: now + i }));
-  const lid = 'sample-l-' + uid();
-  put('lists', lid, { store: null, dueAt: fromDateInput(toDateInput(presets()[2][1])), title: '範例：週末補貨', remindAt: presets()[2][1], status: 'active', createdBy: ME || 'local', createdAt: now, sample: true });
-  [[0, 1, 'bought', 'costco'], [1, 1, 'todo', 'costco'], [3, 2, 'todo', 'pxmart'], [4, 1, 'todo', 'cvs'], [5, 1, 'todo', 'costco']].forEach((r, i) => put('items', 'sample-i' + i + '-' + uid(), { listId: lid, productId: ids[r[0]], store: r[3], name: P[r[0]][1], cat: P[r[0]][0], qty: r[1], state: r[2], subbed: false, createdAt: now + i, sample: true }));
-  addListMembers(lid, []);
-  toast('已載入範例，在「我的」可以一次清掉');
 }
+let TOUR_T = [];
+function tourStop() { TOUR_T.forEach(t => clearTimeout(t)); TOUR_T = []; }
+// 打出來的字要先翻好，否則翻譯層只看得到半截中文
+function trL(s) { return (window.trEN && window.trEN(s)) || s; }
+function tourDo(r, op, k, v) {
+  const el = r.querySelector('[data-k="' + k + '"]');
+  if (!el) return;
+  if (op === 'on') el.classList.add('on');
+  else if (op === 'off') el.classList.remove('on');
+  else if (op === 'show') { el.hidden = false; el.classList.add('tp-pop'); }
+  else if (op === 'hide') el.hidden = true;
+  else if (op === 'set') { if (k === 'photo') { el.classList.add('on'); el.querySelector('.ic').outerHTML = catIcon('milk'); } else el.textContent = trL(v); }
+  else if (op === 'type') {
+    const s = trL(v); let n = 0;
+    const t = setInterval(() => { if (!el.isConnected || n >= s.length) return clearInterval(t); el.textContent = s.slice(0, ++n); }, Math.min(150, 800 / s.length));
+    TOUR_T.push(t);
+  } else if (op === 'tap') {
+    r.querySelectorAll('.focus').forEach(x => x.classList.remove('focus'));
+    if (el.classList.contains('tp-in')) el.classList.add('focus');
+    const f = r.querySelector('.tour-tap'), a = el.getBoundingClientRect(), b = r.getBoundingClientRect();
+    f.style.left = (a.left - b.left + a.width / 2) + 'px'; f.style.top = (a.top - b.top + a.height / 2) + 'px';
+    f.classList.add('on'); f.classList.remove('press'); void f.offsetWidth; f.classList.add('press');
+  }
+}
+function tourGo(i) {
+  const S = tourScenes(), sc = S[i], scr = $('#tour-screen');
+  if (!scr || !sc) return;
+  tourStop();
+  scr.innerHTML = sc.html + '<span class="tour-tap" data-k="tap"></span>';
+  $('#tour-cap').innerHTML = '<h3>' + (i + 1) + '　' + sc.t + '</h3><p>' + sc.d + '</p>';
+  document.querySelectorAll('.tour-bars button').forEach((b, j) => {
+    b.className = j < i ? 'done' : j === i ? 'now' : '';
+    const bar = b.querySelector('b'); bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = ''; bar.style.animationDuration = sc.len + 'ms';
+  });
+  $('#tour').dataset.i = i;
+  $('#tour-prev').disabled = i === 0;
+  $('#tour-next').textContent = i === S.length - 1 ? '開始使用' : '下一段 ›';
+  sc.steps.forEach(s => TOUR_T.push(setTimeout(() => { if (scr.isConnected) tourDo(scr, s[1], s[2], s[3]); }, s[0])));
+  if (i < S.length - 1) TOUR_T.push(setTimeout(() => { if (scr.isConnected) tourGo(i + 1); }, sc.len));
+}
+function openTour() {
+  try { localStorage.setItem(LS_TOUR, '1'); } catch (e) { /* 忽略 */ }
+  openSheet({
+    title: '使用教學',
+    html: '<div class="tour" id="tour"><div class="tour-bars">' + tourScenes().map((s, j) => '<button type="button" data-act="tour-go" data-i="' + j + '" aria-label="' + esc(s.t) + '"><i><b></b></i></button>').join('') + '</div>' +
+      '<div class="tour-phone" role="img" aria-label="使用教學影片"><div class="tour-screen" id="tour-screen" aria-hidden="true"></div></div>' +
+      '<div class="tour-cap" id="tour-cap" aria-live="polite"></div>' +
+      '<div class="tour-ctl"><button class="btn btn-sm btn-secondary" id="tour-prev" data-act="tour-prev">‹ 上一段</button><button class="btn btn-sm btn-primary" id="tour-next" data-act="tour-next">下一段 ›</button></div></div>',
+    mount: () => tourGo(0),
+    onClose: tourStop
+  });
+}
+// 只有第一次打開會自動播放，之後要從「我的」重看
+function maybeTour() { try { if (localStorage.getItem(LS_TOUR)) return; } catch (e) { return; } if (!SHEET) openTour(); }
 function clearSamples() {
   const sampleLists = new Set(Object.keys(D.lists).filter(k => D.lists[k].sample));
   Object.keys(D.items).forEach(k => { const it = D.items[k]; if (it.sample || sampleLists.has(it.listId)) remove('items', k); });
@@ -2187,7 +2326,10 @@ function pickFile(cb) { const inp = $('#file-in'); inp.value = ''; FILE_CB = cb;
 const itemIdOf = el => { const r = el.closest('[data-item]'); return r ? r.getAttribute('data-item') : null; };
 const ACT = {
   'new-list': () => openNewList(),
-  'samples-load': () => loadSamples(),
+  'tour': () => openTour(),
+  'tour-go': a => tourGo(+a.dataset.i),
+  'tour-prev': () => tourGo(Math.max(0, +$('#tour').dataset.i - 1)),
+  'tour-next': () => { const i = +$('#tour').dataset.i; if (i >= tourScenes().length - 1) { tourStop(); closeSheet(true); } else tourGo(i + 1); },
   'samples-clear': () => { if (arm('samples')) clearSamples(); else scheduleRender(); },
   'dismiss': a => { const s = seenSet(); s.add(a.dataset.list); try { localStorage.setItem(LS_SEEN, JSON.stringify(Array.from(s).slice(-200))); } catch (e) { /* 忽略 */ } scheduleRender(); },
   'toggle': a => {
@@ -2478,7 +2620,7 @@ async function boot() {
   }
   if (!configured || !window.supabase || !window.supabase.createClient) {
     if (configured) toast('載入不了 Supabase 程式庫（可能被瀏覽器的追蹤保護擋住），先用單機模式', 8000);
-    MODE = 'local'; ME = 'local'; loadLocalData(); loadCarrier(); render({ animate: true }); return;
+    MODE = 'local'; ME = 'local'; loadLocalData(); loadCarrier(); render({ animate: true }); maybeTour(); return;
   }
   render({ animate: true });
   SB = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
@@ -2502,6 +2644,7 @@ async function startCloud(session) {
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && MODE === 'cloud') cloudLoadAll().catch(() => {}); });
   loadCarrier();
   render({ animate: true });
+  maybeTour();
 }
 boot();
 })();
