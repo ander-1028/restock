@@ -547,6 +547,12 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 .prod-card{border:1px solid var(--line)}
 .hist-card{border:1px solid var(--line)}
 /* 使用教學：用動畫在假手機上示範操作 */
+.btn-google{background:var(--surface);color:var(--fg);border:1px solid var(--line);gap:10px;font-weight:600}
+.btn-google:hover{background:var(--tile)}
+.btn-google svg{width:20px;height:20px;flex:none}
+.or{display:flex;align-items:center;gap:12px;width:100%;color:var(--fg-3);font-size:13px;margin:6px 0 -2px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.avatar-lg{width:84px;height:84px;border-radius:50%;object-fit:cover;background:var(--tile);display:grid;place-items:center;font-size:34px;font-weight:700;color:var(--fg-2)}
 .inv-one{display:grid;gap:10px;padding-top:12px;border-top:1px solid var(--line-soft)}
 .tour{display:grid;gap:14px;justify-items:center;padding-bottom:4px}
 .tour [hidden]{display:none!important}
@@ -626,7 +632,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.7（10/25 邀請自動填信箱）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 2.0 Google 登入版（10/26）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -648,7 +654,7 @@ var EN = {
   // 導覽、頁尾
   '補貨清單': 'Restock', '主要頁面': 'Main pages', '清單': 'Lists', '商品': 'Products', '紀錄': 'History', '我的': 'Me',
   '同步狀態': 'Sync status', '連線中': 'Connecting', '正在連線…': 'Connecting…', '已同步': 'Synced', '僅本機': 'This device only', '未登入': 'Signed out',
-  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items', '帳號資料隔離': 'account privacy', '使用教學': 'tutorial', '邀請自動填信箱': 'invite email prefill',
+  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items', '帳號資料隔離': 'account privacy', '使用教學': 'tutorial', '邀請自動填信箱': 'invite email prefill', 'Google 登入版': 'Google sign-in edition',
   '只改這張清單裡的這一項。品牌、規格、照片要改的話：': 'Only changes this item in this list. To change brand, size or photo:',
   '編輯商品資料 ›': 'Edit product details ›', '這一項改到': 'Store changed to',
   '清單和商品存在 Supabase 雲端，家庭成員即時同步。': 'Lists and products are stored in the Supabase cloud and sync live with your family.',
@@ -845,6 +851,14 @@ var EN = {
   'App 不會自己寄信，請用 LINE 或 Email 把網址傳給對方。對方點網址，信箱會自動填好。': 'The app doesn’t send emails itself. Send the link by LINE or email; when they open it, their email is already filled in.',
   '你被邀請的信箱已經填好了，按「寄登入連結」，再去信箱點信裡的連結就登入了。': 'Your invited email is already filled in. Tap “Send sign-in link”, then open the link in that email to sign in.',
   '這個人已經在名單裡了': 'This person is already on the list',
+  '登入或註冊': 'Sign in or sign up', '用 Google 帳號繼續': 'Continue with Google', '或用 Email 登入連結': 'or use an email sign-in link',
+  '第一次用 Google 登入會幫你建立帳號，之後按一下就登入。': 'Your first Google sign-in creates your account. After that it’s one tap.',
+  '你被邀請的信箱是': 'You were invited as', '，請用這個帳號登入。': '. Please sign in with that account.',
+  '歡迎！': 'Welcome!', '先建立你的個人資料，下次登入就直接進來。': 'Set up your profile first. Next time you’ll go straight in.',
+  '名字': 'Name', '登入帳號': 'Signed in as', '手機條碼載具（選填）': 'Mobile barcode carrier (optional)',
+  '結帳時拿出來給店員掃。之後也可以在「我的」修改。': 'Show it to the cashier at checkout. You can change it later under “Me”.',
+  '完成，開始使用': 'Done, let’s go', '請填名字': 'Please enter your name', '歡迎，': 'Welcome, ',
+  'Google 登入失敗：': 'Google sign-in failed: ', '登入沒有完成：': 'Sign-in didn’t finish: ',
   // 使用教學
   '使用教學': 'Tutorial', '播放教學': 'Play tutorial', '看使用教學': 'Watch tutorial', '載具、設定和使用教學。': 'Carrier, settings and tutorial.',
   '半分鐘的操作示範：怎麼開清單、加要買的東西，還有拍照、讀條碼讓東西買得更準。': 'A 30-second demo: create a list, add what to buy, and use photos and barcodes so the right thing gets bought.',
@@ -1376,7 +1390,12 @@ function carrierKey() { return MODE === 'cloud' ? LS_CARRIER + ':' + ME : LS_CAR
 async function loadCarrier() {
   try { MY_CARRIER = localStorage.getItem(carrierKey()) || ''; } catch (e) { MY_CARRIER = ''; }
   if (MODE === 'cloud') {
-    try { const { data } = await SB.from('private_settings').select('carrier,display_name').eq('email', ME).maybeSingle(); if (data && data.carrier) MY_CARRIER = data.carrier; if (data && data.display_name) MY_NAME = data.display_name; } catch (e) { /* 用本機的 */ }
+    try {
+      const { data, error } = await SB.from('private_settings').select('carrier,display_name').eq('email', ME).maybeSingle();
+      if (data && data.carrier) MY_CARRIER = data.carrier; if (data && data.display_name) MY_NAME = data.display_name;
+      // 確定讀得到而且沒有名字，才當作第一次登入（網路斷掉不要誤判）
+      NEED_PROFILE = !error && !MY_NAME;
+    } catch (e) { /* 用本機的 */ }
   }
   scheduleRender();
 }
@@ -1409,6 +1428,7 @@ function render(opts) {
   ANIM = !!opts.animate && !reduceMotion;
   let html = '';
   if (MODE === 'login') html = viewLogin();
+  else if (NEED_PROFILE) html = viewProfile();
   else if (MODE === 'denied') html = viewDenied();
   else if (VIEW === 'list') html = viewList();
   else if (VIEW === 'products') html = viewProducts();
@@ -1776,11 +1796,30 @@ function viewMe() {
 /* ── 登入 ── */
 // 邀請網址 #login=對方信箱：登入頁直接填好
 let LOGIN_HINT = '';
+const GOOGLE_G = '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.2l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C1 16.5 0 20.1 0 24s1 7.5 2.7 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.2 0-11.5-4.2-13.4-9.8l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>';
 function viewLogin() {
   return '<section class="band hero"><div class="wrap"><h1 class="hero-title' + R() + '">補貨清單</h1><p class="tagline' + R(1) + '">登入後，全家共用同一份清單。</p></div></section>' +
-    '<section class="band alt"><div class="wrap"><div class="empty" style="max-width:520px;margin:0 auto"><h3>用 Email 登入</h3><p class="muted">' + (LOGIN_HINT ? '你被邀請的信箱已經填好了，按「寄登入連結」，再去信箱點信裡的連結就登入了。' : '輸入信箱，我們寄一封登入連結給你，點了就登入，不用密碼。') + '</p>' +
-    '<form id="login-form" class="form" style="width:100%" novalidate><input id="login-email" type="email" placeholder="you@example.com" autocomplete="email" value="' + esc(LOGIN_HINT) + '"><button class="btn btn-primary btn-wide" type="submit">寄登入連結</button></form>' +
+    '<section class="band alt"><div class="wrap"><div class="empty" style="max-width:520px;margin:0 auto"><h3>登入或註冊</h3><p class="muted">' + (LOGIN_HINT ? '你被邀請的信箱是 ' + esc(LOGIN_HINT) + '，請用這個帳號登入。' : '第一次用 Google 登入會幫你建立帳號，之後按一下就登入。') + '</p>' +
+    '<button class="btn btn-google btn-wide" data-act="google-login">' + GOOGLE_G + '用 Google 帳號繼續</button>' +
+    '<div class="or"><span>或用 Email 登入連結</span></div>' +
+    '<form id="login-form" class="form" style="width:100%" novalidate><input id="login-email" type="email" placeholder="you@example.com" autocomplete="email" value="' + esc(LOGIN_HINT) + '"><button class="btn btn-secondary btn-wide" type="submit">寄登入連結</button></form>' +
     '<p class="help">只有加入「家庭成員」的信箱才看得到清單。</p></div></div></section>';
+}
+// 第一次登入（雲端還沒有名字）先填個人資料
+let NEED_PROFILE = false, ME_META = {};
+function viewProfile() {
+  const pic = ME_META.avatar_url || ME_META.picture || '';
+  const nm = MY_NAME || ME_META.full_name || ME_META.name || '';
+  return '<section class="band hero"><div class="wrap"><h1 class="hero-title' + R() + '">歡迎！</h1><p class="tagline' + R(1) + '">先建立你的個人資料，下次登入就直接進來。</p></div></section>' +
+    '<section class="band alt"><div class="wrap"><div class="empty" style="max-width:520px;margin:0 auto">' +
+    (pic ? '<img class="avatar-lg" src="' + esc(pic) + '" alt="" referrerpolicy="no-referrer">' : '<span class="avatar-lg">' + esc((nm || ME || '?').charAt(0).toUpperCase()) + '</span>') +
+    '<form id="profile-form" class="form" style="width:100%;text-align:left" novalidate>' +
+    '<label class="field"><span>名字</span><input id="pf-name" value="' + esc(nm) + '" maxlength="20" placeholder="例：Anderson" autocomplete="name"></label>' +
+    '<p class="help">一起編輯清單的人會看到這個名字。</p>' +
+    '<label class="field"><span>登入帳號</span><input value="' + esc(ME) + '" disabled></label>' +
+    '<label class="field"><span>手機條碼載具（選填）</span><input id="pf-carrier" value="' + esc(MY_CARRIER) + '" placeholder="/ABC1234" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>' +
+    '<p class="help">結帳時拿出來給店員掃。之後也可以在「我的」修改。</p>' +
+    '<button class="btn btn-primary btn-wide" type="submit">完成，開始使用</button></form></div></div></section>';
 }
 function viewDenied() {
   return '<section class="band hero"><div class="wrap"><h1 class="hero-title">補貨清單</h1></div></section>' +
@@ -2516,6 +2555,12 @@ const ACT = {
   },
   // 換語言要重新載入：已經換成英文的字沒辦法原地換回中文
   'lang': a => { try { localStorage.setItem('restock.lang', a.dataset.v); } catch (e) {} location.reload(); },
+  'google-login': () => {
+    if (!SB) return;
+    // login_hint：從邀請網址進來的，Google 會先選好那個帳號
+    SB.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname, queryParams: LOGIN_HINT ? { login_hint: LOGIN_HINT } : {} } })
+      .then(({ error }) => { if (error) toast('Google 登入失敗：' + error.message, 6000); });
+  },
   'logout': () => { if (SB) SB.auth.signOut().then(() => location.reload()); },
   'member-remove': a => {
     const em = a.dataset.email;
@@ -2591,6 +2636,17 @@ document.addEventListener('submit', e => {
     const lid = CUR_LIST;
     inviteToList(lid, em, nm).then(ok => { if (ok) openInviteDone(lid, [em]); });
   }
+  else if (f.id === 'profile-form') {
+    const nm = ($('#pf-name').value || '').trim().slice(0, 20), car = normCarrier($('#pf-carrier').value || '');
+    if (!nm) { toast('請填名字'); $('#pf-name').focus(); return; }
+    if (car && !/^\/[0-9A-Z.+\-]{7}$/.test(car)) { toast('載具格式不對：斜線開頭共 8 碼'); $('#pf-carrier').focus(); return; }
+    const row = { email: ME, display_name: nm }; if (car) row.carrier = car;
+    Promise.all([SB.from('private_settings').upsert(row), SB.from('list_members').update({ name: nm }).eq('email', ME)]).then(rs => {
+      const err = rs.find(x => x.error); if (err) { onWriteError(err.error); return; }
+      MY_NAME = nm; if (car) { MY_CARRIER = car; try { localStorage.setItem(carrierKey(), car); } catch (e) { /* 忽略 */ } }
+      NEED_PROFILE = false; render({ animate: true }); toast('歡迎，' + nm); maybeTour();
+    });
+  }
   else if (f.id === 'myname-form') {
     const nm = ($('#myname-in').value || '').trim().slice(0, 20);
     MY_NAME = nm;
@@ -2624,6 +2680,11 @@ $('#file-in').addEventListener('change', async e => {
 async function boot() {
   const h = (location.hash || '').slice(1);
   if (['lists', 'products', 'history', 'me'].includes(h)) VIEW = h;
+  if (/error_description=/.test(h)) {
+    const q = new URLSearchParams(h);
+    setTimeout(() => toast('登入沒有完成：' + (q.get('error_description') || q.get('error')), 6000), 800);
+    history.replaceState(null, '', location.pathname);
+  }
   if (h.startsWith('login=')) {
     try { LOGIN_HINT = decodeURIComponent(h.slice(6)).trim().toLowerCase(); } catch (e) { /* 網址壞掉就不填 */ }
     if (!validEmail(LOGIN_HINT)) LOGIN_HINT = '';
@@ -2660,9 +2721,10 @@ async function startCloud(session) {
   try { await cloudLoadAll(); } catch (e) { toast('讀取雲端資料失敗：' + (e.message || ''), 5000); }
   subscribeRealtime();
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && MODE === 'cloud') cloudLoadAll().catch(() => {}); });
-  loadCarrier();
+  ME_META = (session.user && session.user.user_metadata) || {};
+  await loadCarrier();
   render({ animate: true });
-  maybeTour();
+  if (!NEED_PROFILE) maybeTour();
 }
 boot();
 })();
