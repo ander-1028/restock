@@ -606,7 +606,12 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 .tour-cap{text-align:center;max-width:440px;display:grid;gap:4px;min-height:100px}
 .tour-cap h3{font-size:20px;margin:0}
 .tour-cap p{margin:0;color:var(--fg-2);line-height:1.6}
-.tour-ctl{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.tour-ctl{position:sticky;bottom:calc(-28px - env(safe-area-inset-bottom,0px));z-index:2;width:calc(100% + 40px);margin:0 -20px -28px;padding:12px 20px calc(16px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;justify-content:center;flex-wrap:wrap;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:1px solid var(--line-soft)}
+.tour-ctl .btn-link{margin-right:auto}
+@media (min-width:720px){.tour-ctl{bottom:-28px;padding-bottom:16px}}
+/* 矮螢幕把假手機縮小，整個教學不用捲就看得完 */
+@media (max-height:820px){.tour-phone{zoom:.85}.tour-cap{min-height:0}}
+@media (max-height:700px){.tour-phone{zoom:.7}.tour{gap:10px}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -848,7 +853,7 @@ var EN = {
   // 使用教學
   '使用教學': 'Tutorial', '播放教學': 'Play tutorial', '看使用教學': 'Watch tutorial', '載具、設定和使用教學。': 'Carrier, settings and tutorial.',
   '半分鐘的操作示範：怎麼開清單、加要買的東西，還有拍照、讀條碼讓東西買得更準。': 'A 30-second demo: create a list, add what to buy, and use photos and barcodes so the right thing gets bought.',
-  '‹ 上一段': '‹ Back', '下一段 ›': 'Next ›', '開始使用': 'Get started', '使用教學影片': 'Tutorial video',
+  '‹ 上一段': '‹ Back', '略過': 'Skip', '下一段 ›': 'Next ›', '開始使用': 'Get started', '使用教學影片': 'Tutorial video',
   '建立購物清單': 'Create a shopping list', '按「新建清單」，取個名字、選好什麼時候要買好。全家打開都看得到同一張。': 'Tap “New list”, give it a name and pick when it’s needed by. Everyone in the family sees the same list.',
   '加要買的東西': 'Add what to buy', '按「加商品」挑品類，加進清單；數量用＋－調整，也能指定要去哪家店買。': 'Tap “Add products”, pick a category and add it. Change the amount with + and −, and choose which store to buy it at.',
   '讓東西買得更精確': 'Make it precise', '幫商品拍張照片，會自動讀出條碼；再補上品牌和規格，代買的人就不會買錯。': 'Snap a photo of the product and the barcode is read automatically. Add the brand and size so whoever shops buys the right one.',
@@ -2271,7 +2276,8 @@ function tourDo(r, op, k, v) {
     r.querySelectorAll('.focus').forEach(x => x.classList.remove('focus'));
     if (el.classList.contains('tp-in')) el.classList.add('focus');
     const f = r.querySelector('.tour-tap'), a = el.getBoundingClientRect(), b = r.getBoundingClientRect();
-    f.style.left = (a.left - b.left + a.width / 2) + 'px'; f.style.top = (a.top - b.top + a.height / 2) + 'px';
+    // 用百分比，手機畫面縮小（zoom）時位置才對
+    f.style.left = (a.left - b.left + a.width / 2) / b.width * 100 + '%'; f.style.top = (a.top - b.top + a.height / 2) / b.height * 100 + '%';
     f.classList.add('on'); f.classList.remove('press'); void f.offsetWidth; f.classList.add('press');
   }
 }
@@ -2292,19 +2298,22 @@ function tourGo(i) {
   if (i < S.length - 1) TOUR_T.push(setTimeout(() => { if (scr.isConnected) tourGo(i + 1); }, sc.len));
 }
 function openTour() {
-  try { localStorage.setItem(LS_TOUR, '1'); } catch (e) { /* 忽略 */ }
+  try { localStorage.setItem(tourKey(), '1'); } catch (e) { /* 忽略 */ }
+  if (MODE === 'cloud' && SB && !TOUR_SEEN) { TOUR_SEEN = true; SB.auth.updateUser({ data: { tour_seen: true } }).catch(() => {}); }
   openSheet({
     title: '使用教學',
     html: '<div class="tour" id="tour"><div class="tour-bars">' + tourScenes().map((s, j) => '<button type="button" data-act="tour-go" data-i="' + j + '" aria-label="' + esc(s.t) + '"><i><b></b></i></button>').join('') + '</div>' +
       '<div class="tour-phone" role="img" aria-label="使用教學影片"><div class="tour-screen" id="tour-screen" aria-hidden="true"></div></div>' +
       '<div class="tour-cap" id="tour-cap" aria-live="polite"></div>' +
-      '<div class="tour-ctl"><button class="btn btn-sm btn-secondary" id="tour-prev" data-act="tour-prev">‹ 上一段</button><button class="btn btn-sm btn-primary" id="tour-next" data-act="tour-next">下一段 ›</button></div></div>',
+      '<div class="tour-ctl"><button class="btn-link" data-act="tour-skip">略過</button><button class="btn btn-sm btn-secondary" id="tour-prev" data-act="tour-prev">‹ 上一段</button><button class="btn btn-sm btn-primary" id="tour-next" data-act="tour-next">下一段 ›</button></div></div>',
     mount: () => tourGo(0),
     onClose: tourStop
   });
 }
 // 只有第一次打開會自動播放，之後要從「我的」重看
-function maybeTour() { try { if (localStorage.getItem(LS_TOUR)) return; } catch (e) { return; } if (!SHEET) openTour(); }
+let TOUR_SEEN = false;
+function tourKey() { return MODE === 'cloud' ? LS_TOUR + ':' + ME : LS_TOUR; }
+function maybeTour() { if (TOUR_SEEN) return; try { if (localStorage.getItem(tourKey())) return; } catch (e) { return; } if (!SHEET) openTour(); }
 function clearSamples() {
   const sampleLists = new Set(Object.keys(D.lists).filter(k => D.lists[k].sample));
   Object.keys(D.items).forEach(k => { const it = D.items[k]; if (it.sample || sampleLists.has(it.listId)) remove('items', k); });
@@ -2342,6 +2351,7 @@ const ACT = {
   'tour': () => openTour(),
   'tour-go': a => tourGo(+a.dataset.i),
   'tour-prev': () => tourGo(Math.max(0, +$('#tour').dataset.i - 1)),
+  'tour-skip': () => { tourStop(); closeSheet(true); },
   'tour-next': () => { const i = +$('#tour').dataset.i; if (i >= tourScenes().length - 1) { tourStop(); closeSheet(true); } else tourGo(i + 1); },
   'samples-clear': () => { if (arm('samples')) clearSamples(); else scheduleRender(); },
   'dismiss': a => { const s = seenSet(); s.add(a.dataset.list); try { localStorage.setItem(LS_SEEN, JSON.stringify(Array.from(s).slice(-200))); } catch (e) { /* 忽略 */ } scheduleRender(); },
@@ -2654,6 +2664,7 @@ let started = false;
 async function startCloud(session) {
   if (started) return; started = true;
   ME = String(session.user.email || '').toLowerCase();
+  TOUR_SEEN = !!(session.user.user_metadata || {}).tour_seen;
   if (location.hash.includes('access_token')) history.replaceState(null, '', location.pathname);
   MODE = 'cloud';
   try { await loadLM(); } catch (e) { toast('讀取共用名單失敗，請確認已經執行過最新的 SQL：' + (e.message || ''), 8000); }
