@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f2cd">
-<title>家庭補貨清單</title>
+<title>購清楚</title>
 <script>try { var t = localStorage.getItem('restock.theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -547,6 +547,13 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 .prod-card{border:1px solid var(--line)}
 .hist-card{border:1px solid var(--line)}
 /* 使用教學：用動畫在假手機上示範操作 */
+.nav-add{display:inline-flex;align-items:center;gap:4px;background:var(--accent)!important;color:var(--on-accent)!important;font-weight:600}
+.nav-add svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+@media (max-width:520px){.nav-links button{padding:11px 12px}.nav-add{padding:11px 14px}}
+@media (max-width:370px){.nav-add span{display:none}}
+.create-pick{display:grid;gap:12px}
+.create-pick .buy-row>span:first-child{display:grid;gap:2px}
+.create-pick small{font-size:14px;color:var(--fg-2)}
 .inv-one{display:grid;gap:10px;padding-top:12px;border-top:1px solid var(--line-soft)}
 .tour{display:grid;gap:14px;justify-items:center;padding-bottom:4px}
 .tour [hidden]{display:none!important}
@@ -620,18 +627,19 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 
 <header class="nav" id="nav">
   <div class="wrap">
-    <button class="brand" data-go="lists">補貨清單</button>
+    <button class="brand" data-go="lists">購清楚</button>
     <nav class="nav-links" aria-label="主要頁面">
-      <button data-go="lists">清單</button>
+      <button data-go="lists">首頁</button>
       <button data-go="products">商品</button>
+      <button class="nav-add" data-act="create" aria-label="新增"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>新增</span></button>
       <button data-go="history">紀錄</button>
-      <button data-go="me">我的</button>
+      <button data-go="me">設定</button>
     </nav>
     <button class="sync" id="sync" data-go="me" data-mode="connecting" aria-label="同步狀態"><i></i><span>連線中</span></button>
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>家庭補貨清單・獨立版 1.7（10/25 邀請自動填信箱）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>購清楚・版本 1.8（10/26 新名字、新選單、問題回報）</p><p id="foot-mode">正在連線…</p><p><button class="btn-link" data-act="feedback">回報問題</button></p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -651,9 +659,9 @@ var EN = {
   '（': ' (', '）': ') ', '，': ', ', '。': '. ', '・': ' · ', '：': ': ', '；': '; ', '、': ', ', '｜': ' | ', '？': '? ', '！': '! ',
   '（日）': ' (Sun) ', '（一）': ' (Mon) ', '（二）': ' (Tue) ', '（三）': ' (Wed) ', '（四）': ' (Thu) ', '（五）': ' (Fri) ', '（六）': ' (Sat) ',
   // 導覽、頁尾
-  '補貨清單': 'Restock', '主要頁面': 'Main pages', '清單': 'Lists', '商品': 'Products', '紀錄': 'History', '我的': 'Me',
+  '補貨清單': 'Restock', '購清楚': 'SpotOn', '首頁': 'Home', '‹ 回首頁': '‹ Home', '主要頁面': 'Main pages', '清單': 'Lists', '商品': 'Products', '紀錄': 'History', '我的': 'Me', '回報問題': 'Report a problem',
   '同步狀態': 'Sync status', '連線中': 'Connecting', '正在連線…': 'Connecting…', '已同步': 'Synced', '僅本機': 'This device only', '未登入': 'Signed out',
-  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items', '帳號資料隔離': 'account privacy', '使用教學': 'tutorial', '邀請自動填信箱': 'invite email prefill',
+  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items', '帳號資料隔離': 'account privacy', '使用教學': 'tutorial', '邀請自動填信箱': 'invite email prefill', '新名字、新選單、問題回報': 'new name, new menu, feedback',
   '只改這張清單裡的這一項。品牌、規格、照片要改的話：': 'Only changes this item in this list. To change brand, size or photo:',
   '編輯商品資料 ›': 'Edit product details ›', '這一項改到': 'Store changed to',
   '清單和商品存在 Supabase 雲端，家庭成員即時同步。': 'Lists and products are stored in the Supabase cloud and sync live with your family.',
@@ -736,7 +744,7 @@ var EN = {
   '哪個牌子、什麼規格，拍張照存起來。': 'Which brand, which size: snap a photo and save it.', '項商品，全家共用': 'products, shared with family',
   '新增商品': 'New product', '搜尋品名、品牌、條碼': 'Search name, brand, barcode', '搜尋商品': 'Search products', '店家': 'Stores', '全部店家': 'All stores',
   '品類': 'Category', '全部': 'All', '還沒有': 'No', '例如：': 'e.g. ', '。寫清楚規格，代買的人才不會拿錯。': ' yet. Write the exact size so nobody grabs the wrong one.',
-  '新增': 'Add', '商品庫是空的': 'No products yet', '先從家裡最常補的東西開始，例如衛生紙、牛奶。': 'Start with what you restock most, like toilet paper or milk.',
+  '新增': 'Create', '商品庫是空的': 'No products yet', '先從家裡最常補的東西開始，例如衛生紙、牛奶。': 'Start with what you restock most, like toilet paper or milk.',
   '找不到符合的商品': 'No matching products', '換個關鍵字，或切回「全部」看看。': 'Try another word, or switch back to “All”.', '可補條碼': 'Add barcode',
   // 紀錄頁
   '購買紀錄': 'Purchase history', '買過的清單，一鍵再買一次。': 'Past lists. Buy again in one tap.', '還沒有紀錄': 'No history yet',
@@ -762,7 +770,7 @@ var EN = {
   '輸入信箱，我們寄一封登入連結給你，點了就登入，不用密碼。': 'Enter your email and we’ll send a sign-in link. No password needed.',
   '寄登入連結': 'Send sign-in link', '只有加入「家庭成員」的信箱才看得到清單。': 'Only emails added as family members can see lists.',
   '這個信箱還沒加入家庭': 'This email isn’t in the family yet',
-  '還不是家庭成員。請已經加入的家人到「我的」→「家庭成員」新增你的信箱，再重新整理這頁。': 'is not a family member yet. Ask a family member to add your email, then reload this page.',
+  '還不是家庭成員。請已經加入的家人到「設定」→「家庭成員」新增你的信箱，再重新整理這頁。': 'is not a family member yet. Ask a family member to add your email, then reload this page.',
   '換一個信箱登入': 'Use another email',
   // 掃描、結帳列
   '掃描條碼': 'Scan barcode', '把條碼放在畫面中間，拿穩': 'Center the barcode and hold steady', '改用拍照': 'Take a photo instead', '取消': 'Cancel',
@@ -850,6 +858,17 @@ var EN = {
   'App 不會自己寄信，請用 LINE 或 Email 把網址傳給對方。對方點網址，信箱會自動填好。': 'The app doesn’t send emails itself. Send the link by LINE or email; when they open it, their email is already filled in.',
   '你被邀請的信箱已經填好了，按「寄登入連結」，再去信箱點信裡的連結就登入了。': 'Your invited email is already filled in. Tap “Send sign-in link”, then open the link in that email to sign in.',
   '這個人已經在名單裡了': 'This person is already on the list',
+  '外觀與帳號': 'Appearance & account', '載具、外觀、帳號、使用教學和問題回報。': 'Carrier, appearance, account, tutorial and feedback.',
+  '購物清單': 'Shopping list', '這次要買什麼、什麼時候買好、找誰一起買': 'What to buy, by when, and who’s helping',
+  '拍照、條碼、品牌和規格，存起來下次直接挑': 'Photo, barcode, brand and size, saved for next time',
+  '回報問題／給意見': 'Report a problem / send feedback', '遇到怪怪的地方、或希望多一個功能，直接寫給我們。': 'Something odd, or a feature you want? Tell us here.',
+  '類型': 'Type', '有問題': 'Problem', '想要新功能': 'Feature idea', '想說的話': 'Message',
+  '例：按「載具」之後畫面沒反應；我用的是 iPhone': 'e.g. Nothing happens after tapping “Carrier”; I’m on an iPhone',
+  '會一起送出：你的帳號、現在的頁面、手機／瀏覽器型號和版本，方便我們找問題。': 'We also send your account, the current page, your phone/browser and the app version to help us track it down.',
+  '送出': 'Send', '請寫一下發生什麼事': 'Please describe what happened', '收到了，謝謝你！': 'Got it, thank you!',
+  '沒送出：': 'Not sent: ', '回報功能還沒開通（要先執行 SQL）': 'Feedback isn’t set up yet (run the SQL first)',
+  '這個版本沒有連雲端，沒辦法送出回報': 'This copy isn’t connected to the cloud, so feedback can’t be sent', '登入後才能回報問題': 'Sign in to send feedback',
+  '版本': 'version',
   // 使用教學
   '使用教學': 'Tutorial', '播放教學': 'Play tutorial', '看使用教學': 'Watch tutorial', '載具、設定和使用教學。': 'Carrier, settings and tutorial.',
   '半分鐘的操作示範：怎麼開清單、加要買的東西，還有拍照、讀條碼讓東西買得更準。': 'A 30-second demo: create a list, add what to buy, and use photos and barcodes so the right thing gets bought.',
@@ -890,7 +909,7 @@ function walk(root) {
   for (var n = w.nextNode(); n; n = w.nextNode()) { if (n.nodeType === 3) doText(n); else doEl(n); }
 }
 document.documentElement.lang = 'en';
-document.title = 'Family Restock List';
+document.title = 'SpotOn';
 walk(document.body);
 new MutationObserver(function (ms) {
   ms.forEach(function (m) {
@@ -1333,7 +1352,7 @@ function addListMembers(lid, invites) {
   enqueue('lm', async () => { const { error } = await SB.from('list_members').upsert(rows, { onConflict: 'list_id,email', ignoreDuplicates: true }); if (error) throw error; await loadLM(); }).catch(onWriteError);
 }
 function inviteText(l, em) {
-  return '我邀請你一起編輯補貨清單「' + l.title + '」' + (l.dueAt ? '（' + fmtDue(l.dueAt) + ' 前要買好）' : '') + '\n用這個信箱登入就看得到：' + em + (APP_URL ? '\n網址：' + APP_URL + '#login=' + enc(em) : '');
+  return '我邀請你在「購清楚」一起編輯購物清單「' + l.title + '」' + (l.dueAt ? '（' + fmtDue(l.dueAt) + ' 前要買好）' : '') + '\n用這個信箱登入就看得到：' + em + (APP_URL ? '\n網址：' + APP_URL + '#login=' + enc(em) : '');
 }
 function openInviteDone(lid, ems, onClose) {
   const l = D.lists[lid]; if (!l) return;
@@ -1342,7 +1361,7 @@ function openInviteDone(lid, ems, onClose) {
     ems.map(em => {
       const t = inviteText(l, em);
       return '<div class="inv-one">' + (ems.length > 1 ? '<strong>' + esc(em) + '</strong>' : '') +
-        '<div class="chips"><a class="btn btn-primary" href="' + lineUrl(t) + '" target="_blank" rel="noopener">用 LINE 傳網址</a><a class="btn btn-secondary" href="mailto:' + enc(em) + '?subject=' + enc('一起編輯補貨清單：' + l.title) + '&body=' + enc(t) + '">寄 Email</a></div>' +
+        '<div class="chips"><a class="btn btn-primary" href="' + lineUrl(t) + '" target="_blank" rel="noopener">用 LINE 傳網址</a><a class="btn btn-secondary" href="mailto:' + enc(em) + '?subject=' + enc('購清楚：一起編輯「' + l.title + '」') + '&body=' + enc(t) + '">寄 Email</a></div>' +
         '<textarea readonly rows="4" aria-label="邀請文字">' + esc(t) + '</textarea><button class="btn btn-secondary btn-sm" data-act="copy-inv" style="justify-self:start">複製文字</button></div>';
     }).join('') +
     (/localhost|127\.0\.0\.1/.test(APP_URL) ? '<p class="help warn">現在的網址是 localhost，只有你這台電腦打得開。放上正式網址後，對方才連得到。</p>' : '') + '</div>' });
@@ -1463,7 +1482,7 @@ function viewLists() {
   else if (!active.length) status = '目前沒有要買的東西。';
   else status = active.length + ' 張清單待採買' + (nOver ? '・' + nOver + ' 張已過提醒時間' : '');
   let h = '<section class="band hero"><div class="wrap">' +
-    '<h1 class="hero-title' + R() + '">補貨清單</h1>' +
+    '<h1 class="hero-title' + R() + '">購清楚</h1>' +
     '<p class="tagline' + R(1) + '">說清楚哪一罐，就不會買錯。</p>' +
     (ready() && active.length ? sumCard(active) : '<p class="hero-status' + R(2) + '">' + esc(status) + '</p>') +
     '<div class="cta-row' + R(2) + '"><button class="btn btn-primary" data-act="new-list">新建清單</button><button class="btn-link" data-go="products">管理商品 ›</button></div>' +
@@ -1541,7 +1560,7 @@ function viewList() {
   const pct = its.length ? Math.round(bought.length / its.length * 100) : 0;
   const creator = nameOf(l.createdBy);
   let h = '<section class="band hero"><div class="wrap">' +
-    '<button class="btn-link back" data-go="lists">‹ 所有清單</button>' +
+    '<button class="btn-link back" data-go="lists">‹ 回首頁</button>' +
     '<p class="eyebrow' + R() + '">' + esc(storesLabel(l)) + (l.sample ? '・範例' : '') + '</p>' +
     '<h1 class="list-title' + R(1) + '">' + esc(l.title) + '</h1>' +
     '<p class="hero-status' + R(2) + '">' + (creator ? esc(whoSp(creator)) + '建立・' : '') + fmtTime(l.createdAt) + (l.dueAt ? '・期限 ' + fmtDue(l.dueAt) : '') + (l.remindAt ? '・提醒 ' + fmtRemind(l.remindAt) : '') + '</p>' +
@@ -1613,7 +1632,7 @@ function itemRow(it, locked) {
 /* 分享文字與連結 */
 function listText(l) {
   const its = itemsOf(l._id);
-  const lines = ['【補貨清單】' + l.title];
+  const lines = ['【購清楚】' + l.title];
   if (l.dueAt) lines.push('期限：' + fmtDue(l.dueAt) + ' 前買好');
   if (l.remindAt) lines.push('提醒：' + fmtRemind(l.remindAt));
   let n = 0;
@@ -1644,7 +1663,7 @@ function doneText(l) {
   if (subs.length) s += '\n買了替代品：' + subs.map(i => prodOf(i).name).join('、');
   return s;
 }
-function mailtoUrl(l, text) { return 'mailto:?subject=' + enc('補貨清單：' + l.title) + '&body=' + enc(text); }
+function mailtoUrl(l, text) { return 'mailto:?subject=' + enc('購清楚：' + l.title) + '&body=' + enc(text); }
 function icsEsc(v) { return String(v).replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;'); }
 function icsText(l) {
   const f = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
@@ -1664,7 +1683,7 @@ function downloadIcs(l) {
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 function lineUrl(text) { return 'https://line.me/R/share?text=' + enc(text); }
-function mailUrl(l, text) { return 'https://mail.google.com/mail/?view=cm&fs=1&su=' + enc('補貨清單：' + l.title) + '&body=' + enc(text); }
+function mailUrl(l, text) { return 'https://mail.google.com/mail/?view=cm&fs=1&su=' + enc('購清楚：' + l.title) + '&body=' + enc(text); }
 function gcalUrl(l) {
   const f = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   const ymd = ms => toDateInput(ms).replace(/-/g, '');
@@ -1758,13 +1777,13 @@ function viewMe() {
   if (MODE === 'cloud') share = '<p>清單和商品存在 Supabase 雲端，登入後在哪支手機都能用。</p><p>每張清單各自決定誰能編輯：打開清單，在最下面「一起編輯」輸入對方的 Email。對方只看得到你邀請他的那幾張。</p>';
   else if (MODE === 'local') share = '<p>還沒設定雲端，資料只存在這台裝置的瀏覽器，換手機或換瀏覽器就看不到。</p><p>在 index.html 最上面填好 Supabase 的網址和金鑰，就會改成全家同步。</p>';
   else share = '<p>正在連線…</p>';
-  let h = '<section class="band hero sm"><div class="wrap"><h1 class="hero-title' + R() + '">我的</h1><p class="tagline' + R(1) + '">載具、設定和使用教學。</p></div></section>';
+  let h = '<section class="band hero sm"><div class="wrap"><h1 class="hero-title' + R() + '">設定</h1><p class="tagline' + R(1) + '">載具、外觀、帳號、使用教學和問題回報。</p></div></section>';
   h += '<section class="band alt"><div class="wrap"><div class="tiles">' +
     '<div class="tile span2 reveal"><h3>我的手機條碼載具</h3><p>斜線開頭共 8 碼。' + (MODE === 'cloud' && ME ? '只存在你自己的帳號裡，家人看不到。' : '存在這台裝置。') + '</p>' +
     '<form class="form" data-carrier-form><div class="input-row"><input id="me-carrier" value="' + esc(MY_CARRIER) + '" placeholder="/ABC1234" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="載具號碼"><button class="btn btn-primary" type="submit">儲存</button></div><p class="help" id="me-carrier-help"></p></form>' +
     (MY_CARRIER ? '<div class="bc-box" style="max-width:360px;margin-top:6px"><svg data-bc="' + esc(MY_CARRIER) + '" data-fmt="CODE39" data-h="70" data-w="1.6"></svg></div>' : '') + '</div>' +
     '<div class="tile reveal"><h3>' + (MODE === 'cloud' ? '雲端同步中' : MODE === 'local' ? '只存在這台裝置' : '連線中') + '</h3>' + share + '</div>' +
-    '<div class="tile span2 reveal settings"><h3>設定</h3>' +
+    '<div class="tile span2 reveal settings"><h3>外觀與帳號</h3>' +
       (MODE === 'cloud' ? '<div class="set-row"><div><strong>我的名字</strong><p>一起編輯清單的人會看到這個名字。</p></div><form class="form" id="myname-form" novalidate><div class="input-row"><input id="myname-in" value="' + esc(MY_NAME) + '" placeholder="例：Anderson" maxlength="20" autocomplete="off" aria-label="我的名字"><button class="btn btn-primary" type="submit">儲存</button></div></form></div>' : '') +
       '<div class="set-row"><div><strong>外觀</strong><p>深色或淺色，只影響這台裝置。</p></div><div class="seg" role="group" aria-label="外觀">' +
         [['', '跟隨系統'], ['light', '淺色'], ['dark', '深色']].map(t => '<button type="button" data-act="theme" data-v="' + t[0] + '" aria-pressed="' + ((document.documentElement.dataset.theme || '') === t[0]) + '">' + t[1] + '</button>').join('') + '</div></div>' +
@@ -1773,6 +1792,7 @@ function viewMe() {
       (MODE === 'cloud' ? '<div class="set-row"><div><strong>帳號</strong><p class="set-mail">' + esc(ME) + '</p></div><button class="btn btn-sm btn-secondary" data-act="logout">登出</button></div>' : '') +
     '</div>' +
     '<div class="tile reveal"><h3>使用教學</h3><p>半分鐘的操作示範：怎麼開清單、加要買的東西，還有拍照、讀條碼讓東西買得更準。</p><div class="chips"><button class="btn btn-sm btn-primary" data-act="tour">播放教學</button>' + (hasSample ? '<button class="btn btn-sm btn-danger" data-act="samples-clear">' + (ARMED && ARMED.key === 'samples' && Date.now() < ARMED.until ? '再按一次確定清除' : '清除範例') + '</button>' : '') + '</div></div>' +
+    '<div class="tile reveal"><h3>回報問題／給意見</h3><p>遇到怪怪的地方、或希望多一個功能，直接寫給我們。</p><div class="chips"><button class="btn btn-sm btn-primary" data-act="feedback">回報問題</button></div></div>' +
     '<div class="tile reveal"><h3>這一版能做什麼</h3><p>清單、商品、打勾、缺貨處理、給店員看、載具結帳、相機掃條碼、LINE、Email、行事曆都可以用。</p><p>還沒有：手機推播通知。之後再加。</p></div>' +
     '</div></div></section>';
   return h;
@@ -1782,14 +1802,14 @@ function viewMe() {
 // 邀請網址 #login=對方信箱：登入頁直接填好
 let LOGIN_HINT = '';
 function viewLogin() {
-  return '<section class="band hero"><div class="wrap"><h1 class="hero-title' + R() + '">補貨清單</h1><p class="tagline' + R(1) + '">登入後，全家共用同一份清單。</p></div></section>' +
+  return '<section class="band hero"><div class="wrap"><h1 class="hero-title' + R() + '">購清楚</h1><p class="tagline' + R(1) + '">登入後，全家共用同一份清單。</p></div></section>' +
     '<section class="band alt"><div class="wrap"><div class="empty" style="max-width:520px;margin:0 auto"><h3>用 Email 登入</h3><p class="muted">' + (LOGIN_HINT ? '你被邀請的信箱已經填好了，按「寄登入連結」，再去信箱點信裡的連結就登入了。' : '輸入信箱，我們寄一封登入連結給你，點了就登入，不用密碼。') + '</p>' +
     '<form id="login-form" class="form" style="width:100%" novalidate><input id="login-email" type="email" placeholder="you@example.com" autocomplete="email" value="' + esc(LOGIN_HINT) + '"><button class="btn btn-primary btn-wide" type="submit">寄登入連結</button></form>' +
     '<p class="help">只有加入「家庭成員」的信箱才看得到清單。</p></div></div></section>';
 }
 function viewDenied() {
-  return '<section class="band hero"><div class="wrap"><h1 class="hero-title">補貨清單</h1></div></section>' +
-    '<section class="band alt"><div class="wrap"><div class="empty"><h3>這個信箱還沒加入家庭</h3><p class="muted">' + esc(ME) + ' 還不是家庭成員。請已經加入的家人到「我的」→「家庭成員」新增你的信箱，再重新整理這頁。</p><div class="cta-row"><button class="btn btn-secondary" data-act="logout">換一個信箱登入</button></div></div></div></section>';
+  return '<section class="band hero"><div class="wrap"><h1 class="hero-title">購清楚</h1></div></section>' +
+    '<section class="band alt"><div class="wrap"><div class="empty"><h3>這個信箱還沒加入家庭</h3><p class="muted">' + esc(ME) + ' 還不是家庭成員。請已經加入的家人到「設定」→「家庭成員」新增你的信箱，再重新整理這頁。</p><div class="cta-row"><button class="btn btn-secondary" data-act="logout">換一個信箱登入</button></div></div></div></section>';
 }
 
 /* ── 相機即時掃條碼 ── */
@@ -2297,6 +2317,27 @@ function tourGo(i) {
   sc.steps.forEach(s => TOUR_T.push(setTimeout(() => { if (scr.isConnected) tourDo(scr, s[1], s[2], s[3]); }, s[0])));
   if (i < S.length - 1) TOUR_T.push(setTimeout(() => { if (scr.isConnected) tourGo(i + 1); }, sc.len));
 }
+/* ───────── 回報問題 ───────── */
+function openFeedback() {
+  if (MODE !== 'cloud') { toast(MODE === 'local' ? '這個版本沒有連雲端，沒辦法送出回報' : '登入後才能回報問題'); return; }
+  openSheet({ title: '回報問題／給意見', focusFirst: false, html: '<form id="fb-form" class="form" novalidate>' +
+    '<div class="field"><span>類型</span><div class="seg" role="group" aria-label="類型">' +
+      [['bug', '有問題'], ['idea', '想要新功能'], ['other', '其他']].map((k, i) => '<button type="button" data-act="fb-kind" data-v="' + k[0] + '" aria-pressed="' + (i === 0) + '">' + k[1] + '</button>').join('') + '</div></div>' +
+    '<label class="field"><span>想說的話</span><textarea id="fb-msg" rows="6" maxlength="2000" placeholder="例：按「載具」之後畫面沒反應；我用的是 iPhone"></textarea></label>' +
+    '<p class="help">會一起送出：你的帳號、現在的頁面、手機／瀏覽器型號和版本，方便我們找問題。</p>' +
+    '<div class="form-actions"><button type="submit" class="btn btn-primary btn-wide">送出</button></div></form>' });
+}
+function sendFeedback() {
+  const msg = ($('#fb-msg').value || '').trim();
+  if (!msg) { toast('請寫一下發生什麼事'); $('#fb-msg').focus(); return; }
+  const kind = ($('[data-act="fb-kind"][aria-pressed="true"]') || {}).dataset.v || 'other';
+  const btn = $('#fb-form [type=submit]'); btn.disabled = true;
+  SB.from('feedback').insert({ kind, message: msg.slice(0, 2000), page: VIEW, ua: navigator.userAgent.slice(0, 300), app_version: ($('.foot p') || {}).textContent || '' }).then(({ error }) => {
+    btn.disabled = false;
+    if (error) { toast(/feedback/.test(error.message || '') && /exist|find/.test(error.message || '') ? '回報功能還沒開通（要先執行 SQL）' : '沒送出：' + (error.message || '請稍後再試'), 6000); return; }
+    closeSheet(true); toast('收到了，謝謝你！');
+  });
+}
 function openTour() {
   try { localStorage.setItem(tourKey(), '1'); } catch (e) { /* 忽略 */ }
   if (MODE === 'cloud' && SB && !TOUR_SEEN) { TOUR_SEEN = true; SB.auth.updateUser({ data: { tour_seen: true } }).catch(() => {}); }
@@ -2310,7 +2351,7 @@ function openTour() {
     onClose: tourStop
   });
 }
-// 只有第一次打開會自動播放，之後要從「我的」重看
+// 只有第一次打開會自動播放，之後要從「設定」重看
 let TOUR_SEEN = false;
 function tourKey() { return MODE === 'cloud' ? LS_TOUR + ':' + ME : LS_TOUR; }
 function maybeTour() { if (TOUR_SEEN) return; try { if (localStorage.getItem(tourKey())) return; } catch (e) { return; } if (!SHEET) openTour(); }
@@ -2348,7 +2389,13 @@ function pickFile(cb) { const inp = $('#file-in'); inp.value = ''; FILE_CB = cb;
 const itemIdOf = el => { const r = el.closest('[data-item]'); return r ? r.getAttribute('data-item') : null; };
 const ACT = {
   'new-list': () => openNewList(),
+  // 底部中間的「新增」：選要開新清單還是加新商品
+  'create': () => openSheet({ title: '新增', html: '<div class="create-pick">' +
+    '<button class="buy-row" data-act="new-list"><span><strong>購物清單</strong><small>這次要買什麼、什麼時候買好、找誰一起買</small></span><span aria-hidden="true">›</span></button>' +
+    '<button class="buy-row" data-act="new-product"><span><strong>商品</strong><small>拍照、條碼、品牌和規格，存起來下次直接挑</small></span><span aria-hidden="true">›</span></button></div>' }),
   'tour': () => openTour(),
+  'feedback': () => openFeedback(),
+  'fb-kind': a => { $$('[data-act="fb-kind"]').forEach(b => b.setAttribute('aria-pressed', b === a)); },
   'tour-go': a => tourGo(+a.dataset.i),
   'tour-prev': () => tourGo(Math.max(0, +$('#tour').dataset.i - 1)),
   'tour-skip': () => { tourStop(); closeSheet(true); },
@@ -2586,6 +2633,7 @@ document.addEventListener('change', e => {
 document.addEventListener('submit', e => {
   const f = e.target; e.preventDefault();
   if (f.id === 'nl-form') createList();
+  else if (f.id === 'fb-form') sendFeedback();
   else if (f.id === 'ed-form') saveEditor();
   else if (f.id === 'login-form') {
     const em = ($('#login-email').value || '').trim().toLowerCase();
