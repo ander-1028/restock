@@ -564,6 +564,35 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 .create-pick{display:grid;gap:12px}
 .create-pick .buy-row>span:first-child{display:grid;gap:2px}
 .create-pick small{font-size:14px;color:var(--fg-2)}
+.shop-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+.shop-top .back{margin:0}
+.shop-prog{margin-top:14px;max-width:520px}
+.store-sub .count{margin-left:6px;opacity:.7}
+.swipe-hint{font-size:13px;color:var(--fg-3);margin:0 0 4px}
+.srows{display:grid;gap:8px}
+.srow{position:relative;border-radius:18px;overflow:hidden}
+.srow-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:15px;font-weight:600;border-radius:18px}
+.srow-bg span{opacity:0}
+.srow[data-dir="right"] .srow-bg{background:var(--accent);color:var(--on-accent)}
+.srow[data-dir="right"] .srow-bg .ok{opacity:1}
+.srow[data-dir="left"] .srow-bg{background:var(--tile-2);color:var(--fg)}
+.srow[data-dir="left"] .srow-bg .no{opacity:1}
+.srow-card{position:relative;display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:6px 6px 6px 2px;transition:transform .22s var(--ease);touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.srow.dragging .srow-card{transition:none}
+.srow-main{flex:1;min-width:0;display:flex;align-items:center;gap:12px;text-align:left;padding:2px 0;color:inherit}
+.srow .th{width:46px;height:46px;border-radius:12px}
+.srow img{pointer-events:none;-webkit-user-drag:none}
+.srow-txt{flex:1;min-width:0;display:grid;gap:1px}
+.srow-txt b{font-size:16px;font-weight:600;overflow-wrap:anywhere}
+.srow-txt .x{color:var(--fg-3);font-weight:500}
+.srow-txt small{font-size:13px;color:var(--fg-2);overflow-wrap:anywhere}
+.srow .pill{flex:none}
+.srow-why{width:36px;height:36px;border-radius:50%;color:var(--fg-3);font-size:18px;flex:none}
+.srow-why:hover{background:var(--tile)}
+.srow.bought .check>span{background:var(--accent);border-color:var(--accent)}
+.srow.bought .check svg{opacity:1}
+.srow.bought .srow-txt b{text-decoration:line-through;color:var(--fg-3)}
+.srow.bought .th,.srow.out .th{opacity:.6}
 .inv-one{display:grid;gap:10px;padding-top:12px;border-top:1px solid var(--line-soft)}
 .tour{display:grid;gap:14px;justify-items:center;padding-bottom:4px}
 .tour [hidden]{display:none!important}
@@ -650,7 +679,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
   </div>
 </header>
 <main id="app"></main>
-<footer class="foot"><div class="wrap"><p>購清楚・版本 2.2 Google 登入版（10/26 圖示選單、耳機回報）</p><p id="foot-mode">正在連線…</p></div></footer>
+<footer class="foot"><div class="wrap"><p>購清楚・版本 2.3 Google 登入版（10/27 採買模式、左右滑）</p><p id="foot-mode">正在連線…</p></div></footer>
 <div class="cobar" id="cobar" hidden></div>
 <div id="sheet-root"></div>
 <div id="overlay-root"></div>
@@ -661,7 +690,7 @@ main.has-cobar ~ .toast{bottom:calc(160px + env(safe-area-inset-bottom,0px))}
 <script>
 /* ── English：選了 English 時，把畫面上的中文換成英文。中文版不經過這裡。
    整段對得上字典就換；夾著字典以外的中文（使用者自己打的名稱）就整段保留原文；「」裡的字當作名稱。
-   分享出去的清單文字（LINE、Email、複製）維持中文。 ── */
+   分享出去的清單文字（Email、複製）維持中文。 ── */
 (function () {
 var lang = 'zh'; try { lang = localStorage.getItem('restock.lang') || 'zh'; } catch (e) {}
 if (lang !== 'en') return;
@@ -672,7 +701,7 @@ var EN = {
   // 導覽、頁尾
   '補貨清單': 'Restock', '購清楚': 'SpotOn', '首頁': 'Home', '‹ 回首頁': '‹ Home', '主要頁面': 'Main pages', '清單': 'Lists', '商品': 'Products', '紀錄': 'History', '我的': 'Me', '回報問題': 'Report a problem',
   '同步狀態': 'Sync status', '連線中': 'Connecting', '正在連線…': 'Connecting…', '已同步': 'Synced', '僅本機': 'This device only', '未登入': 'Signed out',
-  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items', '帳號資料隔離': 'account privacy', '使用教學': 'tutorial', '邀請自動填信箱': 'invite email prefill', '新名字、新選單、問題回報': 'new name, new menu, feedback', '圖示選單、耳機回報': 'icon menu, headset feedback',
+  '家庭補貨清單': 'Family Restock List', '獨立版': 'standalone', '中英文切換': 'English option', '品類圖示': 'category icons', '清單項目可編輯': 'editable items', '帳號資料隔離': 'account privacy', '使用教學': 'tutorial', '邀請自動填信箱': 'invite email prefill', '新名字、新選單、問題回報': 'new name, new menu, feedback', '圖示選單、耳機回報': 'icon menu, headset feedback', '採買模式、左右滑': 'shopping mode, swipe',
   'Google 登入版': 'Google sign-in edition',
   '只改這張清單裡的這一項。品牌、規格、照片要改的話：': 'Only changes this item in this list. To change brand, size or photo:',
   '編輯商品資料 ›': 'Edit product details ›', '這一項改到': 'Store changed to',
@@ -711,7 +740,7 @@ var EN = {
   // 邀請
   '通知對方': 'Let them know', '已邀請': 'Invited',
   '對方用這個信箱登入，就看得到也改得到這張清單，看不到你的其他清單。': 'They sign in with this email to see and edit this list. They can’t see your other lists.',
-  '用 LINE 傳網址': 'Send link via LINE', '寄 Email': 'Send email', '邀請文字': 'Invite text', '複製文字': 'Copy text',
+  '寄 Email': 'Send email', '邀請文字': 'Invite text', '複製文字': 'Copy text',
   '現在的網址是 localhost，只有你這台電腦打得開。放上正式網址後，對方才連得到。': 'This address is localhost, so only this computer can open it. Publish the app first so others can reach it.',
   '這個人已經可以編輯這張清單了': 'This person can already edit this list', '邀請失敗：': 'Invite failed: ', '邀請失敗': 'Invite failed',
   '登入雲端版之後，才能邀請別人一起編輯這張清單。': 'Sign in to the cloud version to invite others to this list.',
@@ -729,7 +758,7 @@ var EN = {
   '，還有': ', still', '項沒買': 'items left', '打開清單': 'Open list', '還沒有要買的清單': 'No lists yet', '三步就能讓代買的人買對。': 'Three steps so whoever shops gets it right.',
   '建好商品': 'Add products', '品牌、規格、照片、條碼，全家共用': 'Brand, size, photo and barcode, shared with the family',
   '開一張清單': 'Start a list', '選店家，挑商品，填數量': 'Pick stores, products and amounts', '傳給對方': 'Send it',
-  'LINE、Email 或加到行事曆': 'LINE, email or calendar', '先看範例': 'See an example', '已過期限': 'Overdue', '已過提醒時間': 'Past reminder',
+  '先看範例': 'See an example', '已過期限': 'Overdue', '已過提醒時間': 'Past reminder',
   '範例': 'Example', '沒有期限': 'No due date', '跑': 'Visit', '個地方': 'places', '人編輯': 'editor(s)',
   // 清單頁
   '這張清單已經被刪除了': 'This list was deleted', '‹ 所有清單': '‹ All lists', '・範例': ' · Example', '建立・': 'created · ', '建立': 'created',
@@ -739,7 +768,7 @@ var EN = {
   '再按一次，確定刪除': 'Tap again to delete', '再按一次，確定退出': 'Tap again to leave', '刪除這張清單': 'Delete this list', '退出這張清單': 'Leave this list',
   '已結帳，': 'Checked out, ', '後完成': 'until done', '時間到會存成購買紀錄並通知': 'Saved to history and notified when time is up', '發起人': 'the owner',
   '。按錯了可以收回。': '. Tap Undo if it was a mistake.', '直接完成': 'Finish now', '出示載具': 'Show carrier', '已完成・': 'Done · ',
-  '，沒買到的已列在下面': ', missed items are listed below', '・有用載具': ' · used carrier', '用 LINE 回報': 'Report via LINE', '再買一次': 'Buy again',
+  '，沒買到的已列在下面': ', missed items are listed below', '・有用載具': ' · used carrier', '再買一次': 'Buy again',
   '重新打開': 'Reopen', '・還有': ' · still', '可替代': 'Substitutes OK', '不可替代': 'No substitutes', '缺貨・可買別牌': 'Out · other brand OK',
   '缺貨・這次不買': 'Out · skip this time', '買了替代品': 'Bought a substitute', '數量': 'Quantity', '減少一個': 'One less', '增加一個': 'One more',
   '給店員看': 'Show to staff', '缺貨': 'Out of stock', '找到了': 'Found it', '取消已買：': 'Unmark bought: ', '標記已買：': 'Mark bought: ', '看': 'View',
@@ -748,7 +777,7 @@ var EN = {
   '。時間到還沒買完，首頁會一直顯示提醒。': '. If it’s not done by then, the home page keeps reminding you.',
   '設定後可以加到日曆；過了時間還沒買完，首頁會提醒。': 'Once set you can add it to your calendar; if it’s not done in time, the home page reminds you.',
   '清除': 'Clear', '把整張清單傳給對方': 'Send the whole list', '，對方點連結就能一起打勾': ', they can tick items from the link',
-  '用 LINE 傳送': 'Send via LINE', '用手機的郵件 App 或 Gmail 開一封寫好的信，填對方信箱就能寄。': 'Opens a ready-made email in your mail app or Gmail. Just add their address.',
+  '用手機的郵件 App 或 Gmail 開一封寫好的信，填對方信箱就能寄。': 'Opens a ready-made email in your mail app or Gmail. Just add their address.',
   '郵件 App': 'Mail app', '行事曆': 'Calendar', '加到手機行事曆，時間到會跳通知；沒買完過幾小時會再提醒一次。': 'Add to your phone calendar for a notification; it reminds you again a few hours later if not done.',
   '先設定期限或提醒時間，才能加到行事曆。': 'Set a due date or reminder first to add it to a calendar.', 'Apple／手機行事曆': 'Apple / phone calendar',
   'Google 日曆': 'Google Calendar', '加到行事曆': 'Add to calendar', '清單文字': 'List text', '複製': 'Copy',
@@ -775,7 +804,7 @@ var EN = {
   '帳號': 'Account', '登出': 'Sign out', '範例資料': 'Example data',
   '6 項範例商品和 1 張範例清單，都會標上「範例」。看完可以一次清掉，不會動到你自己建的東西。': '6 example products and 1 example list, all marked “Example”. Clear them in one go without touching your own items.',
   '再按一次確定清除': 'Tap again to clear', '清除範例': 'Clear examples', '載入範例': 'Load examples', '這一版能做什麼': 'What this version does',
-  '清單、商品、打勾、缺貨處理、給店員看、載具結帳、相機掃條碼、LINE、Email、行事曆都可以用。': 'Lists, products, ticking off, out-of-stock handling, showing staff, carrier checkout, barcode scanning, LINE, email and calendar all work.',
+  '清單、商品、打勾、缺貨處理、給店員看、載具結帳、相機掃條碼、Email、行事曆都可以用。': 'Lists, products, ticking off, out-of-stock handling, showing staff, carrier checkout, barcode scanning, email and calendar all work.',
   '還沒有：手機推播通知。之後再加。': 'Not yet: phone push notifications. Coming later.',
   // 登入
   '登入後，全家共用同一份清單。': 'Sign in to share the same lists with your family.', '用 Email 登入': 'Sign in with email',
@@ -834,7 +863,7 @@ var EN = {
   '完成了': 'Done', '沒買到': 'Missed', '沒買到：': 'Missed: ', '倒數結束會存成購買紀錄': 'Saved to history when the countdown ends',
   '倒數結束會存成購買紀錄。按錯了可以收回；確定沒問題就按「直接完成」，不用等。': 'Saved to history when the countdown ends. Tap Undo if it was a mistake, or “Finish now” to skip the wait.', '打開 App 就會看到': 'will see it when they open the app',
   '。按錯了可以收回；確定沒問題就按「直接完成」，不用等。': '. Tap Undo if it was a mistake, or “Finish now” to skip the wait.',
-  '打開 App 就會看到完成通知。也可以直接傳 LINE 跟對方說。': 'They’ll see it when they open the app. You can also tell them on LINE.',
+  
   '已存成購買紀錄。': 'Saved to history.', '回清單': 'Back to lists',
   '已經超過 2 分鐘，不能收回了。可以在清單裡「重新打開」。': 'More than 2 minutes have passed, so it can’t be undone. You can “Reopen” it from the list.',
   '已收回，可以繼續買': 'Undone, keep shopping', '設定手機條碼載具': 'Set up mobile barcode carrier',
@@ -867,7 +896,6 @@ var EN = {
   '載入不了 Supabase 程式庫（可能被瀏覽器的追蹤保護擋住），先用單機模式': 'Couldn’t load the Supabase library (maybe blocked by tracking protection). Using offline mode',
   '讀取共用名單失敗，請確認已經執行過最新的 SQL：': 'Couldn’t load shared members. Make sure the latest SQL has been run: ', '讀取雲端資料失敗：': 'Couldn’t load cloud data: ',
   '已刪除的商品': 'Deleted product', '例如': 'e.g.',
-  'App 不會自己寄信，請用 LINE 或 Email 把網址傳給對方。對方點網址，信箱會自動填好。': 'The app doesn’t send emails itself. Send the link by LINE or email; when they open it, their email is already filled in.',
   '你被邀請的信箱已經填好了，按「寄登入連結」，再去信箱點信裡的連結就登入了。': 'Your invited email is already filled in. Tap “Send sign-in link”, then open the link in that email to sign in.',
   '這個人已經在名單裡了': 'This person is already on the list',
   '登入或註冊': 'Sign in or sign up', '用 Google 帳號繼續': 'Continue with Google', '或用 Email 登入連結': 'or use an email sign-in link',
@@ -889,6 +917,17 @@ var EN = {
   '沒送出：': 'Not sent: ', '回報功能還沒開通（要先執行 SQL）': 'Feedback isn’t set up yet (run the SQL first)',
   '這個版本沒有連雲端，沒辦法送出回報': 'This copy isn’t connected to the cloud, so feedback can’t be sent', '登入後才能回報問題': 'Sign in to send feedback',
   '版本': 'version',
+  '完成編輯': 'Done editing', '前買好・': ' due · ', '沒買到': 'Missed', '還沒有商品，按「編輯」加要買的東西。': 'No items yet. Tap “Edit” to add what to buy.',
+  '往右滑＝買到了・往左滑＝沒買到・點一下看照片和條碼': 'Swipe right = got it · swipe left = missed · tap for photo and barcode',
+  '✓ 買到了': '✓ Got it', '放回待買': 'Back to list', '沒買到 ›': 'Missed ›', '替代品': 'Substitute',
+  '沒買到？': ' — missed?', '找不到，請店員幫忙': 'Can’t find it, ask staff', '打開照片和條碼給店員看': 'Show the photo and barcode to staff',
+  '缺貨': 'Out of stock', '這項可以換別的牌子': 'Another brand is OK', '這項不可替代，這次先不買': 'No substitutes, skip this time',
+  '買了替代品': 'Bought a substitute', '換別的牌子，算已買': 'Another brand, counts as bought',
+  '太貴，這次不買': 'Too expensive, skip', '這次先不買': 'Skip this time', '還是要買': 'Still need it',
+  '找不到': 'Couldn’t find', '太貴': 'Too expensive', '這次不買': 'Skipped', '沒買到・': 'Missed · ', '」沒買到：': '” missed: ',
+  'App 不會自己寄信，請用 Email 或複製文字把網址傳給對方。對方點網址，信箱會自動填好。': 'The app doesn’t send emails itself. Send the link by email or copy it; when they open it, their email is already filled in.',
+  'Email、複製文字或加到行事曆': 'Email, copy or calendar',
+  '打開 App 就會看到完成通知。': 'will see it when they open the app.',
   // 使用教學
   '使用教學': 'Tutorial', '播放教學': 'Play tutorial', '看使用教學': 'Watch tutorial', '載具、設定和使用教學。': 'Carrier, settings and tutorial.',
   '半分鐘的操作示範：怎麼開清單、加要買的東西，還有拍照、讀條碼讓東西買得更準。': 'A 30-second demo: create a list, add what to buy, and use photos and barcodes so the right thing gets bought.',
@@ -1377,11 +1416,11 @@ function inviteText(l, em) {
 function openInviteDone(lid, ems, onClose) {
   const l = D.lists[lid]; if (!l) return;
   openSheet({ title: '通知對方', onClose, html: '<div class="form"><p>已邀請 <strong>' + ems.map(e => esc(e)).join('、') + '</strong>。對方用這個信箱登入，就看得到也改得到這張清單，看不到你的其他清單。</p>' +
-    '<p class="help">App 不會自己寄信，請用 LINE 或 Email 把網址傳給對方。對方點網址，信箱會自動填好。</p>' +
+    '<p class="help">App 不會自己寄信，請用 Email 或複製文字把網址傳給對方。對方點網址，信箱會自動填好。</p>' +
     ems.map(em => {
       const t = inviteText(l, em);
       return '<div class="inv-one">' + (ems.length > 1 ? '<strong>' + esc(em) + '</strong>' : '') +
-        '<div class="chips"><a class="btn btn-primary" href="' + lineUrl(t) + '" target="_blank" rel="noopener">用 LINE 傳網址</a><a class="btn btn-secondary" href="mailto:' + enc(em) + '?subject=' + enc('購清楚：一起編輯「' + l.title + '」') + '&body=' + enc(t) + '">寄 Email</a></div>' +
+        '<div class="chips"><a class="btn btn-primary" href="mailto:' + enc(em) + '?subject=' + enc('購清楚：一起編輯「' + l.title + '」') + '&body=' + enc(t) + '">寄 Email</a></div>' +
         '<textarea readonly rows="4" aria-label="邀請文字">' + esc(t) + '</textarea><button class="btn btn-secondary btn-sm" data-act="copy-inv" style="justify-self:start">複製文字</button></div>';
     }).join('') +
     (/localhost|127\.0\.0\.1/.test(APP_URL) ? '<p class="help warn">現在的網址是 localhost，只有你這台電腦打得開。放上正式網址後，對方才連得到。</p>' : '') + '</div>' });
@@ -1495,7 +1534,7 @@ function goView(v) {
   window.scrollTo(0, 0);
   render({ animate: true });
 }
-function goList(id) { VIEW = 'list'; CUR_LIST = id; closeSheet(true); window.scrollTo(0, 0); render({ animate: true }); }
+function goList(id) { VIEW = 'list'; CUR_LIST = id; LIST_EDIT = false; closeSheet(true); window.scrollTo(0, 0); render({ animate: true }); }
 
 /* ── 首頁：清單 ── */
 function viewLists() {
@@ -1548,7 +1587,7 @@ function emptyLists() {
   return '<div class="empty reveal"><h3>還沒有要買的清單</h3><p class="muted">三步就能讓代買的人買對。</p>' +
     '<ol class="steps"><li class="step"><b>1</b><strong>建好商品</strong><span>品牌、規格、照片、條碼，全家共用</span></li>' +
     '<li class="step"><b>2</b><strong>開一張清單</strong><span>選店家，挑商品，填數量</span></li>' +
-    '<li class="step"><b>3</b><strong>傳給對方</strong><span>LINE、Email 或加到行事曆</span></li></ol>' +
+    '<li class="step"><b>3</b><strong>傳給對方</strong><span>Email、複製文字或加到行事曆</span></li></ol>' +
     '<div class="cta-row"><button class="btn btn-primary" data-act="new-list">新建清單</button><button class="btn btn-secondary" data-act="tour">看使用教學</button></div></div>';
 }
 function listCard(l) {
@@ -1574,6 +1613,8 @@ function listCard(l) {
 }
 
 /* ── 清單詳情 ── */
+// 清單頁有兩種：採買模式（預設，像待辦清單）和編輯模式（原本的完整畫面）
+let LIST_EDIT = false;
 function viewList() {
   const l0 = D.lists[CUR_LIST];
   if (!l0) {
@@ -1584,9 +1625,10 @@ function viewList() {
   const st = listStatus(l), its = itemsOf(l._id), locked = st !== 'active';
   const todo = its.filter(i => i.state === 'todo'), out = its.filter(i => i.state === 'out'), bought = its.filter(i => i.state === 'bought');
   const pct = its.length ? Math.round(bought.length / its.length * 100) : 0;
+  if (!LIST_EDIT) return viewShop(l, st, its, locked, todo, out, bought, pct);
   const creator = nameOf(l.createdBy);
   let h = '<section class="band hero"><div class="wrap">' +
-    '<button class="btn-link back" data-go="lists">‹ 回首頁</button>' +
+    '<div class="shop-top"><button class="btn-link back" data-go="lists">‹ 回首頁</button><button class="btn btn-sm btn-primary" data-act="list-edit-done">完成編輯</button></div>' +
     '<p class="eyebrow' + R() + '">' + esc(storesLabel(l)) + (l.sample ? '・範例' : '') + '</p>' +
     '<h1 class="list-title' + R(1) + '">' + esc(l.title) + '</h1>' +
     '<p class="hero-status' + R(2) + '">' + (creator ? esc(whoSp(creator)) + '建立・' : '') + fmtTime(l.createdAt) + (l.dueAt ? '・期限 ' + fmtDue(l.dueAt) : '') + (l.remindAt ? '・提醒 ' + fmtRemind(l.remindAt) : '') + '</p>' +
@@ -1612,25 +1654,74 @@ function viewList() {
   h += '<section class="band alt"><div class="wrap center"><button class="btn btn-danger" data-act="' + (mine ? 'list-delete' : 'list-leave') + '">' + (armed ? (mine ? '再按一次，確定刪除' : '再按一次，確定退出') : (mine ? '刪除這張清單' : '退出這張清單')) + '</button></div></section>';
   return h;
 }
+function viewShop(l, st, its, locked, todo, out, bought, pct) {
+  let h = '<section class="band hero sm"><div class="wrap">' +
+    '<div class="shop-top"><button class="btn-link back" data-go="lists">‹ 回首頁</button>' + (locked ? '' : '<button class="btn btn-sm btn-secondary" data-act="list-edit">編輯</button>') + '</div>' +
+    '<h1 class="list-title' + R(1) + '">' + esc(l.title) + '</h1>' +
+    '<p class="hero-status' + R(2) + '">' + (l.dueAt ? fmtDue(l.dueAt) + ' 前買好・' : '') + '已買 ' + bought.length + ' / ' + its.length + (out.length ? '・沒買到 ' + out.length : '') + '</p>' +
+    '<div class="progress shop-prog" aria-hidden="true"><i style="width:' + pct + '%"></i></div>' +
+    '</div></section><section class="band alt"><div class="wrap">' + listBanner(l, st, its);
+  if (!its.length) return h + '<div class="items-empty">還沒有商品，按「編輯」加要買的東西。' + (locked ? '' : '<div class="cta-row" style="justify-content:center;margin-top:12px"><button class="btn btn-primary" data-act="pick">加商品</button></div>') + '</div></div></section>';
+  if (!locked && todo.length) h += '<p class="swipe-hint">往右滑＝買到了・往左滑＝沒買到・點一下看照片和條碼</p>';
+  const sts = []; todo.forEach(i => { const x = itemStore(i); if (!sts.includes(x)) sts.push(x); });
+  h += sts.map(x => { const g = todo.filter(i => itemStore(i) === x); return '<h3 class="store-sub">' + esc(storeOf(x).name) + '<span class="count">' + g.length + '</span></h3><div class="srows">' + g.map(it => shopRow(it, locked)).join('') + '</div>'; }).join('');
+  if (!todo.length && !locked) h += '<div class="items-empty">全部處理完了。按下方「載具」或「完成」結帳。</div>';
+  if (out.length) h += '<h3 class="store-sub">沒買到<span class="count">' + out.length + '</span></h3><div class="srows">' + out.map(it => shopRow(it, locked)).join('') + '</div>';
+  if (bought.length) h += '<h3 class="store-sub">已買<span class="count">' + bought.length + '</span></h3><div class="srows">' + bought.map(it => shopRow(it, locked)).join('') + '</div>';
+  return h + '</div></section>';
+}
+function shopRow(it, locked) {
+  const p = prodOf(it), sub = subLine(p);
+  const tag = it.state === 'out' ? '<span class="pill warn">' + whyText(it) + '</span>' : it.subbed ? '<span class="pill ok">替代品</span>' : '';
+  return '<div class="srow ' + esc(it.state) + '" data-item="' + esc(it._id) + '"' + (locked ? '' : ' data-swipe') + '>' +
+    '<div class="srow-bg" aria-hidden="true"><span class="ok">' + (it.state === 'bought' ? '放回待買' : '✓ 買到了') + '</span><span class="no">沒買到 ›</span></div>' +
+    '<div class="srow-card">' +
+      '<button class="check" data-act="toggle" aria-pressed="' + (it.state === 'bought') + '" aria-label="' + (it.state === 'bought' ? '取消已買：' : '標記已買：') + esc(p.name) + '"' + (locked ? ' disabled' : '') + '><span>' + CHECK_SVG + '</span></button>' +
+      '<button class="srow-main" data-act="clerk" aria-label="給店員看「' + esc(p.name) + '」">' +
+        '<span class="th">' + thumbInner(p) + '</span>' +
+        '<span class="srow-txt"><b>' + esc(p.name) + ' <span class="x">× ' + it.qty + '</span></b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span>' + tag + '</button>' +
+      (locked ? '' : '<button class="srow-why" data-act="why" aria-label="沒買到：' + esc(p.name) + '">⋯</button>') +
+    '</div></div>';
+}
+function openWhy(id) {
+  const it = D.items[id]; if (!it) return;
+  const p = prodOf(it);
+  const opt = (attrs, title, sub) => '<button class="buy-row" ' + attrs + '><span><strong>' + title + '</strong>' + (sub ? '<small>' + sub + '</small>' : '') + '</span><span aria-hidden="true">›</span></button>';
+  openSheet({ title: '「' + p.name + '」沒買到？', html: '<div class="create-pick" data-item="' + esc(id) + '">' +
+    opt('data-act="why-clerk"', '找不到，請店員幫忙', '打開照片和條碼給店員看') +
+    opt('data-act="why-set" data-why="oos"', '缺貨', p.sub ? '這項可以換別的牌子' : '這項不可替代，這次先不買') +
+    (p.sub ? opt('data-act="why-sub"', '買了替代品', '換別的牌子，算已買') : '') +
+    opt('data-act="why-set" data-why="price"', '太貴，這次不買', '') +
+    opt('data-act="why-set" data-why="skip"', '這次先不買', '') +
+    (it.state !== 'todo' ? opt('data-act="why-reset"', '還是要買', '放回待買') : '') + '</div>' });
+}
+function markBought(id) {
+  const it = D.items[id]; if (!it) return;
+  const next = it.state === 'bought' ? 'todo' : 'bought';
+  patch('items', id, { state: next, subbed: false, why: null });
+  if (next === 'bought') { const rest = itemsOf(it.listId).filter(i => i._id !== id && i.state === 'todo').length; if (!rest) toast('都處理完了，按下方「載具」或「完成」結帳'); }
+}
 function listBanner(l, st, its) {
   const now = Date.now();
   if (st === 'checkout') {
     return '<div class="banner list-banner"><span class="dot"></span><div class="banner-text"><strong>已結帳，<span data-countdown="' + l.notifyAt + '">' + mmss(l.notifyAt - now) + '</span> 後完成</strong><p>時間到會存成購買紀錄並通知' + (nameOf(l.createdBy) && l.createdBy !== ME ? ' ' + esc(nameOf(l.createdBy)) : '發起人') + '。按錯了可以收回。</p></div><div class="banner-acts"><button class="btn btn-sm btn-secondary" data-act="co-undo" data-list="' + l._id + '">收回</button><button class="btn btn-sm btn-finish" data-act="co-finish" data-list="' + l._id + '">直接完成</button>' + (l.carrier && l.checkoutBy === ME ? '<button class="btn btn-sm btn-primary" data-act="co-show" data-list="' + l._id + '">出示載具</button>' : '') + '</div></div>';
   }
   if (st === 'done') {
-    const text = doneText(l);
-    return '<div class="banner ok list-banner"><span class="dot"></span><div class="banner-text"><strong>' + (nameOf(l.checkoutBy) ? esc(whoSp(nameOf(l.checkoutBy))) : '') + '已完成・' + fmtTime(l.notifyAt) + '</strong><p>已買 ' + its.filter(i => i.state === 'bought').length + ' 項' + (its.some(i => i.state !== 'bought') ? '，沒買到的已列在下面' : '') + (l.carrier ? '・有用載具' : '') + '</p></div><div class="banner-acts"><a class="btn btn-sm btn-primary" href="' + lineUrl(text) + '" target="_blank" rel="noopener">用 LINE 回報</a><button class="btn btn-sm btn-secondary" data-act="rebuy" data-list="' + l._id + '">再買一次</button><button class="btn btn-sm btn-secondary" data-act="reopen" data-list="' + l._id + '">重新打開</button></div></div>';
+    return '<div class="banner ok list-banner"><span class="dot"></span><div class="banner-text"><strong>' + (nameOf(l.checkoutBy) ? esc(whoSp(nameOf(l.checkoutBy))) : '') + '已完成・' + fmtTime(l.notifyAt) + '</strong><p>已買 ' + its.filter(i => i.state === 'bought').length + ' 項' + (its.some(i => i.state !== 'bought') ? '，沒買到的已列在下面' : '') + (l.carrier ? '・有用載具' : '') + '</p></div><div class="banner-acts"><button class="btn btn-sm btn-secondary" data-act="rebuy" data-list="' + l._id + '">再買一次</button><button class="btn btn-sm btn-secondary" data-act="reopen" data-list="' + l._id + '">重新打開</button></div></div>';
   }
   if (isOverdue(l)) {
     return '<div class="banner warn list-banner"><span class="dot"></span><div class="banner-text"><strong>還沒買完</strong><p>' + overdueWhy(l) + '・還有 ' + its.filter(i => i.state === 'todo').length + ' 項沒買</p></div></div>';
   }
   return '';
 }
+// 往左滑選的「沒買到」原因；舊資料沒有 why，就當作缺貨
+const WHY = { oos: '缺貨', notfound: '找不到', price: '太貴', skip: '這次不買' };
+const whyText = it => WHY[it.why] || '缺貨';
 function itemRow(it, locked) {
   const p = prodOf(it), tags = [], storeId = itemStore(it);
   tags.push('<span class="pill accent">' + esc(storeOf(storeId).name) + '</span>');
   tags.push(p.sub ? '<span class="pill">可替代</span>' : '<span class="pill">不可替代</span>');
-  if (it.state === 'out') tags.push(p.sub ? '<span class="pill warn">缺貨・可買別牌</span>' : '<span class="pill warn">缺貨・這次不買</span>');
+  if (it.state === 'out') tags.push('<span class="pill warn">沒買到・' + whyText(it) + '</span>');
   if (it.subbed) tags.push('<span class="pill ok">買了替代品</span>');
   if (p.sample) tags.push('<span class="pill">範例</span>');
   const sub = subLine(p);
@@ -1640,9 +1731,6 @@ function itemRow(it, locked) {
   if (!locked) {
     acts = '<div class="item-actions">' +
       '<div class="stepper" role="group" aria-label="數量"><button data-act="dec" aria-label="減少一個">−</button><output>' + it.qty + '</output><button data-act="inc" aria-label="增加一個">＋</button></div>' +
-      '<button class="chip" data-act="clerk">給店員看</button>' +
-      (it.state === 'todo' ? '<button class="chip" data-act="out">缺貨</button>' : '') +
-      (it.state === 'out' ? '<button class="chip" data-act="back-todo">找到了</button>' + (p.sub ? '<button class="chip" data-act="subbed">買了替代品</button>' : '') : '') +
       '<button class="chip" data-act="item-edit">編輯</button>' +
       '<button class="chip quiet" data-act="remove">移除</button></div>';
   }
@@ -1684,7 +1772,7 @@ function listText(l) {
 function doneText(l) {
   const its = itemsOf(l._id), b = its.filter(i => i.state === 'bought'), nb = its.filter(i => i.state !== 'bought');
   let s = '【買好了】' + l.title + '\n已買 ' + b.length + ' 項';
-  if (nb.length) s += '\n沒買到：' + nb.map(i => prodOf(i).name + (i.state === 'out' ? '（缺貨）' : '')).join('、');
+  if (nb.length) s += '\n沒買到：' + nb.map(i => prodOf(i).name + (i.state === 'out' ? '（' + whyText(i) + '）' : '')).join('、');
   const subs = b.filter(i => i.subbed);
   if (subs.length) s += '\n買了替代品：' + subs.map(i => prodOf(i).name).join('、');
   return s;
@@ -1708,7 +1796,6 @@ function downloadIcs(l) {
   const a = document.createElement('a'); a.href = url; a.download = '補貨-' + l.title.replace(/[\\/:*?"<>|]/g, '') + '.ics';
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
-function lineUrl(text) { return 'https://line.me/R/share?text=' + enc(text); }
 function mailUrl(l, text) { return 'https://mail.google.com/mail/?view=cm&fs=1&su=' + enc('購清楚：' + l.title) + '&body=' + enc(text); }
 function gcalUrl(l) {
   const f = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
@@ -1726,7 +1813,6 @@ function notifyBand(l) {
     '<div class="tile reveal"><h3>提醒時間</h3><p>' + (has ? fmtRemind(l.remindAt) + '。時間到還沒買完，首頁會一直顯示提醒。' : '設定後可以加到日曆；過了時間還沒買完，首頁會提醒。') + '</p>' +
     '<input type="datetime-local" id="list-remind" value="' + (has ? toLocalInput(l.remindAt) : '') + '" aria-label="提醒時間">' +
     '<div class="chips">' + presets().map(p => '<button class="chip" data-act="remind-preset" data-ts="' + p[1] + '">' + p[0] + '</button>').join('') + (has ? '<button class="chip quiet" data-act="remind-clear">清除</button>' : '') + '</div></div>' +
-    '<div class="tile reveal"><h3>LINE</h3><p>把整張清單傳給對方' + (APP_URL ? '，對方點連結就能一起打勾' : '') + '。</p><a class="btn btn-primary" href="' + lineUrl(text) + '" target="_blank" rel="noopener">用 LINE 傳送</a></div>' +
     '<div class="tile reveal"><h3>Email</h3><p>用手機的郵件 App 或 Gmail 開一封寫好的信，填對方信箱就能寄。</p><div class="chips" style="margin-top:auto"><a class="btn btn-secondary" href="' + mailtoUrl(l, text) + '">郵件 App</a><a class="btn btn-secondary" href="' + mailUrl(l, text) + '" target="_blank" rel="noopener">Gmail</a></div></div>' +
     '<div class="tile reveal"><h3>行事曆</h3><p>' + (cal ? '加到手機行事曆，時間到會跳通知；沒買完過幾小時會再提醒一次。' : '先設定期限或提醒時間，才能加到行事曆。') + '</p>' + (cal ? '<div class="chips" style="margin-top:auto"><button class="btn btn-secondary" data-act="ics">Apple／手機行事曆</button><a class="btn btn-secondary" href="' + gcalUrl(l) + '" target="_blank" rel="noopener">Google 日曆</a></div>' : '<button class="btn btn-secondary" disabled>加到行事曆</button>') + '</div>' +
     '</div><div class="text-preview reveal"><div class="sec-head"><h3>清單文字</h3><button class="btn btn-sm btn-secondary" data-act="copy-text">複製</button></div>' +
@@ -1819,7 +1905,7 @@ function viewMe() {
     '</div>' +
     '<div class="tile reveal"><h3>使用教學</h3><p>半分鐘的操作示範：怎麼開清單、加要買的東西，還有拍照、讀條碼讓東西買得更準。</p><div class="chips"><button class="btn btn-sm btn-primary" data-act="tour">播放教學</button>' + (hasSample ? '<button class="btn btn-sm btn-danger" data-act="samples-clear">' + (ARMED && ARMED.key === 'samples' && Date.now() < ARMED.until ? '再按一次確定清除' : '清除範例') + '</button>' : '') + '</div></div>' +
     '<div class="tile reveal"><h3>回報問題／給意見</h3><p>遇到怪怪的地方、或希望多一個功能，直接寫給我們。</p><div class="chips"><button class="btn btn-sm btn-primary" data-act="feedback">回報問題</button></div></div>' +
-    '<div class="tile reveal"><h3>這一版能做什麼</h3><p>清單、商品、打勾、缺貨處理、給店員看、載具結帳、相機掃條碼、LINE、Email、行事曆都可以用。</p><p>還沒有：手機推播通知。之後再加。</p></div>' +
+    '<div class="tile reveal"><h3>這一版能做什麼</h3><p>清單、商品、打勾、缺貨處理、給店員看、載具結帳、相機掃條碼、Email、行事曆都可以用。</p><p>還沒有：手機推播通知。之後再加。</p></div>' +
     '</div></div></section>';
   return h;
 }
@@ -1897,7 +1983,7 @@ async function liveScan() {
 function renderCobar() {
   const l = VIEW === 'list' && D.lists[CUR_LIST];
   const its = l ? itemsOf(CUR_LIST) : [];
-  const show = !!(l && listStatus(l) === 'active' && its.length);
+  const show = !!(l && !LIST_EDIT && listStatus(l) === 'active' && its.length);
   app.classList.toggle('has-cobar', show);
   if (!show) { cobar.hidden = true; cobar.innerHTML = ''; return; }
   const b = its.filter(i => i.state === 'bought').length;
@@ -2225,15 +2311,15 @@ function checkoutHtml() {
     h += '<h2 class="co-head">買好了</h2>';
   }
   h += '<div class="co-sum"><div><strong>' + b.length + '</strong><span>已買</span></div><div><strong>' + nb.length + '</strong><span>沒買到</span></div></div>';
-  if (nb.length) h += '<p class="co-miss">沒買到：' + nb.map(i => esc(prodOf(i).name) + (i.state === 'out' ? '（缺貨）' : '')).join('、') + '</p>';
+  if (nb.length) h += '<p class="co-miss">沒買到：' + nb.map(i => esc(prodOf(i).name) + (i.state === 'out' ? '（' + whyText(i) + '）' : '')).join('、') + '</p>';
   if (st === 'checkout') {
     const C = 2 * Math.PI * 56;
     h += '<div class="ring" aria-hidden="true"><svg viewBox="0 0 128 128"><circle class="rbg" cx="64" cy="64" r="56"/><circle class="rfg" cx="64" cy="64" r="56" stroke-dasharray="' + C.toFixed(1) + '" data-ring="' + l.notifyAt + '" data-c="' + C.toFixed(1) + '"/></svg><span data-countdown="' + l.notifyAt + '">' + mmss(l.notifyAt - Date.now()) + '</span></div>' +
       '<p class="scan-hint">倒數結束會存成購買紀錄' + (creator ? '，' + esc(creator) + ' 打開 App 就會看到' : '') + '。按錯了可以收回；確定沒問題就按「直接完成」，不用等。</p>' +
       '<div class="co-btns"><button class="btn btn-secondary" data-act="co-undo" data-list="' + l._id + '">收回</button><button class="btn btn-finish" data-act="co-finish" data-list="' + l._id + '">直接完成</button></div>';
   } else if (st === 'done') {
-    h += '<p class="scan-hint">' + (creator ? esc(creator) + ' 打開 App 就會看到完成通知。也可以直接傳 LINE 跟對方說。' : '已存成購買紀錄。') + '</p>' +
-      '<div class="cta-row" style="margin-top:8px"><a class="btn btn-primary" href="' + lineUrl(doneText(l)) + '" target="_blank" rel="noopener">用 LINE 回報</a><button class="btn btn-secondary" data-act="ov-close">回清單</button></div>';
+    h += '<p class="scan-hint">' + (creator ? esc(creator) + ' 打開 App 就會看到完成通知。' : '已存成購買紀錄。') + '</p>' +
+      '<div class="cta-row" style="margin-top:8px"><button class="btn btn-primary" data-act="ov-close">回清單</button></div>';
   }
   h += '</div></div>';
   return h;
@@ -2447,17 +2533,16 @@ const ACT = {
   'tour-next': () => { const i = +$('#tour').dataset.i; if (i >= tourScenes().length - 1) { tourStop(); closeSheet(true); } else tourGo(i + 1); },
   'samples-clear': () => { if (arm('samples')) clearSamples(); else scheduleRender(); },
   'dismiss': a => { const s = seenSet(); s.add(a.dataset.list); try { localStorage.setItem(LS_SEEN, JSON.stringify(Array.from(s).slice(-200))); } catch (e) { /* 忽略 */ } scheduleRender(); },
-  'toggle': a => {
-    const id = itemIdOf(a), it = D.items[id]; if (!it) return;
-    const next = it.state === 'bought' ? 'todo' : 'bought';
-    patch('items', id, { state: next, subbed: false });
-    if (next === 'bought') { const rest = itemsOf(it.listId).filter(i => i._id !== id && i.state === 'todo').length; if (!rest) toast('都處理完了，按下方「載具」或「完成」結帳'); }
-  },
+  'toggle': a => markBought(itemIdOf(a)),
+  'list-edit': () => { LIST_EDIT = true; window.scrollTo(0, 0); render({ animate: true }); },
+  'list-edit-done': () => { LIST_EDIT = false; window.scrollTo(0, 0); render({ animate: true }); },
+  'why': a => openWhy(itemIdOf(a)),
+  'why-clerk': a => { const id = itemIdOf(a), it = D.items[id]; closeSheet(true); if (it) openClerk(it.listId, id); },
+  'why-set': a => { const id = itemIdOf(a), it = D.items[id]; closeSheet(true); if (!it) return; patch('items', id, { state: 'out', why: a.dataset.why, subbed: false }); toast('「' + prodOf(it).name + '」沒買到：' + WHY[a.dataset.why]); },
+  'why-sub': a => { const id = itemIdOf(a); closeSheet(true); if (D.items[id]) patch('items', id, { state: 'bought', subbed: true, why: null }); },
+  'why-reset': a => { const id = itemIdOf(a); closeSheet(true); if (D.items[id]) patch('items', id, { state: 'todo', subbed: false, why: null }); },
   'inc': a => { const id = itemIdOf(a); const it = D.items[id]; if (it) setQty(id, it.qty + 1); },
   'dec': a => { const id = itemIdOf(a); const it = D.items[id]; if (it) { if (it.qty <= 1) toast('最少 1 個；不要了請按「移除」'); else setQty(id, it.qty - 1); } },
-  'out': a => { const id = itemIdOf(a), it = D.items[id]; if (!it) return; patch('items', id, { state: 'out' }); const p = prodOf(it); toast(p.sub ? '標記缺貨。這項可以買別的牌子' : '標記缺貨。這項不可替代，這次先不買', 3500); },
-  'back-todo': a => patch('items', itemIdOf(a), { state: 'todo', subbed: false }),
-  'subbed': a => patch('items', itemIdOf(a), { state: 'bought', subbed: true }),
   'item-edit': a => openItemEdit(itemIdOf(a)),
   'item-store': a => {
     const id = itemIdOf(a), it = D.items[id], s = a.dataset.store; if (!it) return;
@@ -2639,8 +2724,41 @@ const ACT = {
   },
 };
 
+let SW = null, SW_AT = 0, SW_ROW = null;
+app.addEventListener('pointerdown', e => {
+  const row = e.target.closest && e.target.closest('[data-swipe]');
+  if (!row || e.button > 0) return;
+  SW = { row, card: row.querySelector('.srow-card'), x: e.clientX, y: e.clientY, dx: 0, on: false, pid: e.pointerId };
+});
+app.addEventListener('pointermove', e => {
+  if (!SW || e.pointerId !== SW.pid) return;
+  const dx = e.clientX - SW.x, dy = e.clientY - SW.y;
+  if (!SW.on) {
+    if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { SW = null; return; } // 上下捲動，不是滑
+    if (Math.abs(dx) < 10) return;
+    SW.on = true; SW.row.classList.add('dragging');
+    try { SW.card.setPointerCapture(e.pointerId); } catch (x) { /* 舊瀏覽器 */ }
+  }
+  SW.dx = dx; SW.card.style.transform = 'translateX(' + dx + 'px)';
+  SW.row.dataset.dir = dx > 0 ? 'right' : 'left';
+});
+function swipeEnd(e, cancel) {
+  if (!SW || e.pointerId !== SW.pid) return;
+  const s = SW; SW = null;
+  if (!s.on) return;
+  SW_AT = Date.now(); SW_ROW = s.row;
+  s.row.classList.remove('dragging');
+  const w = s.row.offsetWidth, id = s.row.getAttribute('data-item');
+  if (cancel || Math.abs(s.dx) < Math.min(100, w * 0.28)) { s.card.style.transform = ''; return; }
+  if (s.dx > 0) { s.card.style.transform = 'translateX(' + w + 'px)'; setTimeout(() => markBought(id), 170); }
+  else { s.card.style.transform = ''; openWhy(id); }
+}
+app.addEventListener('pointerup', e => swipeEnd(e, false));
+app.addEventListener('pointercancel', e => swipeEnd(e, true));
+
 document.addEventListener('click', e => {
   const t = e.target;
+  if (SW_ROW && SW_ROW.contains(t) && Date.now() - SW_AT < 400) { SW_ROW = null; e.preventDefault(); return; } // 剛滑完放開，不要當成點那一列
   if (t.closest && t.closest('[data-scrim]') && t.hasAttribute && t.hasAttribute('data-scrim')) { closeSheet(); return; }
   const go = t.closest('[data-go]'); if (go) { e.preventDefault(); goView(go.dataset.go); return; }
   const a = t.closest('[data-act]');
